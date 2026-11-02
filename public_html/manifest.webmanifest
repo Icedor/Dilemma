@@ -2,7 +2,7 @@
 	"id": "/",
 	"name": "Dilemma",
 	"short_name": "Dilemma",
-	"description": "What would change your mind? Start with something you believe. Invite someone who disagrees, follow the arguments and raise the white flag if they convince you. Keep your debates close, with optional notifications.",
+	"description": "Meet someone who disagrees. Test the arguments. Raise the white flag if you change your mind.",
 	"start_url": "/app",
 	"scope": "/",
 	"display": "standalone",

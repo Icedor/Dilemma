@@ -1,30 +1,15 @@
 <?php
 declare(strict_types=1);
-// Reproducible code-drawn brand artwork; no stock images or runtime font requests.
+// Brand typography over the approved, reference-led texture asset.
 if (PHP_SAPI !== 'cli') exit(1);
 $font = $argv[1] ?? 'C:/Windows/Fonts/arialbd.ttf';
 if (!is_file($font) || !extension_loaded('gd')) throw new RuntimeException('GD and a local bold sans-serif font are required');
 $directory = dirname(__DIR__) . '/public_html/assets';
 function canvas(int $width, int $height): GdImage {
 	$image = imagecreatetruecolor($width, $height);
-	mt_srand(112026);
-	for ($y = 0; $y < $height; $y++) for ($x = 0; $x < $width; $x++) {
-		$u = $x / $width; $v = $y / $height;
-		$rgb = [255.0, 220.0, 57.0];
-		$layers = [
-			[.08, .95, .8, .7, [255, 207, 22], .9],
-			[1.1, .95, .7, .9, [255, 112, 100], .95],
-			[.84, .03, .75, .7, [255, 249, 200], 1],
-		];
-		foreach ($layers as [$cx, $cy, $rx, $ry, $tone, $strength]) {
-			$distance = hypot(($u - $cx) / $rx, ($v - $cy) / $ry);
-			$weight = max(0, 1 - $distance); $weight = $weight * $weight * (3 - 2 * $weight) * $strength;
-			foreach ($rgb as $channel => $value) $rgb[$channel] = $value * (1 - $weight) + $tone[$channel] * $weight;
-		}
-		$grain = mt_rand(-2, 2);
-		$color = imagecolorallocate($image, ...array_map(static fn ($value) => max(0, min(255, (int) round($value) + $grain)), $rgb));
-		imagesetpixel($image, $x, $y, $color);
-	}
+	$texture = imagecreatefromwebp(dirname(__DIR__) . '/public_html/assets/gradient-yellow.webp');
+	if (!$texture) throw new RuntimeException('Missing yellow texture');
+	imagecopyresampled($image, $texture, 0, 0, 0, 0, $width, $height, imagesx($texture), imagesy($texture));
 	return $image;
 }
 $image = canvas(1200, 630);

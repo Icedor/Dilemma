@@ -31,20 +31,21 @@ $canonical = $localized_url($language);
 	<meta property="og:description" content="<?= $e($indexable ? $description : I18n::t('seo_home')) ?>">
 	<meta property="og:url" content="<?= $e($indexable ? $canonical : Config::url()) ?>">
 	<meta property="og:locale" content="<?= $language === 'en' ? 'en_GB' : 'sv_SE' ?>">
-	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png')) ?>">
+	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-5')) ?>">
 	<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 	<meta property="og:image:alt" content="Dilemma. What would change your mind?">
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png')) ?>">
-	<link rel="manifest" href="/manifest.webmanifest?v=20261102-4">
+	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-5')) ?>">
+	<link rel="manifest" href="/manifest.webmanifest?v=20261102-5">
 	<link rel="apple-touch-icon" href="/assets/icon-192.png">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<script src="/assets/language.js?v=20261102-4"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261102-4">
-	<script type="module" src="/assets/app.js?v=20261102-4"></script>
+	<script src="/assets/language.js?v=20261102-5"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261102-5">
+	<script type="module" src="/assets/app.js?v=20261102-5"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
+	<div class="site-shell">
 	<header class="site-header">
 		<a class="wordmark" href="/" aria-label="Dilemma.se">dilemma</a>
 		<nav class="main-nav" aria-label="Dilemma">
@@ -59,6 +60,7 @@ $canonical = $localized_url($language);
 	<noscript><p class="notice"><?= $t('no_script') ?></p></noscript>
 	<?php if (!Config::production()): ?><p class="notice preview-notice"><?= $t('local_preview') ?></p><?php endif; ?>
 	<main id="main"><?= $content ?></main>
+	</div>
 	<footer class="site-footer"><a class="wordmark" href="/">dilemma</a><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy"><?= $t('privacy') ?></a><a href="/terms"><?= $t('terms') ?></a></nav></footer>
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
 	<template id="translations"><?= $e(Support::json(I18n::all())) ?></template>
