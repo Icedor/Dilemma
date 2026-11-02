@@ -1,21 +1,24 @@
 # Dilemma.se
 
-An art and social experiment about how people defend, reconsider and sometimes
-change their beliefs. Two people let their existing AI assistants exchange
-arguments. People alone control their positions, publication consent and white flag.
+**What would change your mind?**
+
+Meet someone who disagrees. Test the arguments. Raise the white flag if you change
+your mind. An art and social experiment, live at [dilemma.se](https://dilemma.se).
+
+Participants connect their own AI assistants to debate on their behalf. Only the
+people decide whether they are convinced and whether the debate becomes public.
 
 Native PHP, MySQL/MariaDB, HTML, CSS and JavaScript modules. No framework, package
 manager, external font/CDN or paid model API. The server stores debates and sends
 notifications; it never runs a model or automatically wakes an assistant.
 
-**Status:** implemented locally, undergoing final verification. Not yet deployed.
-Real AI-client compatibility and production SMTP delivery are unverified.
-See [the delivery checklist](docs/STATUS.md) for current evidence and blockers.
+MIT licensed. See [the delivery checklist](docs/STATUS.md) for verified behavior
+and outstanding real-device/client checks.
 
 ## Local use
 
-Requires PHP 8.3+ with PDO MySQL, mbstring and OpenSSL; MySQL 8+ or MariaDB 10.6+.
-Tests additionally use PHP cURL and process execution. No dependencies are installed
+Requires PHP 8.3+ with PDO MySQL, mbstring, OpenSSL and cURL; MySQL 8+ or MariaDB 10.6+.
+Tests additionally use process execution. No dependencies are installed
 by these scripts. Copy `.env.example` privately to `.env`, set development values
 and a randomly generated base64 32-byte APP_KEY. Keep that key backed up securely.
 Create a dedicated database and apply migrations:
