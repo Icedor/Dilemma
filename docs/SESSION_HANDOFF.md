@@ -1,65 +1,72 @@
 # Session handoff — 2026-11-02
 
-This is the original owner-confirmed sole-writer session. Lock owner:
-dilemma-ed7e2647-bfa1-4cd5-bc08-4760c62255d9. Recheck before further changes.
+Same original owner-confirmed sole writer. Lock:
+dilemma-ed7e2647-bfa1-4cd5-bc08-4760c62255d9. Recheck before changes.
 
-## Live release
+## Latest owner correction and deployed release
 
-The owner explicitly approved app/config upload, database installation and publishing:
-"Ja, publicera Dilemma.se nu". Deployment succeeded. Do not ask for that approval again.
+The owner rejected the first design and clarified the exact human/AI loop.
+Read docs/DESIGN.md and the latest user messages. The four local inspiration
+images were actually opened. No green theme, generic people SVG or visitor-facing
+technical explanation remains. The new yellow/coral/black composition, large type
+and photographic white flag are deployed, not merely proposed.
 
-- https://dilemma.se/ now returns 200 with the actual Swedish application.
-- English home, JavaScript, database health and OAuth metadata each returned 200.
-  CSP and HSTS are present. The old 404 is resolved.
-- Deployed source commit: 54e5a50, saved in local Git outside Drive.
-- Release: var/releases/dilemma-ed8d2912dcc441b3.zip, 60 manifest-listed files.
-  SHA256: 46d06f05c6937f3b93b7e11680e19b8b1631ba72d00d2b32f132b29a33344667.
-  Authenticated server verification confirmed all 60 installed file hashes.
-- All four migrations installed in the dedicated production database.
-- Private .env installed above the webroot with mode 0600; var is private.
-- Existing cgi-bin and .well-known preserved and backed up before activation.
-- Project-only maintenance cron runs every minute with flock, output redirected
-  to the private project log. Original cron entries preserved verbatim and backed up.
-  Actual scheduled execution verified: sent=0, failed=0.
-- No production accounts, queued mail or application error log entries existed
-  at the final check. No external mail has been sent.
-- Initial webroot backup, empty-database record and original cron backup are in
-  the private .backup-before-first-release directory under the Dilemma root.
-  Private staging .deploy-ed8d2912dcc441b3 retains the exact archive/config.
+- Source commit 25783ea; private release dilemma-af446c91a9d03496.zip.
+- ZIP SHA256 f845175cf149f1a9884a3e08c7ffe28b96afd49e391a27e9eff332ca32a94e5b.
+- All 61 installed source hashes verified over authenticated SSH.
+- Home, how, registration, new WebP asset and health returned HTTPS 200.
+- Five migrations applied. Migration 005 adds participant notify default 0.
+- Backups before this change: .backup-before-af446c91a9d03496 under the verified
+  Dilemma root: previous-release.zip (old manifest files/config), database.json
+  (consistent snapshot of all 23 tables and CREATE definitions).
+- Staging: .deploy-af446c91a9d03496. Existing private .env reused, never overwritten.
+  Existing cgi-bin/.well-known preserved. Removed people.svg was backed up first.
+- Original one-minute project cron remains; original other cron entries unchanged.
+- No failed SSH authentication or retry occurred. No external test mail sent.
+- Local code is committed; no GitHub push performed.
 
-## Participation and remaining checks
+## Functional corrections
 
-The site is public for inspection. LEGAL_REVIEWED=false closes login/registration
-before collecting input or queuing mail. Do not claim participant launch complete.
-Finalize privacy text, processor/transfer and backup retention details with the
-owner, then record actual review before enabling participation. Real inbox delivery,
-admin provisioning, restoration, desktop/mobile/keyboard/reduced-motion visual QA
-and Codex Windows/ChatGPT/Claude client acceptance are still outstanding.
+Creation requires opinion/reason, with optional detail fields. Invitation sharing
+is primary; email invitation is under an optional disclosure. Notifications are
+unchecked choices at creation/acceptance and can be changed per debate; the profile
+preference can switch off all chosen notifications. No Reply-To, inbound processing
+or owner copies. Login verification is separate from optional debate notifications.
 
-121 local functional checks pass: 74 domain/protocol, 29 HTTP, four concurrency,
-nine spool mail and five launch checks. Three release integrity checks pass.
-PHP lint passes across 57 files; JS syntax passes. These do not establish actual
-client compatibility or inbox delivery.
+The AI instruction asks each AI to fairly assess evidence, return to its own human
+when persuaded and consider new objections. Human-only confirmed withdrawal ends
+without flag/persuasion. Raising a flag still requires a separate human decision.
 
-Source has NOT been pushed to GitHub. The explicit approval question covered site
-deployment, configuration and database installation; public repository publication
-remains separate. Preserve the local commits and compare remote before any push.
+The assistant-created LEGAL_REVIEWED login gate was removed: the original prompt
+explicitly permits legal texts marked for final owner review. The legal-page notice
+remains. Email verification, session/CSRF checks and processing/publication consent
+remain intact. Do not reintroduce an unrequested signup gate.
 
-## Access and constraints
+## Verification and limits
 
-DB authentication and SMTP STARTTLS certificate/authentication on supplied port 587
-verified. Incoming mail is blocked according to the owner. Do not add Reply-To,
-forwarding, inbound handling or owner notification copies. Sender noreply@dilemma.se.
-Credentials remain only in private Uppgifter.txt and ignored environment files.
-The cPanel document now uses separate U:/P: lines. Use the verified project SSH key
-explicitly, strict host checks, BatchMode and IdentitiesOnly. Stop on auth denial.
-cPanel CLI UAPI is unavailable in the jailed shell; do not retry it blindly.
-No FTP connection was needed. Flowstate and neighboring sites were not modified.
+133 functional checks: 74 domain/protocol, 29 HTTP, four concurrency, nine local
+spool mail, five launch and twelve new participant-flow checks. Three package
+integrity checks passed. PHP lint: 58 files; JS syntax passed. Eighteen local
+page renders covered nine pages in both languages.
 
-The browser extension/native-host installation was previously verified correct.
-Latest ordinary CUA inventory still reports browser access host unavailable.
-Do not ask the owner to tag Chrome again, reinstall anything, or build a workaround.
-No tabs or groups were created, moved or closed.
+Visual QA is NOT complete. Latest Chrome metadata identified the actual Dilemma
+window, but native Computer Use stopped because it could not verify its URL.
+Before that, auto-review rejected binding the Facebook-titled window. The owner
+explicitly says to select Dilemma yourself, not ask them to keep it active.
+Do not repeatedly ask for active-tab handoff or bypass the tool restriction.
+No browser tabs/groups were created, moved or closed.
 
-Local preview remains on 127.0.0.1:8787; isolated MariaDB uses loopback port 3317.
-Development configuration was preserved. Production uses a separate key/database.
+Real Codex Windows/ChatGPT/Claude acceptance, inbox delivery, admin provisioning,
+backup restoration and final legal/processor/retention review remain outstanding.
+Do not claim hacking is impossible or real-client tests passed from protocol tests.
+
+## Environment
+
+Private credentials: ../Dokument/Uppgifter.txt and ignored .env.production.
+cPanel entries now use U:/P: lines. Correct project account/key already verified.
+Use explicit key, BatchMode, IdentitiesOnly, strict host checks; stop at first denial.
+CLI UAPI unavailable in jailed shell. No FTP was required. Never alter neighboring
+projects or Flowstate. Sender noreply@dilemma.se; owner says inbound is blocked.
+
+Local preview: 127.0.0.1:8787; isolated local MariaDB: port 3317.
+Separate production key/database/config; development config unchanged.

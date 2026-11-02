@@ -1,8 +1,7 @@
 # Delivery status
 
-Updated 2026-11-02, Europe/Stockholm. Website deployed; full redesign in progress.
-The old release remains live until the new package is verified and installed.
-Source commits remain local, not on GitHub.
+Updated 2026-11-02, Europe/Stockholm. Redesign deployed as source commit 25783ea,
+release af446c91a9d03496. Registration is available. Source remains local, not on GitHub.
 
 ## Owner-requested redesign
 
@@ -19,12 +18,14 @@ Source commits remain local, not on GitHub.
 - [x] Twelve new participant-flow tests pass alongside existing regression suites.
 - [ ] Actual desktop/mobile visual and keyboard QA: native Computer Use stopped
   on URL verification even after Chrome was identified as Dilemma. No bypass.
-- [ ] Publish and verify the redesigned release.
+- [x] Publish redesigned release: all 61 installed file hashes match. Home, how,
+  registration, WebP asset and database health returned 200 over HTTPS.
+- [x] Back up previous source/config and all 23 database tables before migration 005.
 
 ## Verified
 
 - [x] Explicit site deployment approval received; actual home now returns HTTPS 200.
-- [x] Production migrations applied and all 60 installed release hashes verified.
+- [x] Five production migrations applied and all 61 installed release hashes verified.
 - [x] Private production config above webroot, mode 0600; initial webroot backed up.
 - [x] Existing cgi-bin/.well-known and all original cron entries preserved.
 - [x] Project maintenance cron installed and actual successful execution verified.
@@ -34,7 +35,7 @@ Source commits remain local, not on GitHub.
 - [x] Own project lock, separate local Git outside Drive, empty remote fetched.
 - [x] Flowstate reviewed without modification; repair candidates documented.
 - [x] Isolated MariaDB on loopback port 3317; dev and test databases separated.
-- [x] Four checksum-verified migrations applied locally.
+- [x] Five checksum-verified migrations applied locally.
 - [x] 74 domain/protocol checks: login, consent, private access, turn order,
   idempotency, real receipts, human-only decisions, OAuth, revocation and deletion.
 - [x] 29 HTTP checks: rendering/languages, protected routes, CSRF, cookies,
@@ -57,10 +58,10 @@ Source commits remain local, not on GitHub.
 - [x] Icey AB contact details verified from https://icey.se/kontakt/ and recorded.
 - [x] MIT license authorized and included. Outbound sender noreply@dilemma.se
   chosen; no reply address, forwarding or incoming email feature.
-- [x] PHP syntax checked across 57 files; JavaScript syntax passes.
+- [x] PHP syntax checked across 58 files; JavaScript syntax passes.
 - [x] Five updated launch checks: registration queues one verification message,
   both languages show sign-in, and legal review remains disclosed on legal pages.
-- [x] Private 60-file release package built; three extraction/integrity checks pass.
+- [x] Private 61-file release package built; three extraction/integrity checks pass.
 - [x] Existing Chrome extension and native-host registration verified correct.
 - [x] Source and staged secret scans passed; implementation saved in local commit
   a59eefd. No files were pushed. Release package matches that runtime source.

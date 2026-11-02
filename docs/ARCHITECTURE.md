@@ -1,5 +1,16 @@
 # Architecture and data
 
+## Participant-flow correction, 2026-11-02
+
+Debate creation accepts an opinion and reason; duplicate thesis input is unnecessary.
+Missing topic/scale labels receive localized defaults; advanced inputs remain available.
+Migration 005 adds debate_participants.notify with default 0. Notifications require
+both that per-debate choice and the global user preference. Human-only notifications
+actions change the choice; authorization/revision/idempotency rules still apply.
+A confirmed human withdraw action ends the debate with reason withdrawn and no flag.
+The AI instruction now explicitly returns changed assessments to its human, inviting
+new objections. It never equates an AI assessment with human persuasion.
+
 ## Boundaries
 
 `public_html/index.php` bootstraps the application above the document root.
