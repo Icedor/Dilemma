@@ -1,3 +1,31 @@
+# Latest checkpoint: warm textures, short copy and GitHub publication
+2026-11-02. Source **2a197d5**, release **d9ccbb7ce9ac3b73** is live.
+This supersedes the historical checkpoints below, including their no-push notes.
+
+- GitHub publication explicitly requested by owner. main verified at 2a197d5;
+  repository now contains the complete project and MIT license. No force push.
+- Fire-yellow/gold organic grain follows the supplied turquoise reference.
+  No white/pink/purple gradients. Warm ember secondary section has a dark overlay.
+  Sharing artwork, icons and offline page use the new yellow texture.
+- Shared home header/hero background; stable header grid and scrollbar gutter.
+- Public copy shortened in both languages; opinions/conviction lead, AI briefly
+  explains the process. Duplicate introductory section removed.
+- 40 HTTP, 7 service-worker and 3 package checks passed; syntax checks passed.
+  Release scan found no known private values or key markers. History scan 199 blobs.
+- All 76 production hashes verified. Three serial HTTPS checks verified English
+  and Swedish copy plus the WebP response. GitHub remote hash verified separately.
+- SHA256 e15768e1a1d6493c07914d4dc100c32a3cfa9db36236e70b53ff84ffe5a10f10.
+- Private stage .deploy-d9ccbb7ce9ac3b73, backup
+  .backup-before-d9ccbb7ce9ac3b73/previous-release.zip includes previous source,
+  configuration, manifest and push identity. No schema changes or migrations.
+  Old grain.svg removed only after backup/hash check. Other projects untouched.
+- Actual browser visual QA and installation screenshots remain blocked by the
+  earlier Computer Use URL-verification stop. No alternate automation attempted.
+  Manifest gallery is NOT complete. PageSpeed 429 remains uncorrected; no score.
+- See TEXTURES.md for assets/prompts and COPY_AND_INSTALL.md for remaining gallery.
+
+## Historical checkpoints
+
 # Latest checkpoint: opinion-first copy and color correction
 2026-11-02, source **b2109f7**, release **a7dbfb83a295b913** is live.
 This supersedes the earlier runtime release details below.

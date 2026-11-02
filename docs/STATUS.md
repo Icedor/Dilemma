@@ -1,8 +1,13 @@
 # Current correction — 2026-11-02
-Live source **b2109f7**, release **a7dbfb83a295b913**.
-Opinion-first intro/search/install copy, new sharing artwork and complete yellow/
-coral gradient/texture treatment are published. All 75 installed hashes and the
-changed public resources were verified. Focused tests: 40 HTTP, 7 worker, 3 package.
+Live source **2a197d5**, release **d9ccbb7ce9ac3b73**.
+GitHub main contains the complete project, verified after owner-authorized push.
+Fire-yellow/gold textured ribbons and warm ember surfaces replace the rejected
+gradients. Header and hero share one background; navigation uses a stable grid
+and reserved scrollbar space. Copy is shorter in both languages, led by opinions
+and conviction. Sharing image/app icons also use the approved palette direction.
+All 76 installed hashes verified. English/Swedish home and WebP response verified.
+Focused tests: 40 HTTP, 7 worker, 3 package. No actual browser layout QA completed.
+See [textures and verification](TEXTURES.md) and [handoff](SESSION_HANDOFF.md).
 
 **Still incomplete:** actual wide/narrow app screenshots and Richer Install UI.
 The description is fixed, but the gallery is missing because browser capture was

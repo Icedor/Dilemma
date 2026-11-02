@@ -45,5 +45,7 @@ installation screenshots remain unverified because Computer Use stopped on URL
 verification. Richer Install UI screenshots are still missing, not completed.
 No measured PageSpeed score; its earlier 429 remains a stop condition.
 
-Owner explicitly requested GitHub publication; main was verified at 3a178d7
-before this correction. Known-secret/history scan: 198 blobs, no matches.
+Owner explicitly requested GitHub publication; main was verified at 2a197d5
+after this correction. Known-secret/history scan: 199 blobs, no matches.
+Production release d9ccbb7ce9ac3b73: all 76 installed hashes verified; three
+serial HTTPS checks verified English/Swedish copy and the yellow WebP response.
