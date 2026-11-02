@@ -81,15 +81,20 @@ final class Debates
 	{
 		self::human($actor);
 		if (($input['processing_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
+		$english = ($input['locale'] ?? '') === 'en';
+		$input['thesis'] = $input['thesis'] ?? $input['title'] ?? '';
+		if (($input['topic'] ?? '') === '') $input['topic'] = $english ? 'Other' : 'Övrigt';
+		if (($input['left_label'] ?? '') === '') $input['left_label'] = $english ? 'Disagree' : 'Håller inte med';
+		if (($input['right_label'] ?? '') === '') $input['right_label'] = $english ? 'Agree' : 'Håller med';
 		return Db::transaction(static function () use ($actor, $input): array {
 			self::actor($actor, true);
 			if ($receipt = Idempotency::replay($actor['user_id'], 'create', $input)) return $receipt;
 			Support::rate('create:' . $actor['user_id'], 10, 3600);
 			$id = Support::id();
 			$locale = ($input['locale'] ?? '') === 'en' ? 'en' : 'sv';
-			Db::run('INSERT INTO debates (id, creator_id, title, topic, thesis, introduction, left_label, right_label, locale, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'title', 5, 160), Support::text($input, 'topic', 2, 60), Support::text($input, 'thesis', 10, 4000), Support::text($input, 'introduction', 0, 4000), Support::text($input, 'left_label', 1, 140), Support::text($input, 'right_label', 1, 140), $locale, Support::now(), Support::now()]);
+			Db::run('INSERT INTO debates (id, creator_id, title, topic, thesis, introduction, left_label, right_label, locale, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'title', 5, 160), Support::text($input, 'topic', 2, 60), Support::text($input, 'thesis', 5, 4000), Support::text($input, 'introduction', 0, 4000), Support::text($input, 'left_label', 1, 140), Support::text($input, 'right_label', 1, 140), $locale, Support::now(), Support::now()]);
 			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 0, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
-			Db::run('UPDATE debate_participants SET processing_consent_at = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), $id, $actor['user_id']]);
+			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $id, $actor['user_id']]);
 			self::consent($id, $actor['user_id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			self::event($id, $actor['user_id'], 'created');
 			self::position($id, $actor['user_id'], $input);
@@ -154,7 +159,7 @@ final class Debates
 			}
 			if (($input['accept_terms'] ?? false) !== true || ($input['processing_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
 			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 1, ?, ?)', [$row['id'], $user['id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
-			Db::run('UPDATE debate_participants SET processing_consent_at = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), $row['id'], $user['id']]);
+			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $row['id'], $user['id']]);
 			self::consent($row['id'], $user['id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			Db::run("UPDATE debate_invitations SET status = 'accepted' WHERE id = ?", [$invitation['id']]);
 			Db::run("UPDATE debates SET status = 'active', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);

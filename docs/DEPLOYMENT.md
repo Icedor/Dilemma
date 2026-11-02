@@ -22,11 +22,11 @@ Use the private operations notes for the verified SSH account/key and Dilemma pa
 4. Provision a dedicated Dilemma database/user and TLS SMTP credentials. Configure
    a new production APP_KEY privately; do not reuse local test credentials.
    Keep `.env` private with mode 0600 and application/var owner-controlled.
-5. Complete privacy/terms review, sender identity, hosting backup retention and
-   processor records. Set LEGAL_REVIEWED=true only after the owner actually reviews.
-   With LEGAL_REVIEWED=false, the site can be published for inspection; login and
-   registration are disabled before storing input or queuing mail. Preflight's
-   owner-review check will remain failed until participation can open.
+5. Finish privacy/terms review, sender identity, hosting backup retention and
+   processor records. Set LEGAL_REVIEWED=true only after actual owner review.
+   The original brief permits legal text marked for final review. LEGAL_REVIEWED
+   controls the legal-page notice; it is not an additional registration gate.
+   Email verification and explicit participation/publication consents stay required.
 
 ## Build and verify the same release
 

@@ -21,6 +21,16 @@ final class DebateActions
 			$notify = null;
 			$data = [];
 			switch ($action) {
+				case 'notifications':
+					Db::run('UPDATE debate_participants SET notify = ? WHERE debate_id = ? AND user_id = ?', [(int) (($input['notify'] ?? false) === true), $id, $actor['user_id']]);
+					$kind = 'notifications_updated';
+					break;
+				case 'withdraw':
+					self::state($status, ['active', 'paused']);
+					if (($input['confirm'] ?? false) !== true) throw new Failure(422, 'confirmation_required');
+					$status = 'ended'; $kind = 'ended'; $notify = 'ended'; $data = ['reason' => 'withdrawn'];
+					Db::run("UPDATE debates SET end_reason = 'withdrawn', end_proposed_by = NULL WHERE id = ?", [$id]);
+					break;
 				case 'position':
 					self::state($status, ['active', 'paused']);
 					Debates::position($id, $actor['user_id'], $input);

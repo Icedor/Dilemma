@@ -23,13 +23,13 @@ $canonical = $localized_url($language);
 	<link rel="alternate" hreflang="sv" href="<?= $e($localized_url('sv')) ?>">
 	<link rel="alternate" hreflang="en" href="<?= $e($localized_url('en')) ?>">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<link rel="stylesheet" href="/assets/style.css">
-	<script type="module" src="/assets/app.js"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261102-2">
+	<script type="module" src="/assets/app.js?v=20261102-2"></script>
 </head>
-<body data-user="<?= $e($user['id'] ?? '') ?>">
+<body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
 	<header class="site-header">
-		<a class="wordmark" href="/" aria-label="Dilemma.se">dilemma<span class="wordmark-dot">.</span></a>
+		<a class="wordmark" href="/" aria-label="Dilemma.se">dilemma</a>
 		<nav class="main-nav" aria-label="Dilemma">
 			<a href="/explore"><?= $t('explore') ?></a><a href="/how"><?= $t('how') ?></a>
 			<?php if ($user): ?><a href="/app"><?= $t('mine') ?></a><?php endif; ?>
@@ -40,10 +40,9 @@ $canonical = $localized_url($language);
 		</div>
 	</header>
 	<noscript><p class="notice"><?= $t('no_script') ?></p></noscript>
-	<?php if (!Config::production()): ?><p class="notice"><?= $t('local_preview') ?></p><?php endif; ?>
-	<?php if (!Config::participation_open()): ?><p class="notice"><?= $t('opening_soon') ?></p><?php endif; ?>
+	<?php if (!Config::production()): ?><p class="notice preview-notice"><?= $t('local_preview') ?></p><?php endif; ?>
 	<main id="main"><?= $content ?></main>
-	<footer class="site-footer"><a class="wordmark" href="/">dilemma.</a><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy"><?= $t('privacy') ?></a><a href="/terms"><?= $t('terms') ?></a></nav></footer>
+	<footer class="site-footer"><a class="wordmark" href="/">dilemma</a><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy"><?= $t('privacy') ?></a><a href="/terms"><?= $t('terms') ?></a></nav></footer>
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
 	<template id="translations"><?= $e(Support::json(I18n::all())) ?></template>
 </body>

@@ -1,0 +1,1 @@
+ALTER TABLE debate_participants ADD COLUMN notify BOOLEAN NOT NULL DEFAULT 0;

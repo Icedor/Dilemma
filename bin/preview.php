@@ -7,7 +7,7 @@ if (PHP_SAPI !== 'cli-server') exit(1);
 require dirname(__DIR__) . '/app/bootstrap.php';
 if (Dilemma\Config::production() || !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'], true)) exit(1);
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
-$assets = ['/assets/app.js' => 'text/javascript', '/assets/style.css' => 'text/css', '/assets/people.svg' => 'image/svg+xml', '/assets/favicon.svg' => 'image/svg+xml'];
+$assets = ['/assets/app.js' => 'text/javascript', '/assets/style.css' => 'text/css', '/assets/white-flag.webp' => 'image/webp', '/assets/favicon.svg' => 'image/svg+xml'];
 if (isset($assets[$path])) {
 	header('Content-Type: ' . $assets[$path]);
 	header('X-Content-Type-Options: nosniff');

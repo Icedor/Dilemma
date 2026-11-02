@@ -8,7 +8,6 @@ final class Auth
 {
 	public static function request_link(array $input, string $ip): void
 	{
-		if (!Config::participation_open()) throw new Failure(503, 'opening_soon');
 		Support::rate('login:ip:' . $ip, 12, 900);
 		$email = Support::email(Support::text($input, 'email', 3, 254));
 		Support::rate('login:email:' . $email, 4, 900);

@@ -1,7 +1,25 @@
 # Delivery status
 
-Updated 2026-11-02, Europe/Stockholm. Website deployed; participation remains closed.
-Runtime release 54e5a50 is installed. Source commits remain local, not on GitHub.
+Updated 2026-11-02, Europe/Stockholm. Website deployed; full redesign in progress.
+The old release remains live until the new package is verified and installed.
+Source commits remain local, not on GitHub.
+
+## Owner-requested redesign
+
+- [x] Re-read original requirements and inspect all four supplied design references.
+- [x] Replace the green-tinted theme and people graphic with yellow/coral/black,
+  oversized typography, a photographic white flag and redesigned page components.
+- [x] Rewrite introduction/about/how text in plain Swedish and English, reflecting
+  the human → own AI → opposing AI → own human → new objections loop.
+- [x] Simplify creation to opinion/reason; optional details stay available.
+- [x] Implement unchecked per-debate notifications at creation/acceptance/settings.
+- [x] Implement human-only confirmed ending without claiming persuasion.
+- [x] Remove the assistant-invented legal-review login gate; keep the legal notice,
+  email verification, authentication and explicit participant/publication consent.
+- [x] Twelve new participant-flow tests pass alongside existing regression suites.
+- [ ] Actual desktop/mobile visual and keyboard QA: native Computer Use stopped
+  on URL verification even after Chrome was identified as Dilemma. No bypass.
+- [ ] Publish and verify the redesigned release.
 
 ## Verified
 
@@ -40,8 +58,8 @@ Runtime release 54e5a50 is installed. Source commits remain local, not on GitHub
 - [x] MIT license authorized and included. Outbound sender noreply@dilemma.se
   chosen; no reply address, forwarding or incoming email feature.
 - [x] PHP syntax checked across 57 files; JavaScript syntax passes.
-- [x] Five launch checks: production with unreviewed terms refuses login before
-  storing personal data; both languages explain availability without an email form.
+- [x] Five updated launch checks: registration queues one verification message,
+  both languages show sign-in, and legal review remains disclosed on legal pages.
 - [x] Private 60-file release package built; three extraction/integrity checks pass.
 - [x] Existing Chrome extension and native-host registration verified correct.
 - [x] Source and staged secret scans passed; implementation saved in local commit

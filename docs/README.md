@@ -3,6 +3,7 @@
 - [Status and complete delivery checklist](STATUS.md)
 - [Latest session handoff and browser diagnosis](SESSION_HANDOFF.md)
 - [Decisions and scope](DECISIONS.md)
+- [Redesigned visual system and participant flow](DESIGN.md)
 - [Development and operations](OPERATIONS.md)
 - [Architecture, data and state machine](ARCHITECTURE.md)
 - [MCP contract, OAuth and client evidence](MCP.md)

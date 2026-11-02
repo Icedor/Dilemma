@@ -5,7 +5,7 @@ DirectoryIndex index.php
 	RewriteEngine On
 	RewriteRule ^\.well-known/acme-challenge/[A-Za-z0-9_-]+$ - [END]
 	RewriteRule ^(?:\.(?!well-known/)|app/|bin/|database/|docs/|tests/|var/) - [F,END]
-	RewriteRule ^assets/(?:app\.js|style\.css|people\.svg|favicon\.svg)$ - [END]
+	RewriteRule ^assets/(?:app\.js|style\.css|white-flag\.webp|favicon\.svg)$ - [END]
 	RewriteRule ^index\.php$ - [END]
 	RewriteRule ^ index.php [END]
 </IfModule>

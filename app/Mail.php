@@ -15,7 +15,7 @@ final class Mail
 	public static function notify(string $debate_id, string $actor_id, string $kind, int $sequence): void
 	{
 		$debate = Db::one('SELECT title FROM debates WHERE id = ?', [$debate_id]);
-		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND u.status = 'active' AND u.notify = 1", [$debate_id, $actor_id]) as $user) {
+		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND u.status = 'active' AND u.notify = 1 AND p.notify = 1", [$debate_id, $actor_id]) as $user) {
 			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title'], 'chat_link' => $user['chat_link'] ? Support::unseal($user['chat_link']) : ''], $user['id']);
 		}
 	}
@@ -70,7 +70,7 @@ final class Mail
 		if ($kind === 'login') $text .= "\n\n" . ($en ? 'The link expires in 15 minutes and can be used once. If you did not request it, ignore this email.' : 'Länken gäller i 15 minuter och kan användas en gång. Bortse från mejlet om du inte begärde det.');
 		if (!empty($data['chat_link'])) $text .= "\n\n" . ($en ? 'Your private AI conversation: ' : 'Din privata AI-konversation: ') . $data['chat_link'];
 		if ($kind !== 'login') $text .= "\n\n" . ($en ? 'Notification settings: ' : 'Aviseringsinställningar: ') . Config::url('/settings');
-		$html = '<!doctype html><html lang="' . ($en ? 'en' : 'sv') . '"><body style="margin:0;padding:24px;background:#f7f5ed;color:#20251e;font:18px/1.6 Arial,sans-serif"><main style="max-width:600px;margin:auto"><h1 style="font-size:28px">' . Support::escape($subject) . '</h1><p>' . Support::escape($data['title'] ?? '') . '</p><p><a href="' . Support::escape($data['url']) . '">' . ($en ? 'Open Dilemma' : 'Öppna Dilemma') . '</a></p><p style="white-space:pre-line">' . nl2br(Support::escape($text)) . '</p></main></body></html>';
+		$html = '<!doctype html><html lang="' . ($en ? 'en' : 'sv') . '"><body style="margin:0;padding:24px;background:#fffdf7;color:#191918;font:18px/1.6 Arial,sans-serif"><main style="max-width:600px;margin:auto"><h1 style="font-size:28px">' . Support::escape($subject) . '</h1><p>' . Support::escape($data['title'] ?? '') . '</p><p><a href="' . Support::escape($data['url']) . '">' . ($en ? 'Open Dilemma' : 'Öppna Dilemma') . '</a></p><p style="white-space:pre-line">' . nl2br(Support::escape($text)) . '</p></main></body></html>';
 		$boundary = 'dilemma-' . $id;
 		$from = Support::email(Config::get('MAIL_FROM'));
 		$to = Support::email($payload['email']);

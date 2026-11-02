@@ -35,10 +35,10 @@ function user_fixture(string $label): array {
 	return ['actor' => ['user_id' => $user['id'], 'channel' => 'human'], 'session' => $session, 'email' => $email, 'login_token' => $token];
 }
 function debate_fixture(array $a, array $b, bool $public_b = true): array {
-	$draft = Debates::create($a, ['idempotency_key' => Support::token(), 'title' => 'Should public parks remain open at night?', 'topic' => 'City life', 'thesis' => 'Should public parks remain open throughout the night?', 'stance' => 'Parks should remain accessible.', 'left_label' => 'Close at night', 'right_label' => 'Open all night', 'locale' => 'en', 'processing_consent' => true, 'public_consent' => true, 'position_consent' => true, 'position' => 0]);
+	$draft = Debates::create($a, ['idempotency_key' => Support::token(), 'title' => 'Should public parks remain open at night?', 'topic' => 'City life', 'thesis' => 'Should public parks remain open throughout the night?', 'stance' => 'Parks should remain accessible.', 'left_label' => 'Close at night', 'right_label' => 'Open all night', 'locale' => 'en', 'notify' => true, 'processing_consent' => true, 'public_consent' => true, 'position_consent' => true, 'position' => 0]);
 	$invitation = Debates::invite($a, $draft['debate_id'], ['idempotency_key' => Support::token()]);
 	$token = parse_url($invitation['invitation_url'], PHP_URL_FRAGMENT);
-	$accepted = Debates::accept($b, ['token' => $token, 'idempotency_key' => Support::token(), 'stance' => 'Closing parks could reduce disturbance.', 'accept_terms' => true, 'processing_consent' => true, 'public_consent' => $public_b, 'position_consent' => false, 'position' => null]);
+	$accepted = Debates::accept($b, ['token' => $token, 'idempotency_key' => Support::token(), 'stance' => 'Closing parks could reduce disturbance.', 'accept_terms' => true, 'notify' => true, 'processing_consent' => true, 'public_consent' => $public_b, 'position_consent' => false, 'position' => null]);
 	return ['id' => $draft['debate_id'], 'revision' => $accepted['revision']];
 }
 function actor_token(array $actor, bool $write, ?string $id = null): array {
