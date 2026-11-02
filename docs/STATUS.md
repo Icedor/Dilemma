@@ -1,3 +1,21 @@
+# Sharing preview incident — 2026-11-02
+
+- [x] Existing image visually inspected: “What would change your mind?” remains
+  intact. Public PNG returned 200/image/png, 462701 bytes; SHA256 matches local.
+- [x] Facebook Sharing Debugger directly observed: Bad Response Code, HTTP 429;
+  og:image still points to /assets/share-opinion.png?v=20261102-9.
+- [x] Read-only Dilemma server logs: facebookexternalhit received 200 for homepage
+  and PNG at 19:21; at 20:43:13 +0100 both the static PNG and homepage received 429.
+  Deployed HTTP/.htaccess/image hashes match the release manifest. The static PNG
+  bypasses PHP; no public-homepage application rate limit exists. Evidence points
+  to hosting/web-server throttling; exact rule/provider component is unverified.
+- [ ] Hosting must identify and correct the legitimate Meta fetch limitation while
+  retaining protections; only after a concrete correction run one fresh scrape.
+- [ ] Verify restored image inside Facebook's actual preview after correction.
+- No image/copy/code changes, firewall changes, new scrape requests, external
+  messages or support tickets made. Earlier PageSpeed 429 may be related but this
+  has not been established. A concise support draft was prepared for the owner.
+
 # Homepage separation restored — 2026-11-02
 
 - [x] Restored the missing project-story section and bilingual content between

@@ -1,3 +1,24 @@
+# Latest checkpoint: sharing preview blocked by HTTP 429
+
+2026-11-02 22:10 Europe/Stockholm. Runtime release remains fdb973d34cfa8029,
+source 7e5eb04. The image is intact, not blank; preserve its existing copy.
+See STATUS.md for evidence and the pending hosting correction.
+
+Chrome extension access now works through cua.getBrowser({url: debugger URL}),
+browser ID 3. Reused user tab 138435524; no tabs created, closed, grouped or moved.
+Facebook debugger reports 429. Its cached echo page returned no data; returned to
+original debugger. Did not press Debug or Scrape Again. Stop repeated scrapes.
+Read-only SSH used the explicit authorized key, strict host validation and no
+fallback. Read only Dilemma's two domain logs, bounded to last 2 MB and filtered
+homepage/PNG records. No IPs or query tokens were retained in notes.
+
+Confirmed PNG SHA256:
+9814fad5dd9ac60ab271d6fe6d92341182e26bfbd048e798af95f199a02bcf84.
+The server's HTTP/.htaccess/image hashes match the deployed release. HTTP 429 on
+an allowlisted static PNG establishes that changing Dilemma PHP rate limits or
+regenerating the artwork is not the appropriate first fix. Exact hosting rule
+needs provider evidence. No security protections may be disabled. No ticket sent.
+
 # Latest checkpoint: dark homepage story restored
 2026-11-02 20:32 Europe/Stockholm. Source **7e5eb04**, release
 **fdb973d34cfa8029** live and pushed. Owner noticed missing row and adjoining yellow/
