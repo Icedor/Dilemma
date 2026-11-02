@@ -31,17 +31,17 @@ $canonical = $localized_url($language);
 	<meta property="og:description" content="<?= $e($indexable ? $description : I18n::t('seo_home')) ?>">
 	<meta property="og:url" content="<?= $e($indexable ? $canonical : Config::url()) ?>">
 	<meta property="og:locale" content="<?= $language === 'en' ? 'en_GB' : 'sv_SE' ?>">
-	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-8')) ?>">
+	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-9')) ?>">
 	<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 	<meta property="og:image:alt" content="Dilemma. What would change your mind?">
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-8')) ?>">
-	<link rel="manifest" href="/manifest.webmanifest?v=20261102-8">
-	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-8">
+	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-9')) ?>">
+	<link rel="manifest" href="/manifest.webmanifest?v=20261102-9">
+	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-9">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<script src="/assets/language.js?v=20261102-8"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261102-8">
-	<script type="module" src="/assets/app.js?v=20261102-8"></script>
+	<script src="/assets/language.js?v=20261102-9"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261102-9">
+	<script type="module" src="/assets/app.js?v=20261102-9"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>

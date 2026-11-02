@@ -161,7 +161,8 @@
 	.hero-wordmark { position: absolute; z-index: 1; inset: auto 3.4% -.025em; font-family: "Arial Black", Arial, sans-serif; font-size: clamp(6rem, 21.7vw, 32rem); font-weight: 900; letter-spacing: -.092em; line-height: .94; white-space: nowrap; overflow-wrap: normal; }
 
 
-	.project-story { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 6rem; padding: 6rem var(--space); max-width: 100rem; margin: auto; }
+	.project-story { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 6rem; padding: 6rem max(var(--space), calc((100vw - 100rem) / 2 + var(--space))); background: #1b1b1b; color: #faf8f1; }
+	.project-story :focus-visible { outline-color: #ffda3d; }
 	.project-story h2 { font-size: clamp(2.5rem, 5.3vw, 5rem); max-width: 10ch; }
 	.story-copy { padding-top: .4rem; }
 	.story-copy p { font-size: clamp(1.1rem, 1.6vw, 1.4rem); line-height: 1.65; max-width: 38rem; margin-bottom: 1.5rem; }
