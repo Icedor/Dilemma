@@ -1,0 +1,2 @@
+<?php use Dilemma\Views; use Dilemma\ReadModel; ?>
+<section class="section"><div class="page-heading split"><h1><?= $t('mine') ?></h1><a class="button" href="/new"><?= $t('new_debate') ?> <span aria-hidden="true">+</span></a></div><nav class="subnav"><a href="/connect"><?= $t('connect') ?> ↗</a><a href="/settings"><?= $t('settings') ?></a></nav><?= Views::debate_list(ReadModel::list($_GET, $actor), 'empty_mine') ?></section>

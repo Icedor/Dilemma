@@ -1,0 +1,81 @@
+# MCP, OAuth and client evidence
+
+Endpoint: `https://dilemma.se/mcp` after deployment; not currently published.
+Single-request stateless Streamable HTTP, JSON responses, POST only. GET/DELETE
+return 405. Notifications return 202. No server event stream or agent wake loop.
+
+## Version and tool contract
+
+- 2026-07-28: `server/discover`, required protocol/client-capability metadata,
+  matching MCP-Protocol-Version and Mcp-Method headers; Mcp-Name for tools/call,
+  including validated Base64 sentinel decoding; complete resultType envelopes.
+- 2025-11-25: initialize negotiation and legacy JSON-RPC envelopes.
+- Unsupported versions fail explicitly. No arbitrary version claim is made.
+
+`ToolRegistry::definitions()` is the authoritative schema. Unknown properties,
+wrong types and undeclared identity inputs are rejected.
+
+| Tool suffix (all prefixed dilemma_) | Purpose | Permission |
+| --- | --- | --- |
+| whoami | Own alias, ID and scopes; no email/private link | debates:read |
+| list_debates | Own permitted debates, status and turn | debates:read |
+| get_debate | Context, argument page, latest positions/history page | debates:read |
+| get_updates | Events after sequence; follow message_id | debates:read |
+| get_argument | Full original, structured content, sources and relations | debates:read |
+| test_connection | Read authenticated connection/scopes | debates:read |
+| test_write | Persist harmless connection proof, without notification | arguments:write |
+| submit_argument | Publish on the authenticated participant's turn | arguments:write |
+| update_argument_metadata | Append own clarification/sources | arguments:write |
+
+Write scope always includes read scope. Connections can cover all the account's
+debates or one owned debate. Write annotations are honest. Read tests do not write
+status records. Agent assessments are stored content/events, never human beliefs.
+No tool controls consent, account deletion, positions, endings or the white flag.
+
+Read current revision before a write. Send an 8–128 character idempotency_key and
+reuse it only for the same payload. Successful publication returns message_id,
+debate_id, event_sequence, new revision and stored_at. On ambiguous network failure,
+retry the unchanged request; never claim publication from generated text alone.
+On revision_conflict, re-read before preparing a new request/key.
+
+## Authentication
+
+OAuth metadata lives at `/.well-known/oauth-authorization-server` and
+`/.well-known/oauth-protected-resource` (also `/mcp` suffix).
+Public-client DCR accepts exact HTTPS redirect URIs; no wildcards/fragments,
+client-secret authentication or client metadata document discovery is advertised.
+Authorization requires Dilemma login and explicit account/debate-scoped consent.
+Treat self-registered client names as unverified; display their callback address.
+
+PKCE S256 is mandatory. Authorization codes expire after two minutes and are
+single-use. Every token is bound to exact client and `/mcp` resource. Access lasts
+one hour; refresh lasts 30 days and rotates. Refresh reuse revokes the connection.
+Manual bearer tokens last 30 days and are shown once. Tokens are stored hashed.
+Revocation is rechecked at domain write time, including actors resolved earlier.
+
+## Evidence matrix — 2026-11-02
+
+| Client/path | Discovery/read/write evidence |
+| --- | --- |
+| Dilemma automated protocol tests | Both revisions; real local DB receipts, no real AI client |
+| Dilemma browser manual fallback | Domain/HTTP tested; visual interaction QA pending |
+| Codex Windows + Flowstate | Owner confirms real working writes; different product |
+| Codex Windows + Dilemma | Not tested |
+| ChatGPT Windows + Dilemma | Not tested |
+| ChatGPT web + Dilemma | Not tested |
+| Claude web/Desktop + Dilemma | Not tested |
+
+Remote cloud clients need a reachable HTTPS deployment. Localhost is not a remote
+connector endpoint. Do not silently replace real-client tests with PHP fixtures.
+Use the site's connection test and check the actual stored receipt per client.
+If a client cannot write, copy the prepared text into Dilemma's participant form.
+
+Research, consulted 2026-11-02:
+- https://developers.openai.com/api/docs/guides/custom-mcp-server
+- https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
+- https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning
+- https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http
+- https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization
+
+Private ChatGPT `/c/…` and Claude `/chat/…` links are optional user-entered web
+shortcuts, not guaranteed native-app deep links. Public sharing URLs are rejected.

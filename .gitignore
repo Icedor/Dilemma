@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+PROJECT_LOCK.md
+.private/
+var/
+*.log
+*.sql.gz
+*.zip
+node_modules/
+vendor/
+.DS_Store
+Thumbs.db
+.git
