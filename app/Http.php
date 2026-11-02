@@ -50,6 +50,12 @@ final class Http
 			I18n::locale($locale);
 			if (str_starts_with($path, '/api/')) self::api($method, $path, $user, $actor, $ip);
 			if ($method !== 'GET') throw new Failure(405, 'method_not_allowed');
+			if ($path === '/connect') {
+				Auth::require_user($user);
+				$target = '/app';
+				if (isset($_GET['debate'])) { $id = Support::uuid($_GET['debate']); Debates::member($id, $user['id']); $target = '/debate/' . $id . '#connect-ai'; }
+				header('Location: ' . $target, true, 303); exit;
+			}
 			if ($path === '/robots.txt') { header('Content-Type: text/plain'); echo Config::production() ? "User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /app\nDisallow: /admin\nDisallow: /oauth/\nDisallow: /connect\nDisallow: /settings\nSitemap: " . Config::url('/sitemap.xml') . "\n" : "User-agent: *\nDisallow: /\n"; exit; }
 			if (in_array($path, ['/sitemap.xml', '/sitemap-pages.xml'], true)) { header('Content-Type: application/xml; charset=UTF-8'); echo Sitemap::render($path === '/sitemap.xml', Support::integer($_GET['page'] ?? 1, 1, 100000, 'page')); exit; }
 			header('Content-Type: text/html; charset=UTF-8');

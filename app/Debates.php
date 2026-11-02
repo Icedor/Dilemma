@@ -98,6 +98,7 @@ final class Debates
 			self::consent($id, $actor['user_id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			self::event($id, $actor['user_id'], 'created');
 			self::position($id, $actor['user_id'], $input);
+			Connections::setup($actor, ['debate_id' => $id]);
 			return Idempotency::save($actor['user_id'], 'create', $input, ['debate_id' => $id, 'revision' => 1, 'stored_at' => Support::now()]);
 		});
 	}
@@ -165,6 +166,7 @@ final class Debates
 			Db::run("UPDATE debates SET status = 'active', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);
 			$event = self::event($row['id'], $user['id'], 'joined');
 			self::position($row['id'], $user['id'], $input);
+			Connections::setup($actor, ['debate_id' => $row['id']]);
 			Mail::notify($row['id'], $user['id'], 'joined', $event);
 			return Idempotency::save($user['id'], 'accept', $input, ['debate_id' => $row['id'], 'revision' => (int) $row['revision'] + 1, 'stored_at' => Support::now()]);
 		});

@@ -292,6 +292,12 @@
 	.connect-secret-note, .connect-help-note { font-size: .9rem; line-height: 1.6; }
 	.connect-help-note { color: var(--muted); margin-block: 1.25rem 2rem; }
 	#connection-copy-status { margin-bottom: 1.5rem; }
+	.debate-ai { margin-block: 2.5rem; }
+	.debate-ai textarea { display: block; margin: 1.25rem 0; min-height: 12rem; resize: vertical; }
+	.debate-ai .connect-secret-note { margin-top: 1.25rem; }
+	.debate-ai-manage { margin-top: 1.25rem; font-size: .85rem; }
+	.debate-ai-manage summary { width: fit-content; }
+	.debate-ai #connection-copy-status:empty { display: none; }
 	.admin-records { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; }
 	.admin-records article { padding: 1.5rem 0; border-top: .0625rem solid var(--rule); }
 	.record-heading { display: flex; justify-content: space-between; gap: 1rem; }

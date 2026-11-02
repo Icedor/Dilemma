@@ -1,78 +1,60 @@
-# Flowstate-style copyable AI access
+# Persistent AI access inside each debate
 
-Published source 1c3f105, release 6a1a1a7accdc7480. All 79 installed hashes
-verified. Public JavaScript module MIME and app version checked over HTTPS.
-Three archive integrity checks and known-private-value scan also passed.
-
-Owner instruction, 2026-11-02: use the working Flowstate reference rather than
-making OAuth settings the main experience. Reference inspected read-only:
-
-- Flowstate/Dev/public_html/assets/js/ai-panel.js: create_access, render_credentials,
-  copy_value, clear_credentials.
-- Flowstate/Dev/public_html/assets/js/mcp-setup.js: ready-to-paste native Codex config.
-- Flowstate/Dev/app/Services/ProjectAiGrantService.php: hashed/revocable timed access.
-- Flowstate/Dev/app/Services/McpProtocolAdapter.php: version negotiation.
-
-No Flowstate file, account or database was modified. No mcp-remote/npm dependency,
-bridge, model runner, automatic wake loop or project mutation system was copied.
+Owner correction, 2026-11-02. Publication recorded in STATUS.md.
 
 ## User flow
 
-1. From a debate, select Connect your AI. The debate is already selected. The
-   account-level Connect page asks for a debate only when needed.
-2. Create and copy instructions. A full instruction with MCP URL, bearer header,
-   native Codex configuration, debate ID, expiry, connection test and debate role
-   is generated and copied. Paste it in the user's own AI chat.
-3. Copy again/manual selection remains available if clipboard permission fails.
-   Remove access immediately revokes the credential. Other access is manageable
-   in a collapsed section; OAuth remains a separate option for apps requiring it.
+Creating or joining a debate creates one persistent MCP access for that human in
+that debate. The debate shows the complete readonly instruction and one copy
+button. Manual selection is always available. No account-wide selection page or
+expiry countdown. Old /connect links redirect to the debate or dashboard.
 
-The primary flow clearly says it is for apps supporting bearer-authenticated MCP,
-such as Codex. A pasted instruction does not install an integration in every app.
-It tells the agent to use available host setup, preserve existing configuration,
-ask for actual required approvals/restarts and never claim success without a tool
-receipt. Owner reports Flowstate works in Codex Windows; Dilemma real-client QA
-is still separate and has not been performed.
+Reloading, recopying and returning next session recover the same credential.
+Remove access revokes it immediately and erases the recoverable secret. Opening
+the page never silently recreates revoked access; explicit renewal is required.
+Each participant has a separate credential limited to that debate. Existing
+still-valid old setup keys survive their upgrade to permanent access.
+
+The pasted instruction includes MCP URL, bearer header, native Codex config,
+debate ID and role. The AI uses its app's available MCP configuration capabilities;
+it must report required host approvals or unsupported access honestly. Flowstate
+works in Codex Windows according to the owner; Dilemma real-client QA is pending.
 
 ## Boundaries
 
-POST /api/connections/setup requires a logged-in human, same-origin request, CSRF
-and existing debate membership. The server fixes one-debate scope, read/write
-permissions and 24-hour expiry; submitted broader scopes/durations are ignored.
-No account-wide default. Existing legacy/manual and OAuth APIs are preserved.
+POST /api/connections/setup requires a human session, same-origin request, CSRF
+and membership. The server fixes debate and read/write scopes. A unique
+participant/debate mapping and transactional row locks prevent duplicate creation.
+Permanent tokens have NULL expiry only when backed by that mapping. Legacy manual
+and OAuth API expiry rules remain unchanged.
 
-Only the token hash is stored. Complete setup is returned once with no-store;
-it is not stored in browser local/session storage. It appears in a readonly
-textarea outside forms and clears on pagehide/logout. Copying to the clipboard is
-explicitly requested by the button. User copy may remain in OS clipboard history;
-do not describe clearing page state as erasing the clipboard or the user's chat.
+Authentication uses the token hash. A separately encrypted copy under APP_KEY
+allows the same setup to be recovered later; it is cleared on revoke or account
+deletion. This replaces the former one-time/hash-only setup design.
+Authenticated HTML and API responses use no-store. Secrets never enter browser
+local/session storage, public read models, opponent views or exports. The readonly
+textarea is outside forms and clears on pagehide/logout; bfcache return retrieves
+the same access again. Clipboard/chat history is not erased by page cleanup.
 
-AI access cannot issue new grants, change human consent/position, end participation
-or raise the flag. Test writes record a receipt without posting or notifying.
-Publication still requires turn/revision checks and a persisted message receipt.
+AI cannot grant access, change human consent/position, end participation or raise
+the flag. Test writes persist proof without posting or notifying anyone. Actual
+publication retains turn, revision and idempotency enforcement.
 
-## Compatibility correction
+## Reference and compatibility
 
-Dilemma previously only accepted 2025-11-25 and 2026-07-28. It now negotiates
-2025-03-26 and 2025-06-18 too, following Flowstate's initialize behavior and the MCP
-HTTP specification. Requested supported legacy versions are echoed; unsupported
-initialize requests receive the supported latest legacy version. Non-initialize
-unsupported headers still fail. Headerless legacy requests assume 2025-03-26;
-modern metadata cannot silently downgrade when its header is missing.
-No 2024 SSE transport claim. Modern discovery/header rules remain enforced.
+Flowstate was inspected read-only: ai-panel.js, mcp-setup.js,
+ProjectAiGrantService.php and McpProtocolAdapter.php. No reference files, database
+or runtime were changed. No package, bridge or automatic model runner was added.
 
-Sources consulted 2026-11-02:
-- https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle
-- https://modelcontextprotocol.io/specification/2025-06-18/basic/transports
-- https://developers.openai.com/api/docs/guides/custom-mcp-server
-- https://developers.openai.com/plugins/deploy/connect-chatgpt
-- https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp
+Legacy negotiation supports 2025-03-26, 2025-06-18 and 2025-11-25. Modern 2026-07-28
+header/metadata rules remain enforced. No SSE compatibility claim.
 
 ## Verification
 
-19 setup checks prove copied credentials read/write real local records, cannot
-cross debates, respect expiry/revocation/human actions, and negotiate all three
-legacy versions. 44 HTTP checks cover login/CSRF/no-store and selected-debate page
-rendering. 74 existing domain/MCP/OAuth checks pass. Four clipboard tests cover
-success, permission fallback, retained manual selection and temporary DOM cleanup.
-These are local integration/unit tests, not a real Codex or browser session.
+32 setup checks cover persistence, isolation, protocol negotiation, real stored
+arguments, revocation, explicit renewal, legacy upgrade and account deletion.
+46 HTTP checks cover authentication/CSRF/no-store and private inline rendering.
+Six concurrency checks include independent simultaneous setup renewals returning
+one connection and identical credentials. Existing 74 domain/MCP/OAuth, 12
+participant-flow, 19 push and four clipboard checks pass. No external delivery or
+real Codex/browser interaction is represented by these tests.

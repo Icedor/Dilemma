@@ -54,3 +54,8 @@ Sources:
 
 Actual Dilemma ChatGPT/Codex/Claude client tests remain unperformed until a reachable
 deployment and suitable connected clients are available.
+# Latest owner correction: persistent debate access
+
+The earlier one-day/separate-page Dilemma adaptation is superseded. Persistent
+per-participant/debate access is shown directly in each debate. See
+AI_CONNECTIONS.md. Flowstate remains unchanged and read-only.

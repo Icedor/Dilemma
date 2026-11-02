@@ -36,4 +36,10 @@ $other = $request; $other['input']['idempotency_key'] = Support::token(); $other
 $results = simultaneous([$request, $other]); $statuses = array_column($results, 'status'); sort($statuses);
 check($statuses === [200, 409], 'Competing writes using different keys produce one success and one conflict');
 check((int) Db::one('SELECT message_count FROM debates WHERE id = ?', [$debate['id']])['message_count'] === 2, 'Concurrent competing writes preserve turn and message counts');
+$setup = \Dilemma\Connections::current($a['actor'], $debate['id']);
+\Dilemma\Connections::revoke($a['actor'], $setup['connection_id']);
+$request = ['operation' => 'setup', 'actor' => $a['actor'], 'input' => ['debate_id' => $debate['id'], 'renew' => true]];
+$results = simultaneous([$request, $request, $request]);
+check(count(array_unique(array_column(array_column($results, 'result'), 'connection_id'))) === 1 && array_column($results, 'status') === [200, 200, 200], 'Concurrent renewals return one persistent connection');
+check(count(array_unique(array_column(array_column($results, 'result'), 'setup_text'))) === 1, 'Concurrent copies return the same recoverable credential');
 echo 'SUCCESS: ' . $checks . " concurrency checks using independent PHP processes.\n";

@@ -65,6 +65,7 @@ final class Accounts
 			Db::run('DELETE FROM idempotency_keys WHERE user_id = ?', [$user['id']]);
 			Db::run('DELETE FROM auth_sessions WHERE user_id = ?', [$user['id']]);
 			Db::run('DELETE FROM email_verifications WHERE user_id = ?', [$user['id']]);
+			Db::run('DELETE FROM debate_ai_access WHERE user_id = ?', [$user['id']]);
 			Db::run("UPDATE moderation_reports SET reason = '[deleted]' WHERE reporter_id = ?", [$user['id']]);
 			Db::run("UPDATE notification_outbox SET encrypted_payload = '', status = CASE WHEN status = 'sent' THEN 'sent' ELSE 'cancelled' END WHERE user_id = ?", [$user['id']]);
 			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?), label = ? WHERE user_id = ?', [Support::now(), '[deleted]', $user['id']]);

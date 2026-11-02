@@ -1,4 +1,15 @@
-# Current correction — 2026-11-02
+# Persistent debate access — 2026-11-02
+
+- [x] One persistent access per participant/debate, created on create/join.
+- [x] Complete selectable setup and copy button directly inside the debate.
+- [x] Same credential on recopy/reload; explicit revoke and deliberate renewal.
+- [x] Encrypted recovery, scoped authentication, migration 007 and legacy upgrade.
+- [x] 32 setup, 46 HTTP, 6 concurrency, 74 domain, 12 participant, 19 push,
+  4 clipboard and 3 archive checks; PHP/JS syntax and private-value scan.
+- [ ] Publish release 4b0de79a9077eb3a after source/config and database backup.
+- [ ] Real AI-client and visual browser QA remain unperformed.
+
+## Previous connection release
 Live source **1c3f105**, release **6a1a1a7accdc7480**, GitHub verified.
 Flowstate-style complete bearer setup is now the primary AI connection flow:
 select/preselect debate, create/copy instructions, paste in the AI app. One-day,

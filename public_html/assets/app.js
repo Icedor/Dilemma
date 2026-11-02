@@ -149,8 +149,8 @@ document.addEventListener('submit', async event => {
 				location.assign(data.redirect);
 				break;
 			}
-			case 'created': location.assign(`/debate/${encodeURIComponent(data.debate_id)}`); break;
-			case 'accepted': storageRemove('dilemma:invitation'); location.assign(data.debate_id ? `/debate/${encodeURIComponent(data.debate_id)}` : '/app'); break;
+			case 'created': location.assign(`/debate/${encodeURIComponent(data.debate_id)}#connect-ai`); break;
+			case 'accepted': storageRemove('dilemma:invitation'); location.assign(data.debate_id ? `/debate/${encodeURIComponent(data.debate_id)}#connect-ai` : '/app'); break;
 			case 'deleted': clearPrivateStorage(); location.assign('/'); break;
 			case 'flag': storageSet('dilemma:flag-replay', location.pathname); location.reload(); break;
 			case 'oauth': location.assign(data.redirect); break;
@@ -160,19 +160,6 @@ document.addEventListener('submit', async event => {
 				const link = document.createElement('a'); link.href = data.invitation_url; link.textContent = data.invitation_url;
 				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy'); copy.dataset.copy = data.invitation_url;
 				result.append(link, copy); result.hidden = false; break;
-			}
-			case 'connection-setup': {
-				const result = document.querySelector('#connection-result');
-				const target = document.querySelector('#ai-setup');
-				target.value = data.setup_text;
-				form.hidden = true; result.hidden = false;
-				const revoke = document.querySelector('#revoke-new-connection');
-				revoke.dataset.connectionId = data.connection_id; revoke.hidden = false;
-				const copied = await copyText(target.value, target);
-				document.querySelector('#connection-copy-status').textContent = t(copied ? 'setup_copied' : 'setup_copy_failed');
-				if (copied) result.querySelector('[data-copy-target]').focus();
-				else { document.querySelector('#setup-text-details').open = true; target.focus(); target.select(); }
-				break;
 			}
 			case 'report': feedback.textContent = t('report_sent'); form.reset(); break;
 			case 'saved': announce(t('saved')); break;
@@ -194,15 +181,46 @@ function clearPrivateStorage() {
 	try { for (const key of Object.keys(sessionStorage)) if (key.startsWith('dilemma:')) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
 }
 
+function renderSetup(data) {
+	const section = document.querySelector('[data-debate-ai]');
+	const target = document.querySelector('[data-private-setup]');
+	if (!section || !target) return;
+	target.value = data.setup_text || '';
+	document.querySelector('#connection-result').hidden = data.revoked || !target.value;
+	document.querySelector('#connection-copy-status').textContent = data.revoked ? t('setup_removed') : '';
+	const revoke = document.querySelector('#revoke-new-connection');
+	revoke.dataset.connectionId = data.connection_id; revoke.disabled = false;
+	document.querySelector('#renew-debate-connection').hidden = !data.revoked;
+	document.querySelector('#retry-debate-connection').hidden = true;
+	section.dataset.setupReady = 'true';
+}
+
+async function loadDebateSetup(renew = false) {
+	const section = document.querySelector('[data-debate-ai]');
+	if (!section || section.dataset.setupBusy === 'true') return;
+	section.dataset.setupBusy = 'true';
+	const restore = document.querySelector('#renew-debate-connection');
+	restore.disabled = true;
+	try {
+		const data = await request('/api/connections/setup', { debate_id: section.dataset.debateAi, renew });
+		renderSetup(data);
+	} catch (error) {
+		document.querySelector('#connection-copy-status').textContent = error.message;
+		document.querySelector('#retry-debate-connection').hidden = false;
+	} finally { section.dataset.setupBusy = 'false'; restore.disabled = false; }
+}
+
 function clearSetup() {
 	const target = document.querySelector('[data-private-setup]');
 	if (!target) return;
 	target.value = '';
 	document.querySelector('#connection-result').hidden = true;
-	document.querySelector('#connection-setup-form').hidden = false;
+	document.querySelector('[data-debate-ai]').dataset.setupReady = 'false';
 	delete document.querySelector('#revoke-new-connection').dataset.connectionId;
 }
 window.addEventListener('pagehide', clearSetup);
+window.addEventListener('pageshow', event => { if (event.persisted) loadDebateSetup(); });
+if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDebateSetup();
 
 document.addEventListener('click', async event => {
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
@@ -216,10 +234,12 @@ document.addEventListener('click', async event => {
 			if (copied) copy.focus();
 		}
 	}
+	if (event.target.closest('#renew-debate-connection')) await loadDebateSetup(true);
+	if (event.target.closest('#retry-debate-connection')) await loadDebateSetup();
 	const revokeNew = event.target.closest('#revoke-new-connection');
 	if (revokeNew?.dataset.connectionId) {
 		revokeNew.disabled = true;
-		try { await request('/api/connections/' + encodeURIComponent(revokeNew.dataset.connectionId) + '/revoke', {}); clearSetup(); location.reload(); }
+		try { await request('/api/connections/' + encodeURIComponent(revokeNew.dataset.connectionId) + '/revoke', {}); renderSetup({ revoked: true, connection_id: revokeNew.dataset.connectionId, setup_text: '' }); }
 		catch (error) { announce(error.message); revokeNew.disabled = false; }
 	}
 	if (event.target.closest('[data-logout]')) {

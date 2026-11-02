@@ -58,7 +58,10 @@ try {
 	$setup = http_request('/api/connections/setup', ['debate_id' => $setup_debate['id']], $session_headers, $cookie);
 	check($setup['status'] === 201 && str_contains($setup['json']['setup_text'], 'Authorization: Bearer ') && str_contains($setup['json']['setup_text'], $setup_debate['id']) && $setup['headers']['cache-control'][0] === 'no-store', 'Authenticated HTTP setup returns complete instructions with no-store');
 	$connect = http_request('/connect?debate=' . $setup_debate['id'], null, [], $cookie);
-	check($connect['status'] === 200 && str_contains($connect['body'], 'connection-setup-form') && str_contains($connect['body'], 'data-private-setup') && !str_contains($connect['body'], 'Authorization: Bearer '), 'Connection page preselects the debate without exposing a previously issued credential');
+	check($connect['status'] === 303 && $connect['headers']['location'][0] === '/debate/' . $setup_debate['id'] . '#connect-ai', 'Old connection links redirect directly to the debate');
+	$debate_page = http_request('/debate/' . $setup_debate['id'], null, [], $cookie);
+	check($debate_page['status'] === 200 && str_contains($debate_page['body'], 'data-private-setup') && str_contains($debate_page['body'], 'Authorization: Bearer ') && $debate_page['headers']['cache-control'][0] === 'no-store', 'Own debate shows the ready-to-copy setup without caching');
+	check(!str_contains(http_request('/debate/' . $setup_debate['id'])['body'], 'Authorization: Bearer '), 'Public debate page never exposes participant credentials');
 	check(http_request('/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/invalid', 'consent' => true], [], $cookie)['status'] === 403, 'Push subscription requires CSRF protection');
 	check(http_request('/api/profile', ['alias' => 'New alias'], [], $cookie)['status'] === 403, 'Session alone cannot bypass CSRF');
 	check(http_request('/settings', null, [], $cookie)['status'] === 200, 'Authenticated settings render through HTTP');

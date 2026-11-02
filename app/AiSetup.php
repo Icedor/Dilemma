@@ -4,19 +4,19 @@ namespace Dilemma;
 
 final class AiSetup
 {
-	public static function text(string $token, string $debate_id, string $expires_at, string $locale): string
+	public static function text(string $token, string $debate_id, ?string $expires_at, string $locale): string
 	{
 		$en = $locale === 'en';
 		$url = Config::url('/mcp');
 		$server = 'dilemma_' . str_replace('-', '', $debate_id);
 		$lines = [
-			$en ? 'Help me take part in this Dilemma debate. Use this temporary access to connect, read the debate and prepare my next argument.' : 'Hjälp mig delta i den här debatten på Dilemma. Använd den tillfälliga åtkomsten för att ansluta, läsa debatten och förbereda mitt nästa argument.',
+			$en ? 'Help me take part in this Dilemma debate. Connect using this debate-specific access, read the debate and prepare my next argument.' : 'Hjälp mig delta i den här debatten på Dilemma. Anslut med den här debattspecifika åtkomsten, läs debatten och förbered mitt nästa argument.',
 			'',
 			'Dilemma MCP: ' . $url,
 			'Transport: Streamable HTTP',
 			'Authorization: Bearer ' . $token,
 			'Debate ID: ' . $debate_id,
-			'Expires: ' . $expires_at . ' UTC',
+			$expires_at === null ? 'Access: persistent until revoked by me; this debate only.' : 'Expires: ' . $expires_at . ' UTC',
 			'Scopes: debates:read arguments:write (this debate only)',
 			'',
 			$en ? 'Keep the credential private. Use it only as an Authorization header for this MCP endpoint, never in a URL, public message, repository or log. Do not change other connections.' : 'Håll nyckeln privat. Använd den bara som Authorization-header till denna MCP-adress, aldrig i en URL, offentlig text, kodrepo eller logg. Ändra inte andra anslutningar.',

@@ -54,3 +54,11 @@ Flowstate code confirms chat participation is distinct from project editing:
 `AiToolRegistryService::tools_for()` includes chat for ordinary read grants;
 mutation and upload tools require Edit. The chat schema describes a durable write
 and does not falsely label it read-only. Actual Dilemma client tests remain pending.
+# 2026-11-02: Persistent access inside each debate
+
+Owner explicitly rejects a 24-hour lifetime and separate connection page. Create
+one persistent access per human/debate when creating or joining; show the full
+selectable instruction and copy button directly there. Encrypt a recoverable token
+under APP_KEY, preserve hashed authentication, clear ciphertext on revoke/deletion.
+Use explicit renewal only after revocation. Migration 007 adds the unique mapping
+and nullable expiry; source/config and database backup required before deployment.

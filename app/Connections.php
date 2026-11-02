@@ -18,11 +18,40 @@ final class Connections
 		return implode(' ', $scopes);
 	}
 
+	public static function current(array $actor, string $debate_id): ?array
+	{
+		Debates::human($actor);
+		Debates::actor($actor);
+		Debates::member(Support::uuid($debate_id), $actor['user_id']);
+		$row = Db::one('SELECT a.*, c.revoked_at FROM debate_ai_access a JOIN mcp_connections c ON c.id = a.connection_id WHERE a.debate_id = ? AND a.user_id = ?', [$debate_id, $actor['user_id']]);
+		return $row ? self::setup_result($row) : null;
+	}
+
+	private static function setup_result(array $row): array
+	{
+		$revoked = $row['revoked_at'] !== null;
+		return ['connection_id' => $row['connection_id'], 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale())];
+	}
+
 	public static function setup(array $actor, array $input): array
 	{
+		Debates::human($actor);
 		$debate_id = Support::uuid($input['debate_id'] ?? '');
-		$result = self::create($actor, ['label' => 'Dilemma AI', 'scopes' => self::READ . ' ' . self::WRITE, 'debate_id' => $debate_id], true, 86400);
-		return ['connection_id' => $result['connection_id'], 'expires_at' => $result['expires_at'], 'setup_text' => AiSetup::text($result['access_token'], $debate_id, $result['expires_at'], I18n::locale())];
+		return Db::transaction(static function () use ($actor, $input, $debate_id): array {
+			Debates::actor($actor, true);
+			// Serialize first creation as well as recopy/renew for this participant.
+			if (!Db::one('SELECT user_id FROM debate_participants WHERE debate_id = ? AND user_id = ? FOR UPDATE', [$debate_id, $actor['user_id']])) throw new Failure(404, 'not_found');
+			$row = Db::one('SELECT a.*, c.revoked_at FROM debate_ai_access a JOIN mcp_connections c ON c.id = a.connection_id WHERE a.debate_id = ? AND a.user_id = ? FOR UPDATE', [$debate_id, $actor['user_id']]);
+			if ($row && ($row['revoked_at'] === null || ($input['renew'] ?? false) !== true)) return self::setup_result($row);
+			// Upgrade the previous setup connection without breaking its still-valid copied key.
+			$legacy = !$row ? Db::one("SELECT c.id FROM mcp_connections c WHERE c.user_id = ? AND c.debate_id = ? AND c.label = 'Dilemma AI' AND c.scopes = 'arguments:write debates:read' AND c.revoked_at IS NULL AND EXISTS (SELECT 1 FROM mcp_tokens t WHERE t.connection_id = c.id AND t.kind = 'access' AND t.client_id IS NULL AND t.expires_at > UTC_TIMESTAMP()) ORDER BY c.created_at DESC LIMIT 1 FOR UPDATE", [$actor['user_id'], $debate_id]) : null;
+			$connection_id = $legacy['id'] ?? self::create($actor, ['label' => 'Dilemma AI', 'scopes' => self::READ . ' ' . self::WRITE, 'debate_id' => $debate_id], false)['connection_id'];
+			$token = Support::token();
+			Db::run("INSERT INTO mcp_tokens (token_hash, connection_id, kind, resource, expires_at) VALUES (?, ?, 'access', ?, NULL)", [Support::hash($token), $connection_id, Config::url('/mcp')]);
+			if ($legacy) Db::run("UPDATE mcp_tokens SET expires_at = NULL WHERE connection_id = ? AND kind = 'access' AND client_id IS NULL AND expires_at > UTC_TIMESTAMP()", [$connection_id]);
+			Db::run('INSERT INTO debate_ai_access (debate_id, user_id, connection_id, encrypted_token, created_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE connection_id = VALUES(connection_id), encrypted_token = VALUES(encrypted_token)', [$debate_id, $actor['user_id'], $connection_id, Support::seal($token), Support::now()]);
+			return self::setup_result(['connection_id' => $connection_id, 'debate_id' => $debate_id, 'encrypted_token' => Support::seal($token), 'revoked_at' => null]);
+		});
 	}
 
 	public static function create(array $actor, array $input, bool $manual = true, int $lifetime = 2592000): array
@@ -57,6 +86,7 @@ final class Connections
 			$connection = Db::one('SELECT id FROM mcp_connections WHERE id = ? AND user_id = ? FOR UPDATE', [$id, $actor['user_id']]);
 			if (!$connection) throw new Failure(404, 'not_found');
 			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?) WHERE id = ?', [Support::now(), $id]);
+			Db::run('UPDATE debate_ai_access SET encrypted_token = NULL WHERE connection_id = ?', [$id]);
 			return ['revoked' => true];
 		});
 	}
@@ -64,7 +94,7 @@ final class Connections
 	public static function authenticate(string $authorization): array
 	{
 		if (!preg_match('/^Bearer ([A-Za-z0-9_-]{43})$/D', $authorization, $match)) throw new Failure(401, 'invalid_token');
-		$row = Db::one("SELECT c.*, t.expires_at, t.resource FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND t.expires_at > UTC_TIMESTAMP() AND c.revoked_at IS NULL AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
+		$row = Db::one("SELECT c.*, t.expires_at, t.resource FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND (t.expires_at > UTC_TIMESTAMP() OR (t.expires_at IS NULL AND EXISTS (SELECT 1 FROM debate_ai_access a WHERE a.connection_id = c.id AND a.user_id = c.user_id AND a.debate_id = c.debate_id))) AND c.revoked_at IS NULL AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
 		if (!$row || $row['resource'] !== Config::url('/mcp')) throw new Failure(401, 'invalid_token');
 		Support::rate('mcp:' . $row['id'], 120, 60);
 		return ['user_id' => $row['user_id'], 'connection_id' => $row['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $row['debate_id']];

@@ -31,17 +31,17 @@ $canonical = $localized_url($language);
 	<meta property="og:description" content="<?= $e($indexable ? $description : I18n::t('seo_home')) ?>">
 	<meta property="og:url" content="<?= $e($indexable ? $canonical : Config::url()) ?>">
 	<meta property="og:locale" content="<?= $language === 'en' ? 'en_GB' : 'sv_SE' ?>">
-	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-7')) ?>">
+	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-8')) ?>">
 	<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 	<meta property="og:image:alt" content="Dilemma. What would change your mind?">
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-7')) ?>">
-	<link rel="manifest" href="/manifest.webmanifest?v=20261102-7">
-	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-7">
+	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-8')) ?>">
+	<link rel="manifest" href="/manifest.webmanifest?v=20261102-8">
+	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-8">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<script src="/assets/language.js?v=20261102-7"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261102-7">
-	<script type="module" src="/assets/app.js?v=20261102-7"></script>
+	<script src="/assets/language.js?v=20261102-8"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261102-8">
+	<script type="module" src="/assets/app.js?v=20261102-8"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
@@ -54,7 +54,7 @@ $canonical = $localized_url($language);
 		</nav>
 		<div class="header-actions">
 			<nav class="language-switch" aria-label="<?= $t('language') ?>"><a href="?<?= $e(http_build_query($query + ['lang' => 'sv'])) ?>" lang="sv" <?= $language === 'sv' ? 'aria-current="true"' : '' ?>>SV</a><span aria-hidden="true">/</span><a href="?<?= $e(http_build_query($query + ['lang' => 'en'])) ?>" lang="en" <?= $language === 'en' ? 'aria-current="true"' : '' ?>>EN</a></nav>
-			<?php if ($user): ?><details class="account-menu"><summary><?= $e($user['alias']) ?></summary><nav><a href="/app"><?= $t('mine') ?></a><a href="/connect"><?= $t('connect') ?></a><a href="/settings"><?= $t('settings') ?></a><?php if ($user['is_admin']): ?><a href="/admin"><?= $t('admin') ?></a><?php endif; ?><button type="button" data-logout><?= $t('logout') ?></button></nav></details><?php else: ?><a class="button small" href="/login"><?= $t('login') ?></a><?php endif; ?>
+			<?php if ($user): ?><details class="account-menu"><summary><?= $e($user['alias']) ?></summary><nav><a href="/app"><?= $t('mine') ?></a><a href="/settings"><?= $t('settings') ?></a><?php if ($user['is_admin']): ?><a href="/admin"><?= $t('admin') ?></a><?php endif; ?><button type="button" data-logout><?= $t('logout') ?></button></nav></details><?php else: ?><a class="button small" href="/login"><?= $t('login') ?></a><?php endif; ?>
 		</div>
 	</header>
 	<noscript><p class="notice"><?= $t('no_script') ?></p></noscript>
