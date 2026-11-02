@@ -1,5 +1,9 @@
 # Flowstate-style copyable AI access
 
+Published source 1c3f105, release 6a1a1a7accdc7480. All 79 installed hashes
+verified. Public JavaScript module MIME and app version checked over HTTPS.
+Three archive integrity checks and known-private-value scan also passed.
+
 Owner instruction, 2026-11-02: use the working Flowstate reference rather than
 making OAuth settings the main experience. Reference inspected read-only:
 

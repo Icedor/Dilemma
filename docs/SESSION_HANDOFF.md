@@ -1,3 +1,34 @@
+# Latest checkpoint: Flowstate-style complete MCP setup
+2026-11-02 20:11 Europe/Stockholm. Source **1c3f105**, release
+**6a1a1a7accdc7480** live; GitHub source hash verified.
+
+- Owner explicitly directed us back to working Flowstate copy/paste behavior.
+  Read ai-panel.js, mcp-setup.js, grant service and protocol adapter. No reference
+  writes or runtime access. See AI_CONNECTIONS.md, not earlier OAuth-first advice.
+- Primary /connect creates full instructions with bearer credential, MCP address,
+  Codex config and debate role. /connect?debate=ID preselects a member's debate.
+  Server fixes 24h lifetime and one-debate scope; no automatic account-wide grant.
+- Button creates/copies in one action. Clipboard fallback leaves selectable text.
+  Secret textarea is outside forms, not persisted in web storage, cleared on
+  pagehide/logout; user's clipboard/chat deliberately remain outside that cleanup.
+- Immediate revoke button and collapsed access management. OAuth is an alternative
+  for apps that require it. Do not promise plain ChatGPT installs from pasted text.
+- Protocol correction: initialize negotiates 2025-11-25 / 2025-06-18 / 2025-03-26;
+  modern per-request checks retained. No 2024 SSE compatibility claim.
+- 19 setup + 44 HTTP + 74 domain/MCP/OAuth + 4 clipboard + 3 package checks pass.
+  Local setup tests read/publish real fixture records and deny cross-debate,
+  expired/revoked credentials and human-only actions. No actual AI-client test.
+- All 79 installed hashes verified. Public clipboard module JavaScript MIME and
+  new app version checked with two serial HTTPS requests. No production grants
+  minted, private conversations read, test mail or notifications sent.
+- SHA256 c3d8e07e45fd14a98d1c21a3d2049e194be035cdefe14fc79171d60d9655f348.
+- Stage .deploy-6a1a1a7accdc7480; backup
+  .backup-before-6a1a1a7accdc7480/previous-release.zip. No DB/schema/config changes.
+- Actual Codex connection, browser visual QA, installation screenshots and measured
+  PageSpeed remain open. Prior browser host unavailable; do not bypass UI tools.
+
+## Previous checkpoints
+
 # Latest checkpoint: branded transactional email
 2026-11-02 19:55 Europe/Stockholm. Source **42405d8**, release
 **10c71f4a97061f89** live. GitHub main verified at the source commit.

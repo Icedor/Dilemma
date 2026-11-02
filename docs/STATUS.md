@@ -1,4 +1,16 @@
 # Current correction — 2026-11-02
+Live source **1c3f105**, release **6a1a1a7accdc7480**, GitHub verified.
+Flowstate-style complete bearer setup is now the primary AI connection flow:
+select/preselect debate, create/copy instructions, paste in the AI app. One-day,
+one-debate read/write access, immediate revoke, clipboard fallback and page-exit
+secret clearing. OAuth remains secondary. Compatible legacy MCP negotiation added.
+19 setup, 44 HTTP, 74 domain/MCP/OAuth, 4 clipboard and 3 package checks pass.
+All 79 production hashes verified; new clipboard module and app version checked
+over HTTPS. Real Codex/ChatGPT/Claude session and browser visual QA still pending.
+Flowstate read-only; see AI_CONNECTIONS.md for exact scope and evidence.
+
+## Previous email release
+
 Live source **42405d8**, release **10c71f4a97061f89**, GitHub verified.
 Branded transactional email replaces duplicated unstructured HTML. Yellow panel,
 one heading/action, concise bilingual copy, responsive email tables and plain-text
