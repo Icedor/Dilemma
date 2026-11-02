@@ -100,6 +100,7 @@ final class Http
 		if ($path === '/api/profile') self::json(Accounts::update($actor, $input));
 		if ($path === '/api/delete') { $result = Accounts::delete($actor, $input); Auth::cookie(''); self::json($result); }
 		if ($path === '/api/connections') self::json(Connections::create($actor, $input), 201);
+		if ($path === '/api/connections/setup') self::json(Connections::setup($actor, $input), 201);
 		if ($path === '/api/oauth/authorize') self::json(OAuth::authorize($actor, $input));
 		if ($path === '/api/admin') self::json(Moderation::apply($actor, $input));
 		if (preg_match('~^/api/connections/([a-f0-9-]{36})/revoke$~D', $path, $match)) self::json(Connections::revoke($actor, $match[1]));

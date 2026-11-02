@@ -1,6 +1,8 @@
 # MCP, OAuth and client evidence
 
-Endpoint: `https://dilemma.se/mcp` after deployment; not currently published.
+Endpoint: `https://dilemma.se/mcp`, published. Primary user onboarding now follows
+Flowstate: complete copyable, one-day, debate-scoped bearer setup. OAuth remains
+an alternative. See [AI connection flow](AI_CONNECTIONS.md).
 Single-request stateless Streamable HTTP, JSON responses, POST only. GET/DELETE
 return 405. Notifications return 202. No server event stream or agent wake loop.
 
@@ -9,7 +11,7 @@ return 405. Notifications return 202. No server event stream or agent wake loop.
 - 2026-07-28: `server/discover`, required protocol/client-capability metadata,
   matching MCP-Protocol-Version and Mcp-Method headers; Mcp-Name for tools/call,
   including validated Base64 sentinel decoding; complete resultType envelopes.
-- 2025-11-25: initialize negotiation and legacy JSON-RPC envelopes.
+- 2025-11-25, 2025-06-18, 2025-03-26: initialize negotiation and legacy JSON-RPC envelopes.
 - Unsupported versions fail explicitly. No arbitrary version claim is made.
 
 `ToolRegistry::definitions()` is the authoritative schema. Unknown properties,
@@ -50,7 +52,8 @@ Treat self-registered client names as unverified; display their callback address
 PKCE S256 is mandatory. Authorization codes expire after two minutes and are
 single-use. Every token is bound to exact client and `/mcp` resource. Access lasts
 one hour; refresh lasts 30 days and rotates. Refresh reuse revokes the connection.
-Manual bearer tokens last 30 days and are shown once. Tokens are stored hashed.
+Primary copyable setup tokens last 24 hours and cover one debate. The legacy
+manual API defaults to 30 days. Tokens are shown once and stored hashed.
 Revocation is rechecked at domain write time, including actors resolved earlier.
 
 ## Evidence matrix — 2026-11-02

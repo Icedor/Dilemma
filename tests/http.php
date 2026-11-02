@@ -52,6 +52,13 @@ try {
 	check(http_request('/api/login', ['email' => 'unused@example.test'], ['Origin: https://attacker.test'])['status'] === 403, 'Cross-origin login is rejected');
 	$a = user_fixture('HTTP'); $cookie = 'dilemma_session=' . $a['session']['token'];
 	$session_headers = ['X-CSRF-Token: ' . $a['session']['csrf']];
+	check(http_request('/api/connections/setup', ['debate_id' => Support::id()])['status'] === 401, 'Copyable AI setup requires a human login');
+	check(http_request('/api/connections/setup', ['debate_id' => Support::id()], [], $cookie)['status'] === 403, 'Copyable AI setup requires CSRF protection');
+	$setup_debate = debate_fixture($a['actor'], user_fixture('HTTPB')['actor']);
+	$setup = http_request('/api/connections/setup', ['debate_id' => $setup_debate['id']], $session_headers, $cookie);
+	check($setup['status'] === 201 && str_contains($setup['json']['setup_text'], 'Authorization: Bearer ') && str_contains($setup['json']['setup_text'], $setup_debate['id']) && $setup['headers']['cache-control'][0] === 'no-store', 'Authenticated HTTP setup returns complete instructions with no-store');
+	$connect = http_request('/connect?debate=' . $setup_debate['id'], null, [], $cookie);
+	check($connect['status'] === 200 && str_contains($connect['body'], 'connection-setup-form') && str_contains($connect['body'], 'data-private-setup') && !str_contains($connect['body'], 'Authorization: Bearer '), 'Connection page preselects the debate without exposing a previously issued credential');
 	check(http_request('/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/invalid', 'consent' => true], [], $cookie)['status'] === 403, 'Push subscription requires CSRF protection');
 	check(http_request('/api/profile', ['alias' => 'New alias'], [], $cookie)['status'] === 403, 'Session alone cannot bypass CSRF');
 	check(http_request('/settings', null, [], $cookie)['status'] === 200, 'Authenticated settings render through HTTP');

@@ -18,10 +18,18 @@ final class Connections
 		return implode(' ', $scopes);
 	}
 
-	public static function create(array $actor, array $input, bool $manual = true): array
+	public static function setup(array $actor, array $input): array
+	{
+		$debate_id = Support::uuid($input['debate_id'] ?? '');
+		$result = self::create($actor, ['label' => 'Dilemma AI', 'scopes' => self::READ . ' ' . self::WRITE, 'debate_id' => $debate_id], true, 86400);
+		return ['connection_id' => $result['connection_id'], 'expires_at' => $result['expires_at'], 'setup_text' => AiSetup::text($result['access_token'], $debate_id, $result['expires_at'], I18n::locale())];
+	}
+
+	public static function create(array $actor, array $input, bool $manual = true, int $lifetime = 2592000): array
 	{
 		Debates::human($actor);
-		return Db::transaction(static function () use ($actor, $input, $manual): array {
+		if ($lifetime < 3600 || $lifetime > 2592000) throw new Failure(422, 'invalid_field');
+		return Db::transaction(static function () use ($actor, $input, $manual, $lifetime): array {
 			Debates::actor($actor, true);
 			Support::rate('connection:' . $actor['user_id'], 20, 3600);
 			$debate_id = ($input['debate_id'] ?? '') ?: null;
@@ -32,9 +40,10 @@ final class Connections
 			$result = ['connection_id' => $id, 'scopes' => $scopes];
 			if ($manual) {
 				$token = Support::token();
-				Db::run('INSERT INTO mcp_tokens (token_hash, connection_id, kind, resource, expires_at) VALUES (?, ?, ?, ?, ?)', [Support::hash($token), $id, 'access', Config::url('/mcp'), gmdate('Y-m-d H:i:s', time() + 2592000)]);
+				$result['expires_at'] = gmdate('Y-m-d H:i:s', time() + $lifetime);
+				Db::run('INSERT INTO mcp_tokens (token_hash, connection_id, kind, resource, expires_at) VALUES (?, ?, ?, ?, ?)', [Support::hash($token), $id, 'access', Config::url('/mcp'), $result['expires_at']]);
 				$result['access_token'] = $token;
-				$result['expires_in'] = 2592000;
+				$result['expires_in'] = $lifetime;
 			}
 			return $result;
 		});

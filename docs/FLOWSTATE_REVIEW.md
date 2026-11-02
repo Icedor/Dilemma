@@ -1,5 +1,16 @@
 # Read-only Flowstate MCP review
 
+## Follow-up: actual onboarding adopted
+
+2026-11-02: re-read ai-panel.js, mcp-setup.js, ProjectAiGrantService.php and
+McpProtocolAdapter.php after the owner's correction. The important reference was
+the complete copyable bearer setup, not just endpoint/authentication internals.
+Dilemma now adapts this main flow with one-day, one-debate read/write access and
+native Codex configuration. Older HTTP MCP version negotiation was also missing
+in Dilemma and is corrected. See AI_CONNECTIONS.md for evidence and limits.
+Flowstate remains completely unchanged. Earlier repair candidates below are
+separate from the owner's confirmed working Codex Windows use.
+
 Reference tree: `G:/Min enhet/06 Icey/Projekt/Subdomänprojekt/Flowstate/Dev`.
 Reviewed 2026-11-02. No reference file or runtime was changed.
 

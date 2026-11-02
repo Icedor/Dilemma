@@ -276,6 +276,22 @@
 	.account-data h2 { margin-bottom: 1.5rem; }
 	.connection-list article { display: flex; justify-content: space-between; gap: 1.5rem; align-items: center; padding: 1.5rem 0; border-bottom: .0625rem solid var(--rule); }
 	.connection-list h3 { margin-bottom: .75rem; }
+	.connect-page { max-width: 64rem; margin: auto; padding: 3.5rem var(--space); }
+	.connect-page h1 { font-size: clamp(2.5rem,5vw,4.5rem); }
+	.connect-page .page-heading { margin-bottom: 2rem; }
+	.connect-start { padding: clamp(1.5rem,4vw,3rem); background: #ffdb24 url('/assets/gradient-yellow-v2.webp?v=20261102-6') center/cover; color: #191918; }
+	.connect-start form { margin: 0; }
+	.connect-start h2 { font-size: clamp(1.8rem,3vw,2.7rem); margin-bottom: 1rem; }
+	.connect-start .button { background: #191918; color: #fffdf7; border-color: #191918; }
+	.connect-start .button:hover { background: #35352d; }
+	.connect-start select, .connect-start textarea { background: #ffdf39; color: #191918; border-color: #19191880; }
+	.connect-start textarea { font: .9rem/1.55 Consolas,monospace; }
+	.connect-start .disclosure { border-color: #19191850; }
+	.connect-debate { font-size: 1.45rem; line-height: 1.35; font-weight: 700; margin-bottom: 1rem; }
+	.connect-permission { max-width: 40rem; margin-bottom: 1.5rem; }
+	.connect-secret-note, .connect-help-note { font-size: .9rem; line-height: 1.6; }
+	.connect-help-note { color: var(--muted); margin-block: 1.25rem 2rem; }
+	#connection-copy-status { margin-bottom: 1.5rem; }
 	.admin-records { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; }
 	.admin-records article { padding: 1.5rem 0; border-top: .0625rem solid var(--rule); }
 	.record-heading { display: flex; justify-content: space-between; gap: 1rem; }

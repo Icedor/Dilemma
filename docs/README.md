@@ -11,6 +11,7 @@
 - [Development and operations](OPERATIONS.md)
 - [Architecture, data and state machine](ARCHITECTURE.md)
 - [MCP contract, OAuth and client evidence](MCP.md)
+- [Flowstate-style copyable AI access](AI_CONNECTIONS.md)
 - [Security and privacy boundaries](SECURITY.md)
 - [Verification and acceptance coverage](VERIFICATION.md)
 - [Deployment and email operations](DEPLOYMENT.md)

@@ -5,7 +5,7 @@ DirectoryIndex index.php
 	RewriteEngine On
 	RewriteRule ^\.well-known/acme-challenge/[A-Za-z0-9_-]+$ - [END]
 	RewriteRule ^(?:\.(?!well-known/)|app/|bin/|database/|docs/|tests/|var/) - [F,END]
-	RewriteRule ^assets/(?:app\.js|language\.js|pwa\.js|style\.css|gradient-(?:yellow-v2|red)\.webp|favicon\.svg|share-opinion\.png|icon-(?:192|512|maskable)\.png|badge\.png)$ - [END]
+	RewriteRule ^assets/(?:app\.js|clipboard\.js|language\.js|pwa\.js|style\.css|gradient-(?:yellow-v2|red)\.webp|favicon\.svg|share-opinion\.png|icon-(?:192|512|maskable)\.png|badge\.png)$ - [END]
 	RewriteRule ^(?:manifest\.webmanifest|sw\.js|offline\.html)$ - [END]
 	RewriteRule ^index\.php$ - [END]
 	RewriteRule ^ index.php [END]
@@ -21,7 +21,7 @@ DirectoryIndex index.php
 	<FilesMatch "\.(?:css|png|svg|webp)$">
 		Header set Cache-Control "public, max-age=86400"
 	</FilesMatch>
-	<FilesMatch "^(?:app|language|pwa)\.js$">
+	<FilesMatch "^(?:app|clipboard|language|pwa)\.js$">
 		Header set Cache-Control "public, max-age=86400"
 	</FilesMatch>
 	<Files "sw.js">

@@ -1,3 +1,4 @@
+import { copyText } from './clipboard.js?v=20261102-7';
 const translations = JSON.parse(document.querySelector('#translations')?.content.textContent || '{}');
 const t = key => translations[key] || translations.unexpected_error || key;
 const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -160,7 +161,19 @@ document.addEventListener('submit', async event => {
 				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy'); copy.dataset.copy = data.invitation_url;
 				result.append(link, copy); result.hidden = false; break;
 			}
-			case 'connection': document.querySelector('#new-token').textContent = data.access_token; document.querySelector('#connection-result').hidden = false; break;
+			case 'connection-setup': {
+				const result = document.querySelector('#connection-result');
+				const target = document.querySelector('#ai-setup');
+				target.value = data.setup_text;
+				form.hidden = true; result.hidden = false;
+				const revoke = document.querySelector('#revoke-new-connection');
+				revoke.dataset.connectionId = data.connection_id; revoke.hidden = false;
+				const copied = await copyText(target.value, target);
+				document.querySelector('#connection-copy-status').textContent = t(copied ? 'setup_copied' : 'setup_copy_failed');
+				if (copied) result.querySelector('[data-copy-target]').focus();
+				else { document.querySelector('#setup-text-details').open = true; target.focus(); target.select(); }
+				break;
+			}
 			case 'report': feedback.textContent = t('report_sent'); form.reset(); break;
 			case 'saved': announce(t('saved')); break;
 			default: location.reload();
@@ -177,14 +190,37 @@ document.addEventListener('submit', async event => {
 });
 
 function clearPrivateStorage() {
+	clearSetup();
 	try { for (const key of Object.keys(sessionStorage)) if (key.startsWith('dilemma:')) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
 }
+
+function clearSetup() {
+	const target = document.querySelector('[data-private-setup]');
+	if (!target) return;
+	target.value = '';
+	document.querySelector('#connection-result').hidden = true;
+	document.querySelector('#connection-setup-form').hidden = false;
+	delete document.querySelector('#revoke-new-connection').dataset.connectionId;
+}
+window.addEventListener('pagehide', clearSetup);
 
 document.addEventListener('click', async event => {
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {
-		try { await navigator.clipboard.writeText(copy.dataset.copy ?? document.getElementById(copy.dataset.copyTarget).textContent); announce(t('copied')); }
-		catch { announce(t('unexpected_error')); }
+		const target = copy.dataset.copyTarget ? document.getElementById(copy.dataset.copyTarget) : null;
+		const value = copy.dataset.copy ?? (target && 'value' in target ? target.value : target?.textContent);
+		if (typeof value === 'string' && value !== '') {
+			const copied = await copyText(value, target);
+			announce(t(copied ? 'copied' : 'setup_copy_failed'));
+			if (target?.matches('[data-private-setup]')) document.querySelector('#connection-copy-status').textContent = t(copied ? 'setup_copied' : 'setup_copy_failed');
+			if (copied) copy.focus();
+		}
+	}
+	const revokeNew = event.target.closest('#revoke-new-connection');
+	if (revokeNew?.dataset.connectionId) {
+		revokeNew.disabled = true;
+		try { await request('/api/connections/' + encodeURIComponent(revokeNew.dataset.connectionId) + '/revoke', {}); clearSetup(); location.reload(); }
+		catch (error) { announce(error.message); revokeNew.disabled = false; }
 	}
 	if (event.target.closest('[data-logout]')) {
 		try { await request('/api/logout', {}); clearPrivateStorage(); location.assign('/'); } catch (error) { announce(error.message); }
