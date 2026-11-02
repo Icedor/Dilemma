@@ -4,6 +4,7 @@
 - [Current design, language, PWA and SEO release](RELEASE_NEXT.md)
 - [Opinion-first copy, color surfaces and missing install screenshots](COPY_AND_INSTALL.md)
 - [Warm reference-led textures and navigation correction](TEXTURES.md)
+- [Transactional email design and verification](EMAIL_DESIGN.md)
 - [Latest session handoff and browser diagnosis](SESSION_HANDOFF.md)
 - [Decisions and scope](DECISIONS.md)
 - [Redesigned visual system and participant flow](DESIGN.md)

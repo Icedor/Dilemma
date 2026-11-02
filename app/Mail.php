@@ -71,11 +71,33 @@ final class Mail
 		];
 		$subject = $subjects[$kind] ?? ($en ? 'Your debate has an update' : 'Din debatt har uppdaterats');
 		$data = $payload['data'];
-		$text = $subject . "\n\n" . ($data['title'] ?? '') . "\n\n" . $data['url'];
-		if ($kind === 'login') $text .= "\n\n" . ($en ? 'The link expires in 15 minutes and can be used once. If you did not request it, ignore this email.' : 'Länken gäller i 15 minuter och kan användas en gång. Bortse från mejlet om du inte begärde det.');
-		if (!empty($data['chat_link'])) $text .= "\n\n" . ($en ? 'Your private AI conversation: ' : 'Din privata AI-konversation: ') . $data['chat_link'];
-		if ($kind !== 'login') $text .= "\n\n" . ($en ? 'Notification settings: ' : 'Aviseringsinställningar: ') . Config::url('/settings');
-		$html = '<!doctype html><html lang="' . ($en ? 'en' : 'sv') . '"><body style="margin:0;padding:24px;background:#fffdf7;color:#191918;font:18px/1.6 Arial,sans-serif"><main style="max-width:600px;margin:auto"><h1 style="font-size:28px">' . Support::escape($subject) . '</h1><p>' . Support::escape($data['title'] ?? '') . '</p><p><a href="' . Support::escape($data['url']) . '">' . ($en ? 'Open Dilemma' : 'Öppna Dilemma') . '</a></p><p style="white-space:pre-line">' . nl2br(Support::escape($text)) . '</p></main></body></html>';
+		$copy = [
+			'login' => [$en ? 'Sign in.' : 'Logga in.', $en ? 'Sign in to Dilemma' : 'Logga in på Dilemma'],
+			'invitation' => [$en ? 'You’re invited.' : 'Du är inbjuden.', $en ? 'View invitation' : 'Se inbjudan'],
+			'joined' => [$en ? 'Ready to begin.' : 'Nu kan ni börja.', $en ? 'Open debate' : 'Öppna debatten'],
+			'argument' => [$en ? 'A new argument.' : 'Ett nytt argument.', $en ? 'Read the argument' : 'Läs argumentet'],
+			'resumed' => [$en ? 'The debate continues.' : 'Debatten fortsätter.', $en ? 'Open debate' : 'Öppna debatten'],
+			'flag' => [$en ? 'A white flag.' : 'En vit flagga.', $en ? 'Open debate' : 'Öppna debatten'],
+			'ended' => [$en ? 'The debate has ended.' : 'Debatten är avslutad.', $en ? 'View debate' : 'Se debatten'],
+		];
+		[$heading, $action] = $copy[$kind] ?? [$en ? 'An update in your debate.' : 'Nytt i din debatt.', $en ? 'Open debate' : 'Öppna debatten'];
+		$title = $kind === 'login' ? '' : (string) ($data['title'] ?? '');
+		$expiry = $en ? 'Valid for 15 minutes. One use only.' : 'Gäller i 15 minuter. Kan användas en gång.';
+		$ignore = $en ? 'Didn’t request this? You can ignore this email.' : 'Har du inte begärt länken? Bortse från det här mejlet.';
+		$settings = !in_array($kind, ['login', 'invitation'], true);
+		$settings_label = $en ? 'Notification settings' : 'Ändra dina notiser';
+		$chat = $kind !== 'login' && !empty($data['chat_link']) ? Support::url($data['chat_link'], true) : '';
+		$chat_label = $en ? 'Your AI conversation' : 'Din AI-konversation';
+		$preview = $kind === 'login' ? $expiry : ($title !== '' ? $title : $subject);
+		$text = $subject . "\n\n" . ($title !== '' ? $title . "\n\n" : '') . $action . ":\n" . $data['url'];
+		if ($kind === 'login') $text .= "\n\n" . $expiry . "\n" . $ignore;
+		if ($chat !== '') $text .= "\n\n" . $chat_label . ': ' . $chat;
+		if ($settings) $text .= "\n\n" . $settings_label . ': ' . Config::url('/settings');
+		$text .= "\n\nDilemma · " . Config::url();
+		$e = Support::escape(...);
+		ob_start();
+		try { require __DIR__ . '/views/email.php'; $html = ob_get_clean(); }
+		catch (\Throwable $error) { ob_end_clean(); throw $error; }
 		$boundary = 'dilemma-' . $id;
 		$from = Support::email(Config::get('MAIL_FROM'));
 		$to = Support::email($payload['email']);

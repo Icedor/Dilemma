@@ -37,4 +37,17 @@ $html = base64_decode(trim(explode('--dilemma-', explode("\r\n\r\n", $parts[2], 
 check(str_contains($html, 'Åsikter, &lt;etik&gt; &amp; källor'), 'Localized mail preserves UTF-8 and escapes user text');
 check(Mail::work(1)['sent'] === 0, 'A completed delivery is not immediately resent');
 unlink($path);
+
+// Decode MIME exactly as a client would; never send external mail.
+foreach (['sv', 'en'] as $locale) {
+	foreach (['login', 'invitation', 'joined', 'argument', 'resumed', 'flag', 'ended', 'update'] as $kind) {
+		$url = Config::url('/verify?from=mail&mode=test#synthetic-token');
+		$message = Mail::render(Support::id(), $kind, ['email' => 'preview@example.test', 'locale' => $locale, 'data' => ['url' => $url, 'title' => '<img src=x onerror=alert(1)> & Åsikter']]);
+		preg_match_all('/Content-Transfer-Encoding: base64\r\n\r\n([A-Za-z0-9+\/=\r\n]+)--dilemma-/', $message, $encoded);
+		$plain = base64_decode(trim($encoded[1][0] ?? ''), true);
+		$html = base64_decode(trim($encoded[1][1] ?? ''), true);
+		check(is_string($plain) && is_string($html) && str_contains($plain, $url) && str_contains($html, 'href="' . Support::escape($url) . '"') && !str_contains($html, '<img') && !str_contains($message, 'Reply-To:') && substr_count($html, '<h1 ') === 1, 'Mail alternatives preserve action URL and escape user content: ' . $locale . '/' . $kind);
+		if ($kind === 'login') check(!str_contains(strip_tags($html), 'synthetic-token') && str_contains($html, '15 min') && !str_contains($html, '/settings') && !str_contains($html, 'onerror'), 'Login excludes raw token, settings and debate text: ' . $locale);
+	}
+}
 echo 'SUCCESS: ' . $checks . " mail checks. Spool only; no external delivery.\n";
