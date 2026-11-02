@@ -28,6 +28,8 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
 - [x] PHP syntax checked across 55 files; JavaScript syntax passes.
 - [x] Private 60-file release package built; three extraction/integrity checks pass.
 - [x] Existing Chrome extension and native-host registration verified correct.
+- [x] Source and staged secret scans passed; implementation saved in local commit
+  a59eefd. No files were pushed. Release package matches that runtime source.
 
 ## Implemented; final integration and UI verification in progress
 
@@ -48,7 +50,7 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
 - [ ] Swedish/English UI; language switch preserving form inputs and location.
 - [ ] Long/error/empty states and keyboard/desktop/mobile/dark/reduced-motion QA.
 - [ ] Deployment package, preflight, documentation, final syntax and secret checks.
-- [ ] Local commit and handoff with exact unpublished revision.
+- [x] Local implementation commit and handoff with exact unpublished revision.
 
 ## External gates
 
