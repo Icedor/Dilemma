@@ -1,8 +1,16 @@
 # Delivery status
 
-Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
+Updated 2026-11-02, Europe/Stockholm. Website deployed; participation remains closed.
+Runtime release 54e5a50 is installed. Source commits remain local, not on GitHub.
 
 ## Verified
+
+- [x] Explicit site deployment approval received; actual home now returns HTTPS 200.
+- [x] Production migrations applied and all 60 installed release hashes verified.
+- [x] Private production config above webroot, mode 0600; initial webroot backed up.
+- [x] Existing cgi-bin/.well-known and all original cron entries preserved.
+- [x] Project maintenance cron installed and actual successful execution verified.
+- [x] Live health/database, English home, JS and OAuth metadata return 200; CSP/HSTS present.
 
 - [x] Domain Dilemma.se; owner confirmed synchronized Drive and sole writer.
 - [x] Own project lock, separate local Git outside Drive, empty remote fetched.
@@ -65,17 +73,15 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
 - [ ] This session's native browser access: inventory reports browser host unavailable,
   even after REPL reset. The installed extension/native host pass diagnostics. Earlier
   native Chrome inspection stopped on URL-confidence enforcement. No UI pass claimed.
-- [ ] Verify hosting document-root mapping and web PHP/extensions/DB settings.
-  cPanel UAPI cannot run inside the current SSH environment; do not retry blindly.
-- [ ] Production migrations/config installation and real mail delivery test.
-  Database and SMTP login checks passed; application remains unpublished.
+- [x] Actual Dilemma webroot and working PHP/database routing verified by live responses.
+- [ ] Exact web PHP configuration audit and real mail delivery test. CLI extensions
+  and SMTP TLS authentication passed; no external mail has been sent.
 - [ ] Owner review of legal bases, processors/transfers and backup retention.
 - [ ] Real Codex Windows, ChatGPT web/Windows and Claude connector sessions.
   Protocol tests do not establish real-client compatibility.
-- [ ] Explicit authorization for deployment: requested after the owner reported
-  the site's 404. Automatic approval review rejected staging/upload based on the
-  earlier no-publication instruction. No deployment-side write was executed.
+- [x] Explicit deployment authorization received and site published.
+- [ ] Public GitHub push; no source was pushed during this deployment.
 
-No server files, other projects or Flowstate were changed. No GitHub push or
-production deployment has occurred. The old HTTP 401 was caused by interpreting
+Only Dilemma's own application/database/maintenance were installed; no neighboring
+project or Flowstate was changed. No GitHub push occurred. The old HTTP 401 was caused by interpreting
 the cPanel username as a password, not proof of invalid supplied credentials.

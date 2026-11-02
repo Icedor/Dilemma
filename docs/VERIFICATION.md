@@ -20,7 +20,7 @@ Mail tests defer other pending fixture mail, exercise failure/backoff/retry, ins
 an actual local `.eml`, then remove that test artifact.
 
 Last completed suites: 74 domain/protocol, 29 HTTP, four concurrency and nine mail
-checks. PHP syntax passed for 55 files and JavaScript syntax passed. These counts
+checks, plus five production-launch checks. PHP syntax passed for 57 files and JavaScript syntax passed. These counts
 do not include real browsers, real MCP clients or external SMTP delivery.
 
 Acceptance coverage:
@@ -35,6 +35,11 @@ Acceptance coverage:
   credentials, turn conflicts, CSRF and escaped hostile HTML.
 
 ## UI and real-client gate
+
+Deployment on 2026-11-02: all four migrations applied, all 60 installed source
+hashes matched release ed8d2912dcc441b3. Public Swedish/English home, JS, health and
+OAuth metadata returned 200. Scheduled maintenance actually ran with no queued mail
+or errors. Private config mode 0600 verified over SSH. Participation remains closed.
 
 Do not mark this complete from source inspection or HTTP 200 alone. Verify desktop
 and mobile widths; both languages; keyboard/focus; dark mode; reduced motion;

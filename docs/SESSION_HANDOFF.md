@@ -1,78 +1,65 @@
 # Session handoff — 2026-11-02
 
-This continues the original owner-confirmed sole-writer session. Its lock remains
-owned by dilemma-ed7e2647-bfa1-4cd5-bc08-4760c62255d9. Recheck ownership before work.
+This is the original owner-confirmed sole-writer session. Lock owner:
+dilemma-ed7e2647-bfa1-4cd5-bc08-4760c62255d9. Recheck before further changes.
 
-## Latest verified work
+## Live release
 
-- Implementation commit a59eefd is saved only in local Git outside Drive. Its
-  staged 82-file secret and whitespace checks passed; working tree was clean.
-  A later documentation-only checkpoint records this commit and browser status.
+The owner explicitly approved app/config upload, database installation and publishing:
+"Ja, publicera Dilemma.se nu". Deployment succeeded. Do not ask for that approval again.
 
-- 74 domain/protocol checks, 29 HTTP, four concurrent-process and nine local-mail
-  checks pass. Three package integrity checks pass. No real AI-client/SMTP proof.
-- Private release: var/releases/dilemma-c8c42ee01959b20f.zip, 60 source files.
-  SHA-256: 93d079eb65a734d655480d1e6a390bf7239954cf840381119400de69c60823cd.
-  Extracted manifest verified; intentional modification was detected; temporary
-  extraction was removed. No secrets, test fixtures or runtime data in the package.
-- Local preview listens only on 127.0.0.1:8787; health returned 200. Its process
-  ID is recorded in ignored var/preview.pid. Mail transport is local spool.
-- MIT license approved and included. Sender is noreply@dilemma.se; no Reply-To,
-  forwarding or incoming mail feature. Owner does not want notification copies.
-- SSH works with the correct cPanel username and dedicated authorized key. Private
-  operational notes include the correction; never repeat the failed header-as-user
-  attempt. Dilemma server directory exists; no production files have been changed.
+- https://dilemma.se/ now returns 200 with the actual Swedish application.
+- English home, JavaScript, database health and OAuth metadata each returned 200.
+  CSP and HSTS are present. The old 404 is resolved.
+- Deployed source commit: 54e5a50, saved in local Git outside Drive.
+- Release: var/releases/dilemma-ed8d2912dcc441b3.zip, 60 manifest-listed files.
+  SHA256: 46d06f05c6937f3b93b7e11680e19b8b1631ba72d00d2b32f132b29a33344667.
+  Authenticated server verification confirmed all 60 installed file hashes.
+- All four migrations installed in the dedicated production database.
+- Private .env installed above the webroot with mode 0600; var is private.
+- Existing cgi-bin and .well-known preserved and backed up before activation.
+- Project-only maintenance cron runs every minute with flock, output redirected
+  to the private project log. Original cron entries preserved verbatim and backed up.
+  Actual scheduled execution verified: sent=0, failed=0.
+- No production accounts, queued mail or application error log entries existed
+  at the final check. No external mail has been sent.
+- Initial webroot backup, empty-database record and original cron backup are in
+  the private .backup-before-first-release directory under the Dilemma root.
+  Private staging .deploy-ed8d2912dcc441b3 retains the exact archive/config.
 
-## Browser diagnosis, not a broken-extension claim
+## Participation and remaining checks
 
-The user confirms other ChatGPT app sessions can control Chrome and that this
-conversation is in VS Code. The existing Chrome extension is installed/enabled.
-The bundled documented diagnostics, run with read-only process/registry access,
-confirmed its native-host registry, manifest name and extension origins are correct.
-An initial sandboxed registry check produced a misleading missing-key result;
-the unrestricted read-only check corrected it. Do not repair/reinstall the host
-based on the sandboxed result.
+The site is public for inspection. LEGAL_REVIEWED=false closes login/registration
+before collecting input or queuing mail. Do not claim participant launch complete.
+Finalize privacy text, processor/transfer and backup retention details with the
+owner, then record actual review before enabling participation. Real inbox delivery,
+admin provisioning, restoration, desktop/mobile/keyboard/reduced-motion visual QA
+and Codex Windows/ChatGPT/Claude client acceptance are still outstanding.
 
-This session's normal cua.getBrowser({id:'chrome'}) and listTabs calls still return
-"The browser access host is unavailable", including after resetting only the REPL.
-Native Chrome selection previously stopped on URL-confidence enforcement. Do not
-bypass that control, read browser sessions from disk, or build alternate automation.
-No browser files, registry settings, tabs, groups, logins or security settings were
-changed. No extra service or plugin was installed.
+121 local functional checks pass: 74 domain/protocol, 29 HTTP, four concurrency,
+nine spool mail and five launch checks. Three release integrity checks pass.
+PHP lint passes across 57 files; JS syntax passes. These do not establish actual
+client compatibility or inbox delivery.
 
-## Remaining
+Source has NOT been pushed to GitHub. The explicit approval question covered site
+deployment, configuration and database installation; public repository publication
+remains separate. Preserve the local commits and compare remote before any push.
 
-The owner asked why work stopped and reported the public 404. An attempted private
-staging/upload was rejected before execution by automatic approval review because
-the earlier no-publication instruction requires explicit authorization. A single
-async question asks permission to upload app/config, migrate and publish Dilemma.se;
-await its answer, then carry out deployment without asking again. No server writes
-occurred. Do not describe the assistant's inference as granted authorization.
+## Access and constraints
 
-Production with LEGAL_REVIEWED=false now renders the site but closes login/signup
-before storing input or queuing mail. Five focused checks plus all 116 existing
-functional checks pass, as do package integrity checks and PHP lint across 57 files.
-The local mail test needed filesystem escalation for its spool directory; it passed
-after that correction. No external mail was sent. Rebuild the package after any
-deployment-document changes; the earlier 862d1bf19260a4bc package contains an outdated
-authorization sentence and must not be presented as the final source revision.
+DB authentication and SMTP STARTTLS certificate/authentication on supplied port 587
+verified. Incoming mail is blocked according to the owner. Do not add Reply-To,
+forwarding, inbound handling or owner notification copies. Sender noreply@dilemma.se.
+Credentials remain only in private Uppgifter.txt and ignored environment files.
+The cPanel document now uses separate U:/P: lines. Use the verified project SSH key
+explicitly, strict host checks, BatchMode and IdentitiesOnly. Stop on auth denial.
+cPanel CLI UAPI is unavailable in the jailed shell; do not retry it blindly.
+No FTP connection was needed. Flowstate and neighboring sites were not modified.
 
-The owner manually supplied DB/SMTP credentials and confirmed the directory layout.
-Private `.env.production` now exists locally and is ignored by Git; development
-configuration is unchanged. Read-only SSH checks verified the dedicated DB login
-(MariaDB 11.4.13, zero tables), required CLI extensions, and SMTP certificate plus
-authentication with STARTTLS on the supplied port 587. No mail was sent. Incoming
-mail is blocked according to the owner; no inbound settings were changed.
-The cPanel credentials now use separate U:/P: lines; never interpret the entire
-section or a label as the username. No FTP connection was needed.
+The browser extension/native-host installation was previously verified correct.
+Latest ordinary CUA inventory still reports browser access host unavailable.
+Do not ask the owner to tag Chrome again, reinstall anything, or build a workaround.
+No tabs or groups were created, moved or closed.
 
-Verify web-server mapping and web PHP, then finish visual/client/delivery checks.
-The owner asked to stop browser troubleshooting and work from the supplied private
-document. Do not ask them to tag Chrome again. The cPanel CLI UAPI
-fails inside the jailed SSH environment; this is not an authentication failure.
-Do not retry host authentication after a denial without a concrete correction.
-
-Public push/deployment still needs explicit owner authorization. All source is
-currently local. Existing .well-known and cgi-bin on the server must be preserved.
-The privacy/processor/backup review remains a launch gate. Follow STATUS.md and
-the deployment document; never describe this as deployed or production-verified.
+Local preview remains on 127.0.0.1:8787; isolated MariaDB uses loopback port 3317.
+Development configuration was preserved. Production uses a separate key/database.
