@@ -6,7 +6,9 @@
 - [x] Encrypted recovery, scoped authentication, migration 007 and legacy upgrade.
 - [x] 32 setup, 46 HTTP, 6 concurrency, 74 domain, 12 participant, 19 push,
   4 clipboard and 3 archive checks; PHP/JS syntax and private-value scan.
-- [ ] Publish release 4b0de79a9077eb3a after source/config and database backup.
+- [x] Published source c53cfa3 / release 4b0de79a9077eb3a; GitHub pushed.
+  Source/config and 25-table database backup verified before migration 007.
+  All 80 server hashes, production preflight, public asset version and health pass.
 - [ ] Real AI-client and visual browser QA remain unperformed.
 
 ## Previous connection release
