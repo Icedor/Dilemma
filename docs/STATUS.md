@@ -1,4 +1,14 @@
 # Current correction — 2026-11-02
+Live source **42405d8**, release **10c71f4a97061f89**, GitHub verified.
+Branded transactional email replaces duplicated unstructured HTML. Yellow panel,
+one heading/action, concise bilingual copy, responsive email tables and plain-text
+fallback. Outgoing-only sender and notification opt-ins unchanged.
+27 mail + 12 participant-flow + 19 push + 3 package checks pass. All 77 production
+hashes verified; production generated both login MIME variants without sending.
+Actual email-client visual/dark-mode checks remain unverified. See EMAIL_DESIGN.md.
+
+## Previous account and palette release
+
 Live source **4a29b34**, release **950517d4071e2aef**, GitHub verified.
 The owner rejected the previous dark/muddy textures. New controlled bright yellow
 and orange gradients remove brown pools and white/pink/purple tones. Dark text has

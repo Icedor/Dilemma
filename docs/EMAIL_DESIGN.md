@@ -1,5 +1,9 @@
 # Transactional email design
 
+Published source 42405d8, release 10c71f4a97061f89: 77 installed hashes verified.
+Production generated both Swedish/English login MIME/template variants successfully
+with synthetic data and no delivery. Three archive integrity checks also pass.
+
 2026-11-02 owner requested a finished, branded email treatment. The old HTML
 duplicated its heading and entire plain-text message, including a visible raw
 login token URL. HTML and plain text now have separate presentations.
