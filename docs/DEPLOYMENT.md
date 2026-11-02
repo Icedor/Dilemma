@@ -1,8 +1,8 @@
 # Deployment and mail operations
 
-The owner requested progress on the actual website on 2026-11-02 after observing
-its 404. Automatic approval review requires explicit deployment authorization
-because of the earlier no-publication instruction; that question is pending.
+The owner explicitly authorized uploading application/private configuration,
+installing database tables and publishing Dilemma.se on 2026-11-02:
+"Ja, publicera Dilemma.se nu". The earlier deployment approval gate is resolved.
 Drive's public_html is local and is not automatically uploaded.
 Use the private operations notes for the verified SSH account/key and Dilemma path.
 
