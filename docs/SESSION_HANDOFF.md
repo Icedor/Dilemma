@@ -1,3 +1,23 @@
+# Latest checkpoint: requested JPEG replacement live, Meta still returns 429
+
+2026-11-02 22:37 Europe/Stockholm. Source 510d53f, release c06790d978ac9de2.
+Original artwork/copy preserved, new JPEG /assets/share-change-your-mind.jpg,
+1200x630/75868 bytes. Added to Apache/preview/package allowlists and generator.
+OG image/secure_url/type and Twitter image/alt updated. Old PNG remains available.
+All 81 production hashes, preflight, PHP syntax, three archive integrity checks,
+secret scan, and two serial public checks (new homepage metadata and JPEG exact
+hash/MIME/length) passed. Source/config backup: .backup-before-c06790d978ac9de2/
+previous-release.zip. No database changes. ZIP SHA256:
+5b446b8fd3ce811ad9e88c6f8f26396c6e53bcc91a49e12f46318adb974c2e9e.
+
+Reused Meta debugger user tab 138435524, browser 3. Exactly one Scrape Again was
+requested after publishing the owner's explicit image replacement; completion
+still showed homepage 429 and cached old PNG metadata. Stop additional attempts.
+Screenshot saved outside Git in the permitted visualizations directory as
+facebook-sharing-check.jpg. No user tabs/groups created/moved/deleted. No security
+protections changed, messages/support tickets sent, or new dependencies installed.
+The requested file replacement is complete; the actual Meta preview is not fixed.
+
 # Latest checkpoint: sharing preview blocked by HTTP 429
 
 2026-11-02 22:10 Europe/Stockholm. Runtime release remains fdb973d34cfa8029,

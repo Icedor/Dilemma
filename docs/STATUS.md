@@ -1,3 +1,17 @@
+# Replacement sharing image published — 2026-11-02
+
+- [x] Owner-requested replacement published at /assets/share-change-your-mind.jpg.
+  Same approved design/copy, 1200x630 JPEG, 75868 bytes (previous PNG 462701).
+  Visually inspected; new stable URL in OG/Twitter, explicit JPEG MIME/secure URL.
+  Old PNG retained for existing links. Source 510d53f, release c06790d978ac9de2.
+- [x] PHP syntax, 3 archive checks, known-secret scan, production preflight and
+  all 81 server hashes passed. Public new JPEG returns 200 with matching MIME,
+  byte count and SHA256; homepage exposes new metadata. GitHub source pushed.
+- [ ] Facebook preview remains unresolved: one Scrape Again after this explicit
+  replacement still returned 429 on the homepage; debugger retains old PNG tags.
+  No further scrape attempts. New asset availability is not proof of Meta access.
+  No firewall or hosting security changes made.
+
 # Sharing preview incident — 2026-11-02
 
 - [x] Existing image visually inspected: “What would change your mind?” remains
