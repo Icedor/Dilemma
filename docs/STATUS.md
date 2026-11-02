@@ -1,4 +1,15 @@
-# Persistent debate access — 2026-11-02
+# Homepage separation restored — 2026-11-02
+
+- [x] Restored the missing project-story section and bilingual content between
+  yellow hero and orange process; removed the duplicate purpose note from process.
+- [x] Explicit full-width dark background in both themes, responsive existing
+  columns and yellow keyboard focus. Source 7e5eb04, release fdb973d34cfa8029 live.
+- [x] PHP syntax, 3 archive checks, private-value scan, production preflight,
+  all 80 live hashes and public Swedish/English section order/version verified.
+- [ ] Visual screenshot not obtained: browser host unavailable; native capture
+  reported the selected Chrome window missing despite its presence in inventory.
+
+## Persistent debate access — 2026-11-02
 
 - [x] One persistent access per participant/debate, created on create/join.
 - [x] Complete selectable setup and copy button directly inside the debate.

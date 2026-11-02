@@ -1,4 +1,24 @@
-# Latest checkpoint: persistent access directly inside each debate
+# Latest checkpoint: dark homepage story restored
+2026-11-02 20:32 Europe/Stockholm. Source **7e5eb04**, release
+**fdb973d34cfa8029** live and pushed. Owner noticed missing row and adjoining yellow/
+orange sections. Git history confirmed project-story was removed in 2a197d5 when
+copy was shortened. Restored original bilingual heading/story/purpose/about link;
+removed duplicate process note. Explicit dark full-width background in both color
+schemes; existing responsive columns retained; visible yellow keyboard focus.
+
+PHP syntax, three archive integrity checks, known-secret scan, production preflight,
+80 server hashes, and two serial public SV/EN content/order/version checks passed.
+Asset version 20261102-9. No DB changes. Private backup:
+.backup-before-fdb973d34cfa8029/previous-release.zip. ZIP SHA256:
+f5032dcdf28993a38ad5ce8d99d27243fdb273d25bef2ca97deb511f3ffc8b06.
+
+Browser QA attempted: cua inventory now exposes Windows Chrome but browser access
+host unavailable. sky list_apps exposed Chrome; get_window/get_window_state failed
+with window missing and only Jump Desktop returned. Recovery list_windows exposed
+Chrome again, now Google Keep. No input sent, no tabs/groups created or moved;
+no actual screenshot verification. Do not treat DOM/order checks as visual QA.
+
+## Previous checkpoint: persistent access directly inside each debate
 2026-11-02 20:28 Europe/Stockholm. Source **c53cfa3**, release
 **4b0de79a9077eb3a** published and pushed to GitHub.
 
