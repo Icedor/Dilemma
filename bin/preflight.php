@@ -16,7 +16,7 @@ function verify(string $name, callable $check): void {
 	echo ($ok ? 'PASS ' : 'FAIL ') . $name . PHP_EOL;
 }
 verify('PHP 8.3 or newer', static fn () => PHP_VERSION_ID >= 80300);
-foreach (['pdo_mysql', 'mbstring', 'openssl'] as $extension) verify('Extension ' . $extension, static fn () => extension_loaded($extension));
+foreach (['pdo_mysql', 'mbstring', 'openssl', 'curl'] as $extension) verify('Extension ' . $extension, static fn () => extension_loaded($extension));
 verify('Production environment', Config::production(...));
 verify('Canonical HTTPS URL without credentials, query, port or path', static function (): bool {
 	$url = parse_url(Config::url());

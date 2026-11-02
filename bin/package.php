@@ -11,11 +11,11 @@ foreach (['app', 'database/migrations', 'public_html'] as $directory) {
 	foreach ($iterator as $file) {
 		if ($file->isLink() || !$file->isFile()) throw new RuntimeException('Unexpected release entry.');
 		$relative = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
-		if (!preg_match('~^(?:app/(?:[A-Za-z0-9]+\.php|views/[a-z-]+\.php)|database/migrations/[0-9]{3}_[a-z_]+\.sql|public_html/(?:index\.php|\.htaccess|\.user\.ini|assets/(?:app\.js|style\.css|white-flag\.webp|favicon\.svg)))$~D', $relative)) throw new RuntimeException('Unallowlisted file in release directories: ' . $relative);
+		if (!preg_match('~^(?:app/(?:[A-Za-z0-9]+\.php|views/[a-z-]+\.php)|database/migrations/[0-9]{3}_[a-z_]+\.sql|public_html/(?:index\.php|\.htaccess|\.user\.ini|manifest\.webmanifest|sw\.js|offline\.html|assets/(?:app\.js|language\.js|pwa\.js|style\.css|grain\.svg|favicon\.svg|share\.png|icon-(?:192|512|maskable)\.png|badge\.png)))$~D', $relative)) throw new RuntimeException('Unallowlisted file in release directories: ' . $relative);
 		$paths[] = $relative;
 	}
 }
-foreach (['bin/migrate.php', 'bin/maintenance.php', 'bin/admin.php', 'bin/preflight.php', 'bin/verify-release.php', '.env.example', 'README.md', 'docs/DEPLOYMENT.md'] as $path) $paths[] = $path;
+foreach (['bin/migrate.php', 'bin/maintenance.php', 'bin/admin.php', 'bin/preflight.php', 'bin/verify-release.php', 'bin/init-push.php', '.env.example', 'README.md', 'docs/DEPLOYMENT.md'] as $path) $paths[] = $path;
 if (is_file($root . '/LICENSE')) $paths[] = 'LICENSE';
 sort($paths);
 $manifest = ['format' => 1, 'created_at' => gmdate('c'), 'files' => []];

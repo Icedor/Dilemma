@@ -10,6 +10,8 @@ use Dilemma\Mail;
 use Dilemma\Support;
 
 echo Support::json(Mail::work()) . PHP_EOL;
+echo Support::json(['push' => Dilemma\Push::work()]) . PHP_EOL;
+Db::run("DELETE FROM push_outbox WHERE created_at < UTC_TIMESTAMP() - INTERVAL 1 DAY AND status <> 'blocked'");
 Db::run('DELETE FROM rate_limits WHERE expires_at < UTC_TIMESTAMP()');
 Db::run('DELETE FROM auth_sessions WHERE expires_at < UTC_TIMESTAMP()');
 Db::run('DELETE FROM email_verifications WHERE expires_at < UTC_TIMESTAMP() - INTERVAL 1 DAY');

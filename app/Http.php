@@ -11,7 +11,7 @@ final class Http
 		ini_set('display_errors', '0');
 		ini_set('log_errors', '1');
 		ini_set('error_log', Config::storage('application.log'));
-		header("Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
+		header("Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'");
 		header('X-Content-Type-Options: nosniff');
 		header('Referrer-Policy: no-referrer');
 		header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
@@ -43,8 +43,10 @@ final class Http
 			if ($method === 'GET' && $path === '/health') { Db::one('SELECT 1'); self::json(['status' => 'ok', 'version' => '0.1.0']); }
 			$user = Auth::session(is_string($_COOKIE['dilemma_session'] ?? null) ? $_COOKIE['dilemma_session'] : null);
 			$actor = $user ? ['user_id' => $user['id'], 'channel' => 'human'] : null;
-			$locale = ($_GET['lang'] ?? $_COOKIE['dilemma_locale'] ?? $user['locale'] ?? 'sv') === 'en' ? 'en' : 'sv';
-			if (isset($_GET['lang'])) setcookie('dilemma_locale', $locale, ['expires' => time() + 31536000, 'path' => '/', 'secure' => Config::production(), 'httponly' => true, 'samesite' => 'Lax']);
+			$explicit_locale = in_array($_GET['lang'] ?? null, ['sv', 'en'], true) ? $_GET['lang'] : null;
+			$cookie_locale = in_array($_COOKIE['dilemma_locale'] ?? null, ['sv', 'en'], true) ? $_COOKIE['dilemma_locale'] : null;
+			$locale = $explicit_locale ?? $cookie_locale ?? I18n::negotiate($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '');
+			if ($explicit_locale !== null) setcookie('dilemma_locale', $locale, ['expires' => time() + 31536000, 'path' => '/', 'secure' => Config::production(), 'httponly' => true, 'samesite' => 'Lax']);
 			I18n::locale($locale);
 			if (str_starts_with($path, '/api/')) self::api($method, $path, $user, $actor, $ip);
 			if ($method !== 'GET') throw new Failure(405, 'method_not_allowed');
@@ -68,6 +70,7 @@ final class Http
 	private static function api(string $method, string $path, ?array $user, ?array $actor, string $ip): never
 	{
 		if ($method === 'GET') {
+			if ($path === '/api/push') { Auth::require_user($user); self::json(Push::status($user)); }
 			if ($path === '/api/i18n') self::json(I18n::all());
 			if ($path === '/api/debates') self::json(ReadModel::list($_GET));
 			if ($path === '/api/mine') { Auth::require_user($user); self::json(ReadModel::list($_GET, $actor)); }
@@ -88,6 +91,8 @@ final class Http
 		Auth::require_user($user);
 		Auth::csrf($user, $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
 		Support::rate('api:' . $user['id'], 120, 60);
+		if ($path === '/api/push/subscribe') self::json(Push::subscribe($user, $input));
+		if ($path === '/api/push/disable') self::json(Push::disable($user));
 		if ($path === '/api/logout') { Auth::logout($user); self::json(['redirect' => '/']); }
 		if ($path === '/api/debates') self::json(Debates::create($actor, $input), 201);
 		if ($path === '/api/invitation') self::json(Debates::invitation($actor, Support::text($input, 'token', 43, 43)));

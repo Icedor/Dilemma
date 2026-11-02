@@ -36,6 +36,13 @@ try {
 	check($home['status'] === 200 && str_contains($home['body'], '<html lang="sv">'), 'Swedish home is server rendered');
 	check(str_contains($home['headers']['content-security-policy'][0], "frame-ancestors 'none'") && $home['headers']['cache-control'][0] === 'no-store', 'HTTP responses enforce CSP and no-store caching');
 	check(http_request('/?lang=en')['status'] === 200 && str_contains(http_request('/?lang=en')['body'], '<html lang="en">'), 'English language selection changes server rendering');
+	foreach (['en-US,en;q=0.9' => 'en', 'en;q=0.5,sv-SE;q=0.9' => 'sv', 'fr-FR' => 'en', 'sv;q=0,en;q=0.2' => 'en'] as $accept => $expected) check(str_contains(http_request('/', null, ['Accept-Language: ' . $accept])['body'], '<html lang="' . $expected . '">'), 'Browser language negotiation: ' . $accept);
+	check(str_contains(http_request('/', null, ['Accept-Language: en'], 'dilemma_locale=sv')['body'], '<html lang="sv">'), 'Manual language cookie wins over browser language');
+	check(str_contains(http_request('/?lang=en', null, [], 'dilemma_locale=sv')['body'], '<html lang="en">'), 'New manual language selection wins over saved cookie');
+	check(str_contains(http_request('/?lang%5B%5D=en', null, ['Accept-Language: sv'])['body'], '<html lang="sv">'), 'Malformed language parameter safely falls back');
+	check(http_request('/manifest.webmanifest')['json']['display'] === 'standalone', 'Install manifest is served as JSON');
+	check(http_request('/sw.js')['status'] === 200 && http_request('/offline.html')['status'] === 200, 'Worker and offline fallback are accessible');
+	check(http_request('/api/push')['status'] === 401, 'Push settings require a human session');
 	check(http_request('/health')['json']['status'] === 'ok', 'Health route checks the database');
 	foreach (['/.env', '/app/bootstrap.php', '/database/migrations/001_initial.sql', '/tests/run.php', '/var/mail', '/.git/config'] as $path) check(http_request($path)['status'] === 404, 'Private path is inaccessible: ' . $path);
 	check(http_request('/assets/app.js')['status'] === 200, 'Only allowlisted preview assets are served');
@@ -45,6 +52,7 @@ try {
 	check(http_request('/api/login', ['email' => 'unused@example.test'], ['Origin: https://attacker.test'])['status'] === 403, 'Cross-origin login is rejected');
 	$a = user_fixture('HTTP'); $cookie = 'dilemma_session=' . $a['session']['token'];
 	$session_headers = ['X-CSRF-Token: ' . $a['session']['csrf']];
+	check(http_request('/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/invalid', 'consent' => true], [], $cookie)['status'] === 403, 'Push subscription requires CSRF protection');
 	check(http_request('/api/profile', ['alias' => 'New alias'], [], $cookie)['status'] === 403, 'Session alone cannot bypass CSRF');
 	check(http_request('/settings', null, [], $cookie)['status'] === 200, 'Authenticated settings render through HTTP');
 	check(http_request('/api/profile', ['alias' => 'New alias', 'locale' => 'en'], $session_headers, $cookie)['status'] === 200, 'Valid session and CSRF can update a profile');

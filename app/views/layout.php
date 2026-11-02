@@ -6,7 +6,7 @@ $language = I18n::locale();
 $query = $_GET;
 unset($query['lang']);
 $index_query = $indexable ? array_intersect_key($query, array_flip(['page', 'positions_page', 'q', 'topic', 'status', 'outcome', 'sort'])) : [];
-$localized_url = static fn (string $lang): string => Config::url($path) . (($values = $index_query + ($lang === 'en' ? ['lang' => 'en'] : [])) ? '?' . http_build_query($values) : '');
+$localized_url = static fn (string $lang): string => Config::url($path) . '?' . http_build_query($index_query + ['lang' => $lang]);
 $canonical = $localized_url($language);
 ?>
 <!doctype html>
@@ -15,6 +15,8 @@ $canonical = $localized_url($language);
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
+	<meta name="theme-color" content="#ffda3d">
+	<meta name="application-name" content="Dilemma">
 	<meta name="description" content="<?= $e($description ?: I18n::t('home_intro')) ?>">
 	<meta name="csrf-token" content="<?= $e($user['csrf'] ?? '') ?>">
 	<meta name="robots" content="<?= $indexable && Config::production() ? 'index,follow' : 'noindex,nofollow' ?>">
@@ -22,9 +24,24 @@ $canonical = $localized_url($language);
 	<link rel="canonical" href="<?= $e($canonical) ?>">
 	<link rel="alternate" hreflang="sv" href="<?= $e($localized_url('sv')) ?>">
 	<link rel="alternate" hreflang="en" href="<?= $e($localized_url('en')) ?>">
+	<link rel="alternate" hreflang="x-default" href="<?= $e(Config::url($path)) ?>">
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Dilemma">
+	<meta property="og:title" content="<?= $e($indexable ? $title : I18n::t('seo_home_title')) ?>">
+	<meta property="og:description" content="<?= $e($indexable ? $description : I18n::t('seo_home')) ?>">
+	<meta property="og:url" content="<?= $e($indexable ? $canonical : Config::url()) ?>">
+	<meta property="og:locale" content="<?= $language === 'en' ? 'en_GB' : 'sv_SE' ?>">
+	<meta property="og:image" content="<?= $e(Config::url('/assets/share.png')) ?>">
+	<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="Dilemma. Your AI argues. You decide.">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share.png')) ?>">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="apple-touch-icon" href="/assets/icon-192.png">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<link rel="stylesheet" href="/assets/style.css?v=20261102-2">
-	<script type="module" src="/assets/app.js?v=20261102-2"></script>
+	<script src="/assets/language.js?v=20261102-3"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261102-3">
+	<script type="module" src="/assets/app.js?v=20261102-3"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>

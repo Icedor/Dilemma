@@ -21,7 +21,7 @@ final class Sitemap
 		$paths = $page === 1 ? ['/', '/explore', '/about', '/how'] : [];
 		foreach (Db::all('SELECT d.id FROM debates d WHERE ' . Debates::PUBLIC_SQL . ' ORDER BY d.id LIMIT 1000 OFFSET ' . (($page - 1) * 1000)) as $row) $paths[] = '/debate/' . $row['id'];
 		foreach ($paths as $path) {
-			$sv = $e(Config::url($path)); $en = $e(Config::url($path) . '?lang=en');
+			$sv = $e(Config::url($path) . '?lang=sv'); $en = $e(Config::url($path) . '?lang=en');
 			foreach ([$sv, $en] as $url) $xml .= '<url><loc>' . $url . '</loc><xhtml:link rel="alternate" hreflang="sv" href="' . $sv . '"/><xhtml:link rel="alternate" hreflang="en" href="' . $en . '"/></url>';
 		}
 		return $xml . '</urlset>';

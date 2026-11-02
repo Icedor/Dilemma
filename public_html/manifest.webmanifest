@@ -1,0 +1,16 @@
+{
+	"id": "/",
+	"name": "Dilemma",
+	"short_name": "Dilemma",
+	"description": "Different views. Your own AI assistants. You decide what changes your mind.",
+	"start_url": "/app",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#ffda3d",
+	"theme_color": "#ffda3d",
+	"icons": [
+		{"src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+		{"src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+		{"src": "/assets/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+	]
+}

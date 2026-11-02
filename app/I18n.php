@@ -7,12 +7,43 @@ namespace Dilemma;
 final class I18n
 {
 	private static string $locale = 'sv';
+	public static function negotiate(string $header): string
+	{
+		$best = $header === '' ? 'sv' : 'en';
+		$quality = -1.0;
+		foreach (explode(',', substr($header, 0, 4096)) as $entry) {
+			if (!preg_match('/^\s*(sv|en)(?:-[a-z0-9-]+)?\s*(?:;\s*q=(0(?:\.\d{1,3})?|1(?:\.0{1,3})?))?\s*$/iD', $entry, $match)) continue;
+			$q = isset($match[2]) ? (float) $match[2] : 1.0;
+			if ($q > 0 && $q > $quality) { $best = strtolower($match[1]); $quality = $q; }
+		}
+		return $best;
+	}
 	public static function locale(?string $locale = null): string { if ($locale !== null) self::$locale = $locale === 'en' ? 'en' : 'sv'; return self::$locale; }
 	public static function t(string $key): string { return self::all()[$key] ?? self::all()['unexpected_error']; }
 	public static function all(): array
 	{
 		$index = self::$locale === 'en' ? 1 : 0;
 		return array_map(static fn (array $pair): string => $pair[$index], [
+			'app_options' => ['App och notiser', 'App and notifications'],
+			'install_app' => ['Installera Dilemma', 'Install Dilemma'],
+			'app_installed' => ['Dilemma är installerat.', 'Dilemma is installed.'],
+			'install_help' => ['iPhone/iPad: öppna Dela och välj Lägg till på hemskärmen. På dator: använd webbläsarens meny för att installera sidan som app. Alternativet visas när webbläsaren stöder det.', 'On iPhone/iPad, open Share and choose Add to Home Screen. On desktop, use your browser menu to install this site as an app. Availability depends on your browser.'],
+			'push_enable' => ['Välj push i stället för mejl', 'Choose push instead of email'],
+			'push_disable' => ['Stäng av push på alla enheter', 'Turn off push on all devices'],
+			'push_help' => ['Valfritt: få en notis när något händer i dina debatter. Push ersätter debattmejl. Du loggar fortfarande in med en länk via mejl.', 'Optional: get notified when your debates change. Push replaces debate emails. You still sign in with a link sent by email.'],
+			'push_optional' => ['Notiser är frivilliga. Du kan ändra dig när som helst.', 'Notifications are optional. You can change your choice at any time.'],
+			'push_active' => ['Push är på för dina debatter på denna enhet.', 'Push is on for your debates on this device.'],
+			'push_off' => ['Push är av. Dina separata val för debattmejl gäller igen.', 'Push is off. Your separate debate email preferences apply again.'],
+			'push_denied' => ['Notiser tilläts inte. Du kan ändra behörigheten i webbläsarens inställningar.', 'Notifications were not allowed. You can change the permission in your browser settings.'],
+			'push_unsupported' => ['Push stöds inte här just nu. På iPhone/iPad: lägg först till Dilemma på hemskärmen och öppna appen därifrån.', 'Push is not available here right now. On iPhone/iPad, add Dilemma to your Home Screen first, then open the app from there.'],
+			'push_unavailable' => ['Push kunde inte förberedas. Försök igen senare.', 'Push could not be set up. Please try again later.'],
+			'push_other_account' => ['Denna enhet hör till en annan inloggning. Försök igen för att skapa en ny prenumeration.', 'This device belongs to another sign-in. Try again to create a new subscription.'],
+			'push_device_limit' => ['Du har nått gränsen på tio enheter. Stäng av push på alla enheter och aktivera dem du vill använda igen.', 'You have reached the ten-device limit. Turn off push on all devices, then enable the ones you want to use.'],
+			'seo_home_title' => ['Olika åsikter. Egna AI-assistenter. Ditt beslut.', 'Different views. Your own AI. Your decision.'],
+			'seo_home' => ['Låt din egen AI möta någon som tycker annorlunda. Följ argumenten, pröva din åsikt och hissa den vita flaggan först när du själv är övertygad.', 'Let your AI debate someone who disagrees. Follow the arguments, challenge your own view and raise the white flag only when you change your mind.'],
+			'seo_explore' => ['Läs offentliga debatter där två människor prövar sina åsikter med hjälp av sina egna AI-assistenter. Följ argumenten och deltagarnas beslut.', 'Read public debates between people with opposing views. Follow their AI assistants’ arguments, sources and the decisions only the people can make.'],
+			'seo_how' => ['Skriv din åsikt, bjud in någon som tycker annorlunda och koppla in era AI-assistenter. Se hur en debatt på Dilemma fungerar, steg för steg.', 'State your view, invite someone who disagrees and connect your own AI assistants. See how a Dilemma debate works, from the first argument to the white flag.'],
+			'seo_about' => ['Dilemma är ett konst- och statistikexperiment om vad som får människor att ändra uppfattning. AI-assistenterna argumenterar. Människorna bestämmer.', 'What makes someone change their mind? Dilemma is an art and social experiment in disagreement, evidence and conviction. AI assistants argue. People decide.'],
 			'home_pitch' => ['Två människor med olika åsikter låter sina egna AI-assistenter debattera. Människorna bestämmer om de ändrar sig.', 'Two people with different views let their own AI assistants debate. The people decide whether to change their minds.'],
 			'get_started' => ['Börja med din åsikt', 'Start with your opinion'],
 			'flag_caption' => ['En vit flagga betyder att en människa blivit övertygad.', 'A white flag means a person has been convinced.'],

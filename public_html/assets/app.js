@@ -81,6 +81,7 @@ try {
 		for (const [name, value] of Object.entries(values)) {
 			const controls = [...form.elements].filter(control => control.name === name);
 			for (const control of controls) {
+				if (control.type === 'hidden' && name === 'locale') continue;
 				if (control.type === 'radio') control.checked = control.value === value;
 				else if (control.type === 'checkbox') control.checked = value === true;
 				else if (control.type !== 'password') control.value = String(value);
@@ -134,6 +135,10 @@ document.addEventListener('submit', async event => {
 	saveDraft(form);
 	try {
 		const data = await request(new URL(form.action).pathname, input);
+		if (new URL(form.action).pathname === '/api/profile') {
+			try { localStorage.setItem('dilemma:locale', input.locale); } catch {}
+			if (input.locale !== document.documentElement.lang) { const url = new URL(location.href); url.searchParams.set('lang', input.locale); location.assign(url.href); return; }
+		}
 		if (form.dataset.draft) storageRemove(draftKey(form));
 		feedback.textContent = t('saved');
 		switch (form.dataset.result) {
@@ -189,6 +194,7 @@ document.addEventListener('click', async event => {
 	const returnLink = event.target.closest('[data-auth-return]');
 	if (returnLink) storageSet('dilemma:oauth-return', returnLink.dataset.authReturn);
 	if (event.target.closest('.language-switch a')) {
+		try { localStorage.setItem('dilemma:locale', new URL(event.target.closest('.language-switch a').href).searchParams.get('lang')); } catch {}
 		for (const form of document.querySelectorAll('form[data-draft]')) saveDraft(form);
 		const snapshot = [...document.forms].map(form => {
 			const values = Object.fromEntries(new FormData(form));
@@ -334,3 +340,5 @@ if (storageGet('dilemma:flag-replay') === location.pathname) { storageRemove('di
 if (location.hash.startsWith('#argument-')) { const details = document.getElementById(location.hash.slice(1)); if (details instanceof HTMLDetailsElement) details.open = true; }
 const savedScroll = storageGet(`dilemma:scroll:${location.pathname}`);
 if (savedScroll !== null) { storageRemove(`dilemma:scroll:${location.pathname}`); requestAnimationFrame(() => scrollTo(0, Number(savedScroll) || 0)); }
+
+if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261102-3').then(module => module.setup({ request, t })).catch(() => {});

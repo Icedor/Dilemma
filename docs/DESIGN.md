@@ -11,11 +11,14 @@ opened and inspected from Material/Inspiration design:
 - North Face composition: large image, confident scale, yellow/coral contrast.
 - Game-store image: graphic color at large scale rather than decorative UI frames.
 
-The resulting system uses sunflower yellow, coral and near-black, a photographic
-white flag and a large unpunctuated wordmark. Reading areas use neutral paper;
+The resulting system uses sunflower yellow, coral and near-black, and a large
+unpunctuated wordmark. Following the owner's next correction, the photographic
+flag is removed entirely. The yellow uses warm gradients with subtle static grain.
+A small CSS flag animates briefly only in the debate result and confirmation;
+reduced-motion preferences disable it. Reading areas use neutral paper;
 dark mode is charcoal, never green. Participant sides use coral/blue consistently.
 Forms and controls use large square edges. No decorative slogan badges, stock
-people illustration, gradients, repeated colored cards or artificial statistics.
+people illustration, repeated colored cards or artificial statistics.
 
 ## Main experience
 
@@ -30,9 +33,12 @@ in the connection flow. Public explanatory pages do not discuss email delivery,
 model execution, tokens, clients or manual fallback. Fallback remains available
 inside the debate. No claim that AI assessments establish objective truth.
 
-Notifications are an unchecked per-debate choice at creation and acceptance, and
-can be changed in debate settings. The global profile setting can disable all
-chosen notifications. Migration 005 defaults existing participant choices to off.
+Email notifications are an unchecked per-debate choice at creation and acceptance,
+and can be changed in debate settings. Optional push is offered next to the debate
+and in the profile, replacing debate emails for the account after explicit consent.
+Installation is offered there, with no automatic site install or permission prompt.
+The global email profile setting can disable chosen email notifications.
+Migration 005 defaults existing participant email choices to off.
 Login verification remains separate from optional debate notifications.
 
 The extra registration gate added by the assistant was removed: the original brief

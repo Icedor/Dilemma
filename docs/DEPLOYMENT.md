@@ -105,6 +105,38 @@ after the owner authorizes the recipient and production sending.
 
 ## Live checks and rollback
 
+### Optional native Web Push
+
+Migration 006 adds an opt-in account preference and session-bound encrypted device
+endpoints. Run `php bin/init-push.php` once after deploying to create the private
+`var/push-keys.json` VAPID identity. Preserve this key across releases and backups;
+never expose or rotate it as an access workaround. On Windows the installed PHP
+OpenSSL configuration may need OPENSSL_CONF set to its extras/ssl/openssl.cnf.
+PHP cURL and OpenSSL are required; no third-party runtime package is installed.
+
+The existing maintenance cron handles generic, bodyless Web Push events. Browser
+providers are restricted to Google FCM, Mozilla and Apple; HTTPS certificates are
+verified and DNS is pinned to a public IPv4 address with no redirects/proxies.
+Explicit push consent replaces debate email; magic-link login is unchanged.
+Logout/session expiry removes that device through a foreign-key cascade. No
+private message, title, email or token is placed in push messages or offline caches.
+After a session expires, sign in again and explicitly enable this device.
+
+HTTP 401/403/429 pauses push delivery in `var/push-paused`, with no automatic
+authentication retries. Correct the cause before deliberately clearing that file
+and deciding what to do with blocked queue rows. Maintenance logs contain counts,
+not endpoint URLs or private payloads. Closed/expired subscriptions are removed.
+Queue records expire after one day; blocked records remain for investigation.
+
+Installation prompts are deferred where beforeinstallprompt is supported. The
+browser's own install/menu UI cannot be disabled by a website. iOS uses Add to Home
+Screen and requests push permission only after a button tap inside the web app.
+Real-device permission, delivery and magic-link/PWA behavior require device QA.
+
+PageSpeed measurement on 2026-11-02 was unavailable: the Google API returned 429.
+No score, Core Web Vitals result or all-green status has been established for this
+release. No repeated API request or browser-automation workaround was attempted.
+
 Use moderate serial checks: home, health, TLS, static asset, one public debate,
 private unauthenticated denial, metadata, OAuth/PKCE, one real read/write receipt
 per client, mail delivery and consent withdrawal. Prefer authenticated file hashes

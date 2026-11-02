@@ -39,6 +39,7 @@ final class Accounts
 			'events' => Db::all('SELECT * FROM debate_events WHERE actor_id = ? ORDER BY sequence', [$id]),
 			'reports' => Db::all('SELECT * FROM moderation_reports WHERE reporter_id = ?', [$id]),
 			'connections' => Db::all('SELECT id, label, scopes, debate_id, created_at, revoked_at, write_test_at FROM mcp_connections WHERE user_id = ?', [$id]),
+			'push_devices' => Db::all('SELECT id, locale, created_at FROM push_subscriptions WHERE user_id = ?', [$id]),
 		];
 	}
 
@@ -67,7 +68,8 @@ final class Accounts
 			Db::run("UPDATE moderation_reports SET reason = '[deleted]' WHERE reporter_id = ?", [$user['id']]);
 			Db::run("UPDATE notification_outbox SET encrypted_payload = '', status = CASE WHEN status = 'sent' THEN 'sent' ELSE 'cancelled' END WHERE user_id = ?", [$user['id']]);
 			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?), label = ? WHERE user_id = ?', [Support::now(), '[deleted]', $user['id']]);
-			Db::run("UPDATE users SET email = NULL, alias = '[deleted]', bio = '', avatar = '', chat_link = NULL, status = 'deleted', notify = 0, is_admin = 0 WHERE id = ?", [$user['id']]);
+			Db::run('DELETE FROM push_subscriptions WHERE user_id = ?', [$user['id']]);
+			Db::run("UPDATE users SET email = NULL, alias = '[deleted]', bio = '', avatar = '', chat_link = NULL, status = 'deleted', notify = 0, push_enabled = 0, is_admin = 0 WHERE id = ?", [$user['id']]);
 			return ['deleted' => true];
 		});
 	}

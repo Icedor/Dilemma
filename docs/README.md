@@ -1,6 +1,7 @@
 # Dilemma documentation
 
 - [Status and complete delivery checklist](STATUS.md)
+- [Current design, language, PWA and SEO release](RELEASE_NEXT.md)
 - [Latest session handoff and browser diagnosis](SESSION_HANDOFF.md)
 - [Decisions and scope](DECISIONS.md)
 - [Redesigned visual system and participant flow](DESIGN.md)

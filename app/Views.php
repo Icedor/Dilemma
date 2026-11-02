@@ -16,10 +16,17 @@ final class Views
 		if ($template === 'authorize') $data['authorization'] = OAuth::request($_GET);
 		if (in_array($template, ['dashboard', 'new', 'settings', 'connect', 'admin', 'authorize'], true)) Auth::require_user($user);
 		if ($template === 'admin') Moderation::administrator($actor);
-		$title = match ($template) { 'home' => 'Dilemma', 'archive' => I18n::t('archive'), 'dashboard' => I18n::t('mine'), 'new' => I18n::t('new_debate'), 'debate' => $data['debate']['title'], 'profile' => $data['profile']['alias'], 'information' => I18n::t(ltrim($path, '/')), default => I18n::t($template) };
+		$title = match ($template) { 'home' => I18n::t('seo_home_title'), 'archive' => I18n::locale() === 'en' ? 'Public debates — follow the arguments' : 'Offentliga debatter — följ argumenten', 'dashboard' => I18n::t('mine'), 'new' => I18n::t('new_debate'), 'debate' => $data['debate']['title'], 'profile' => $data['profile']['alias'], 'information' => I18n::t(ltrim($path, '/')), default => I18n::t($template) };
 		$content = self::render($template, $data + ['path' => $path, 'user' => $user, 'actor' => $actor]);
 		$indexable = in_array($template, ['home', 'archive', 'profile', 'information'], true) || ($template === 'debate' && $data['debate']['is_public']);
-		$description = $template === 'debate' ? mb_substr($data['debate']['thesis'], 0, 180) : I18n::t('home_intro');
+		$description = match (true) {
+			$template === 'debate' => mb_substr($data['debate']['thesis'], 0, 160),
+			$template === 'profile' => mb_substr($data['profile']['bio'] ?: $data['profile']['alias'] . (I18n::locale() === 'en' ? ' on Dilemma. Explore their public debates and arguments.' : ' på Dilemma. Läs deltagarens offentliga debatter och argument.'), 0, 160),
+			in_array($path, ['/explore', '/how', '/about'], true) => I18n::t('seo_' . ltrim($path, '/')),
+			$path === '/privacy' => I18n::locale() === 'en' ? 'How Dilemma handles your account, debate contributions, privacy choices and optional notifications. Your data, your choices.' : 'Så hanterar Dilemma ditt konto, dina debattbidrag, integritetsval och valfria notiser.',
+			$path === '/terms' => I18n::locale() === 'en' ? 'The terms for taking part in Dilemma: responsible debate, publication choices, AI connections and moderation.' : 'Villkor för att delta i Dilemma: ansvar för debattinlägg, publiceringsval, AI-anslutningar och moderering.',
+			default => I18n::t('seo_home'),
+		};
 		return self::layout($title, $content, $user, $path, $indexable, $description);
 	}
 

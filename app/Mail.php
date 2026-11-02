@@ -15,7 +15,8 @@ final class Mail
 	public static function notify(string $debate_id, string $actor_id, string $kind, int $sequence): void
 	{
 		$debate = Db::one('SELECT title FROM debates WHERE id = ?', [$debate_id]);
-		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND u.status = 'active' AND u.notify = 1 AND p.notify = 1", [$debate_id, $actor_id]) as $user) {
+		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND u.status = 'active' AND (u.push_enabled = 1 OR (u.notify = 1 AND p.notify = 1))", [$debate_id, $actor_id]) as $user) {
+			if ($user['push_enabled']) { Push::enqueue($user['id'], $sequence); continue; }
 			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title'], 'chat_link' => $user['chat_link'] ? Support::unseal($user['chat_link']) : ''], $user['id']);
 		}
 	}
@@ -32,6 +33,10 @@ final class Mail
 			});
 			if (!$row) break;
 			try {
+				if (!in_array($row['kind'], ['login', 'invitation'], true) && $row['user_id'] && Db::one('SELECT id FROM users WHERE id = ? AND push_enabled = 1', [$row['user_id']])) {
+					Db::run("UPDATE notification_outbox SET status = 'cancelled', encrypted_payload = '', lease_until = NULL WHERE id = ?", [$row['id']]);
+					continue;
+				}
 				$payload = json_decode(Support::unseal($row['encrypted_payload']), true, 32, JSON_THROW_ON_ERROR);
 				$message = self::render($row['id'], $row['kind'], $payload);
 				if (Config::get('MAIL_TRANSPORT') === 'spool' && !Config::production()) {

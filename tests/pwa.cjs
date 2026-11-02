@@ -1,0 +1,24 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync('public_html/assets/pwa.js', 'utf8').replace('export async function setup', 'async function setup');
+const controls = {};
+for (const name of ['data-pwa-status', 'data-push-enable', 'data-push-disable', 'data-install']) controls[name] = { hidden: false, disabled: false, handlers: {}, addEventListener(name, fn) { this.handlers[name] = fn; } };
+let permissionCalls = 0, permission = 'denied', subscriptions = 0, unsubscribed = 0, prompts = 0;
+const requests = [];
+const subscription = { endpoint: 'https://fcm.googleapis.com/fcm/send/test', unsubscribe: async () => { unsubscribed++; } };
+const registration = { pushManager: { getSubscription: async () => null, subscribe: async () => { subscriptions++; return subscription; } } };
+const window = { PushManager: class {}, Notification: {}, addEventListener() {}, dilemmaInstallPrompt: null };
+const context = { document: { querySelectorAll: () => [{ querySelector: selector => controls[selector.slice(1, -1)] }] }, navigator: { serviceWorker: { register: async () => registration, ready: Promise.resolve(registration) } }, window, isSecureContext: true, matchMedia: () => ({ matches: false }), Notification: { requestPermission: async () => { permissionCalls++; return permission; } }, Uint8Array, atob: value => Buffer.from(value, 'base64').toString('binary') };
+vm.createContext(context); vm.runInContext(source, context);
+(async () => {
+	await context.setup({ t: key => key, request: async (url, input) => { requests.push({ url, input }); return url === '/api/push' ? { public_key: 'BA', enabled: false, device: false } : { enabled: url.endsWith('subscribe'), device: url.endsWith('subscribe') }; } });
+	assert.equal(permissionCalls, 0); assert.equal(subscriptions, 0); assert.equal(requests.length, 1);
+	await controls['data-push-enable'].handlers.click(); assert.equal(permissionCalls, 1); assert.equal(subscriptions, 0); assert.equal(requests.length, 1);
+	permission = 'granted'; await controls['data-push-enable'].handlers.click(); assert.equal(subscriptions, 1); assert.equal(requests[1].url, '/api/push/subscribe'); assert.equal(requests[1].input.consent, true); assert(controls['data-push-enable'].hidden);
+	await controls['data-push-disable'].handlers.click(); assert.equal(requests[2].url, '/api/push/disable'); assert(!controls['data-push-enable'].hidden);
+	await controls['data-install'].handlers.click(); assert.equal(controls['data-pwa-status'].textContent, 'install_help');
+	window.dilemmaInstallPrompt = { prompt: async () => { prompts++; }, userChoice: Promise.resolve({ outcome: 'dismissed' }) };
+	assert.equal(prompts, 0); await controls['data-install'].handlers.click(); assert.equal(prompts, 1); assert.equal(window.dilemmaInstallPrompt, null);
+	console.log('PASS 6 PWA opt-in, denial, disable and installation interaction checks');
+})().catch(error => { console.error(error); process.exitCode = 1; });

@@ -122,20 +122,30 @@
 	.avatar-picker label:has(:checked) { outline: .15rem solid currentColor; outline-offset: .2rem; }
 }
 @layer pages {
-	.home-page .site-header { background: var(--yellow); color: #191918; border: 0; }
+	.hero, .auth-intro, .flag-result, dialog { background-color: var(--yellow); background-image: radial-gradient(ellipse at 85% 75%, #fff6bb99, transparent 58%), radial-gradient(ellipse at 10% 100%, #f6a82677, transparent 65%); }
+	.hero::before, .auth-intro::before { content: ''; position: absolute; inset: 0; background: url('/assets/grain.svg'); opacity: .075; mix-blend-mode: multiply; pointer-events: none; z-index: 0; }
+	.pwa-controls { padding-block: 1.5rem; border-block: .0625rem solid var(--rule); margin-block: 2rem; }
+	.pwa-controls > p { margin-top: .8rem; max-width: 52rem; }
+	.mini-flag { display: inline-block; position: relative; width: 3.5rem; height: 4.5rem; flex: none; }
+	.mini-flag::before { content: ''; position: absolute; top: 0; left: .25rem; width: .16rem; height: 100%; background: #191918; border-radius: .1rem; }
+	.mini-flag::after { content: ''; position: absolute; top: .2rem; left: .4rem; width: 2.8rem; height: 1.9rem; background: linear-gradient(110deg, #fff 10%, #e6e4da 50%, #fff 90%); clip-path: polygon(0 0, 33% 8%, 68% 0, 100% 10%, 96% 100%, 65% 90%, 32% 100%, 0 92%); transform-origin: left center; animation: flag-wave 2.8s ease-in-out 3 alternate; }
+	dialog[open] .mini-flag { animation: flag-rise .7s ease-out both; }
+	@keyframes flag-wave { from { transform: perspective(12rem) rotateY(-12deg) skewY(-3deg); } to { transform: perspective(12rem) rotateY(16deg) skewY(3deg); } }
+	@keyframes flag-rise { from { opacity: 0; transform: translateY(1rem); } to { opacity: 1; transform: translateY(0); } }
+	.home-page .site-header { background-color: var(--yellow); color: #191918; border: 0; }
 	.home-page .site-header .button { background: #191918; color: #fffdf7; border-color: #191918; }
 	.home-page .site-header .button:hover { background: transparent; color: #191918; }
-	.home-page .preview-notice { background: var(--yellow); color: #191918; border: 0; }
-	.hero { isolation: isolate; position: relative; min-height: 42rem; max-height: 65rem; height: min(55vw, 51rem); overflow: hidden; background: var(--yellow); color: #191918; padding: 2rem var(--space) 0; }
-	.hero-intro { position: relative; z-index: 3; width: 37%; max-width: 26rem; padding-top: 2rem; }
+	.home-page .preview-notice { background-color: var(--yellow); color: #191918; border: 0; }
+	.hero { isolation: isolate; position: relative; min-height: 33rem; height: min(45vw, 43rem); overflow: hidden; background-color: var(--yellow); color: #191918; padding: 2rem var(--space) 0; }
+	.hero-intro { position: relative; z-index: 3; width: 48%; max-width: 32rem; padding-top: 2rem; }
 	.hero-intro p { font-size: clamp(1.1rem, 1.65vw, 1.5rem); line-height: 1.45; letter-spacing: -.025em; }
 	.hero-intro .actions { margin-top: 2rem; gap: 1.2rem; }
 	.hero .button { background: #191918; border-color: #191918; color: #fffdf7; }
 	.hero .button:hover { background: #fffdf7; color: #191918; }
 	.hero .text-link { font-size: .95rem; }
 	.hero-wordmark { position: absolute; z-index: 1; inset: auto 3.4% -.025em; font-family: "Arial Black", Arial, sans-serif; font-size: clamp(6rem, 21.7vw, 32rem); font-weight: 900; letter-spacing: -.092em; line-height: .94; white-space: nowrap; overflow-wrap: normal; }
-	.hero-art { position: absolute; z-index: 2; top: -1rem; right: 6%; height: 92%; width: 52%; object-fit: contain; object-position: top; transform: rotate(5deg); pointer-events: none; }
-	.hero-caption { position: absolute; right: var(--space); top: 58%; width: 11rem; z-index: 3; font-size: .85rem; line-height: 1.4; }
+
+
 	.project-story { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 6rem; padding: 6rem var(--space); max-width: 100rem; margin: auto; }
 	.project-story h2 { font-size: clamp(2.5rem, 5.3vw, 5rem); max-width: 10ch; }
 	.story-copy { padding-top: .4rem; }
@@ -162,9 +172,9 @@
 	.empty-state > p:first-of-type { font-size: 1.4rem; letter-spacing: -.03em; }
 	.filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1rem; margin-block: 2.5rem; }
 	.auth-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 38rem; }
-	.auth-intro { position: relative; background: var(--yellow); color: #191918; padding: 4rem var(--space); overflow: hidden; }
+	.auth-intro { position: relative; background-color: var(--yellow); color: #191918; padding: 4rem var(--space); overflow: hidden; }
 	.auth-intro h1 { position: relative; z-index: 1; font-size: clamp(3rem,5vw,5rem); }
-	.auth-intro img { position: absolute; right: 3%; bottom: -7rem; height: 31rem; width: 75%; object-fit: contain; transform: rotate(8deg); }
+
 	.auth-form { padding: 4rem; align-self: center; max-width: 40rem; width: 100%; margin: auto; }
 	.auth-switch { margin-top: 2rem; }
 	.auth-form > p { font-size: 1.2rem; margin-bottom: 2rem; }
@@ -248,29 +258,29 @@
 	dl { display: grid; grid-template-columns: 10rem minmax(0,1fr); gap: .5rem 1rem; }
 	dt { font-weight: 700; overflow-wrap: anywhere; }
 	dd { margin: 0; }
-	.flag-result { display: flex; align-items: center; gap: 2rem; padding: 2rem; background: var(--yellow); color: #191918; margin: 3rem 0; }
+	.flag-result { display: flex; align-items: center; gap: 2rem; padding: 2rem; background-color: var(--yellow); color: #191918; margin: 3rem 0; }
 	.flag-result h2 { font-size: 2rem; }
 	.flag-result .button { margin-left: auto; color: #191918; border-color: #191918; }
 	.flag-result .button:hover { background: #191918; color: white; }
-	.small-flag { width: 4rem; height: 5rem; object-fit: contain; }
-	dialog { border: 0; padding: 3rem; background: var(--yellow); color: #191918; text-align: center; width: min(42rem,calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; }
+
+	dialog { border: 0; padding: 3rem; background-color: var(--yellow); color: #191918; text-align: center; width: min(32rem,calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; }
 	dialog::backdrop { background: #000b; }
 	dialog h2 { font-size: clamp(2.4rem,5vw,4.5rem); }
 	dialog p { margin: 1rem 0 1.75rem; }
 	dialog .button { background: #191918; color: #fffdf7; border-color: #191918; }
 	.dialog-close { position: absolute; top: .5rem; right: .7rem; border: 0; background: none; font-size: 2rem; padding: .5rem; line-height: 1; z-index: 3; }
-	.flag-scene { height: 22rem; max-width: 100%; margin: auto; overflow: hidden; }
-	.flag-scene img { height: 100%; width: 100%; object-fit: contain; transform-origin: 45% 100%; }
-	dialog[open] .flag-scene img { animation: flag-raise 1.4s cubic-bezier(.16,1,.3,1) both, flag-breeze 5s ease-in-out 1.4s infinite alternate; }
-	@keyframes flag-raise { from { transform: translateY(90%) rotate(-20deg); opacity: 0; } to { transform: translateY(0) rotate(0); opacity: 1; } }
-	@keyframes flag-breeze { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+	.flag-scene { margin: .5rem auto 2rem; width: 4rem; height: 5rem; }
+	.flag-scene { margin: .5rem auto 2rem; width: 4rem; height: 5rem; }
+
+
+
 }
 @layer responsive {
-	@media (min-width: 105rem) { .hero { min-height: 51rem; } .hero-wordmark { font-size: 22vw; } }
+	@media (min-width: 105rem) { .hero { min-height: 43rem; } .hero-wordmark { font-size: 22vw; } }
 	@media (max-width: 65rem) {
 		.site-header { gap: 1.25rem; } .main-nav { gap: 1.2rem; } .header-actions { gap: 1.25rem; }
-		.hero { height: 43rem; min-height: 0; } .hero-intro { width: 44%; }
-		.hero-art { top: 3rem; right: 1%; width: 53%; height: 80%; } .hero-caption { display: none; }
+		.hero { height: 35rem; min-height: 0; } .hero-intro { width: 44%; }
+
 		.project-story { gap: 3rem; } .process-list { gap: 2rem; }
 		.debate-row { grid-template-columns: 7rem minmax(0,1fr) 8rem; gap: 1.2rem; } .row-arrow { display: none; }
 		.new-debate-layout { gap: 3rem; grid-template-columns: 1fr 1.3fr; }
@@ -281,12 +291,12 @@
 		.wordmark { font-size: 1.6rem; } .header-actions { margin-left: auto; gap: .8rem; }
 		.main-nav { order: 3; width: 100%; justify-content: flex-start; gap: 2rem; font-size: .85rem; }
 		.main-nav a { font-size: .85rem; } .site-header .button.small { min-height: 2.6rem; padding: .55rem .8rem; }
-		.hero { height: 43rem; padding-top: .5rem; }
+		.hero { height: 29rem; padding-top: .5rem; }
 		.hero-intro { width: 100%; max-width: 25rem; padding-top: .5rem; }
 		.hero-intro p { font-size: 1.1rem; max-width: 28ch; }
 		.hero-intro .actions { margin-top: 1.4rem; gap: 1rem; }
 		.hero-intro .button { min-height: 3.3rem; padding-inline: 1.1rem; }
-		.hero-art { top: 12rem; right: 1%; height: 27rem; width: 80%; transform: rotate(7deg); }
+
 		.hero-wordmark { font-size: 21.8vw; bottom: .07em; left: 3%; }
 		.project-story { grid-template-columns: 1fr; gap: 2rem; padding-block: 3.5rem; }
 		.project-story h2 { max-width: 15ch; font-size: 2.8rem; }
@@ -300,7 +310,7 @@
 		.debate-meta { display: flex; flex-wrap: wrap; gap: 1rem; } .debate-title p { margin-top: .5rem; }
 		.filters { grid-template-columns: 1fr 1fr; } .search-field, .filters .button { grid-column: 1 / -1; }
 		.auth-layout { grid-template-columns: 1fr; min-height: 0; }
-		.auth-intro { padding: 2.5rem 1.25rem; min-height: 12rem; } .auth-intro img { height: 16rem; width: 40%; bottom: -5rem; right: 0; opacity: .9; } .auth-intro h1 { max-width: 70%; font-size: 2.8rem; }
+		.auth-intro { padding: 2.5rem 1.25rem; min-height: 12rem; } .auth-intro h1 { max-width: 70%; font-size: 2.8rem; }
 		.auth-form { padding: 2rem 1.25rem 3rem; }
 		.information-page { padding-top: 2.5rem; }
 		.information-page > header { grid-template-columns: 1fr; gap: 1.5rem; padding-bottom: 2rem; }
@@ -320,7 +330,7 @@
 		.site-footer { flex-direction: column; align-items: flex-start; margin-top: 2rem; padding-block: 2.5rem; } .site-footer nav { gap: 1rem 1.5rem; }
 		.copy-row, .connection-list article { align-items: flex-start; flex-direction: column; }
 		dl { grid-template-columns: 1fr; } dd { margin-bottom: .75rem; } .account-menu { max-width: 8rem; }
-		dialog { padding: 2rem 1.25rem; } .flag-scene { height: 18rem; }
+		dialog { padding: 2rem 1.25rem; }
 	}
 	@media (prefers-reduced-motion: reduce) {
 		*, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
