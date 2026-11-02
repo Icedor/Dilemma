@@ -31,11 +31,14 @@ $canonical = $localized_url($language);
 	<meta property="og:description" content="<?= $e($indexable ? $description : I18n::t('seo_home')) ?>">
 	<meta property="og:url" content="<?= $e($indexable ? $canonical : Config::url()) ?>">
 	<meta property="og:locale" content="<?= $language === 'en' ? 'en_GB' : 'sv_SE' ?>">
-	<meta property="og:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-9')) ?>">
+	<meta property="og:image" content="<?= $e(Config::url('/assets/share-change-your-mind.jpg')) ?>">
+	<meta property="og:image:secure_url" content="<?= $e(Config::url('/assets/share-change-your-mind.jpg')) ?>">
+	<meta property="og:image:type" content="image/jpeg">
 	<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 	<meta property="og:image:alt" content="Dilemma. What would change your mind?">
 	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-opinion.png?v=20261102-9')) ?>">
+	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-change-your-mind.jpg')) ?>">
+	<meta name="twitter:image:alt" content="Dilemma. What would change your mind?">
 	<link rel="manifest" href="/manifest.webmanifest?v=20261102-9">
 	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-9">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">

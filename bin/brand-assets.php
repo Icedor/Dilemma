@@ -20,6 +20,7 @@ imagettftext($image, 82, 0, 54, 360, $ink, $font, 'change your');
 imagettftext($image, 82, 0, 54, 475, $ink, $font, 'mind?');
 imagettftext($image, 16, 0, 62, 581, $ink, $font, 'dilemma.se');
 if (!imagepng($image, $directory . '/share-opinion.png', 9)) throw new RuntimeException('Cannot write share image');
+if (!imagejpeg($image, $directory . '/share-change-your-mind.jpg', 88)) throw new RuntimeException('Cannot write JPEG share image');
 foreach (['icon-192.png' => 192, 'icon-512.png' => 512, 'icon-maskable.png' => 512] as $name => $size) {
 	$image = canvas($size, $size);
 	$ink = imagecolorallocate($image, 25, 25, 24);
