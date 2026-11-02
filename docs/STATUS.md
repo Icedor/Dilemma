@@ -1,4 +1,16 @@
 # Current correction — 2026-11-02
+Live source **4a29b34**, release **950517d4071e2aef**, GitHub verified.
+The owner rejected the previous dark/muddy textures. New controlled bright yellow
+and orange gradients remove brown pools and white/pink/purple tones. Dark text has
+minimum measured exported-image contrast 9.87:1 on yellow and 6.68:1 on orange.
+Account creation/sign-in redesigned with a yellow headline panel and clearer form.
+Terms/privacy links in forms AND footer open separate tabs, preserving progress.
+76 installed hashes verified; live registration/legal links and CSS verified.
+40 HTTP, 7 worker, 6 PWA, 3 package checks pass. No real browser layout QA:
+inventory still reports browser access host unavailable and no browsers.
+
+## Superseded visual version
+
 Live source **2a197d5**, release **d9ccbb7ce9ac3b73**.
 GitHub main contains the complete project, verified after owner-authorized push.
 Fire-yellow/gold textured ribbons and warm ember surfaces replace the rejected

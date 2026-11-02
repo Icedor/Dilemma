@@ -1,3 +1,29 @@
+# Latest checkpoint: bright readable correction and account creation
+2026-11-02 19:48 Europe/Stockholm. Source **4a29b34**, release
+**950517d4071e2aef** live; GitHub main verified at the same source commit.
+
+- Owner rejected prior generated textures. Native PHP/GD gradients now bright
+  yellow/gold and orange with fine grain, no brown/white/pink/purple. Process text
+  dark. Every exported pixel checked against #191918: yellow >=9.87:1, orange >=6.68:1.
+- New gradient-yellow-v2.webp filename bypasses prior service-worker cached image.
+  SW cache v4 and versioned icon/CSS/manifest/sharing references. Old yellow image
+  removed only after backup and hash check. Sharing art/icons updated consistently.
+- Account form redesigned: yellow opinion panel, action heading, concise magic-link
+  explanation, spaced fields, grouped consent, wide submit, compact mobile banner.
+- Both form and footer terms/privacy links open separate tabs with noopener and
+  accessible descriptions; original inputs remain on the original page.
+- 40 HTTP, 7 worker, 6 PWA, 3 package checks pass; PHP lint and known-secret archive
+  scan pass. Live registration HTML confirms all four legal links; CSS verified.
+- All 76 production hashes verified. No schema/config changes or notifications sent.
+- SHA256 2e749d11f5989f2033036bca1aae46d3ce2d818fc7aaea06ea1031a718d1f536.
+- Stage .deploy-950517d4071e2aef; private backup
+  .backup-before-950517d4071e2aef/previous-release.zip. No authentication failures.
+- Browser inventory checked again: no browsers, access host unavailable. Asset
+  bitmaps inspected, but actual browser layout/PWA screenshots still unverified.
+  PageSpeed score remains unmeasured. Do not present Richer Install UI as complete.
+
+## Previous checkpoints
+
 # Latest checkpoint: warm textures, short copy and GitHub publication
 2026-11-02. Source **2a197d5**, release **d9ccbb7ce9ac3b73** is live.
 This supersedes the historical checkpoints below, including their no-push notes.
