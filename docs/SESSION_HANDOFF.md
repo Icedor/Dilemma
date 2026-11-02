@@ -1,3 +1,25 @@
+# Latest checkpoint: refinement/PWA deployed
+2026-11-02, same original exclusive session. This section supersedes the prior release details below.
+
+- User approved the improved overall design, rejected the large flag, requested yellow gradients/grain and a compact animated flag inside debates.
+- Also requested first-visit browser language with manual localStorage persistence, optional install/PWA/push, magic-link sign-in, social artwork and strong English SEO before deployment.
+- Implemented and published source commit **d409253**, release **d0db48bdb8c01b80**, 75 files.
+- ZIP SHA256: 44b1d60f439d8241f8a9a6667e42a44bcc507b692f37077decc04eefffdfc347.
+- Production six migrations; new 006 adds push preference/subscriptions/outbox. All 75 installed hashes verified after publishing.
+- Production stage: /home/superpeppse/dilemma.se/.deploy-d0db48bdb8c01b80.
+- Backup: .backup-before-d0db48bdb8c01b80/previous-release.zip and database.json (consistent snapshot of all 23 pre-migration tables). Restoration not tested.
+- Push identity: private var/push-keys.json, mode 0600. Private local recovery copy .env.production.push-keys.json (Git ignored). No secret values in docs.
+- Existing cron observed executing the new push worker with sent=0, failed=0, blocked=false. No real push delivery or external email test performed.
+- HTTPS checked: browser English on root, explicit Swedish plus persistent cookie, manifest (correct MIME/standalone), worker (JS/no-cache), sharing PNG and database health.
+- 183 functional checks and 3 package integrity checks pass; 62 PHP files lint; JS syntax checked. No private data in release.
+- Google PageSpeed API returned 429; stop, no retry until concrete access correction. No measured score/all-green claim.
+- Native browser UI remains blocked by URL verification; do not use another automation channel to bypass it. Real desktop/mobile visual, PWA install, push delivery and magic-link-in-installed-app QA still outstanding.
+- Deployment paused once because root-level files failed an overly strict parent-path check; corrected and resumed only after every file matched old/new hashes. No authentication error or SSH retry loop. Existing .env, other projects, cgi-bin, .well-known and cron entries preserved.
+- Local source committed, no GitHub push. Remote fetch still had no remote branch refs.
+- Do not resend project mail to the owner, add inbound mail/reply handling, enable push by default, or put installation controls on the home page.
+
+## Previous checkpoint (historical)
+
 # Session handoff — 2026-11-02
 
 Same original owner-confirmed sole writer. Lock:

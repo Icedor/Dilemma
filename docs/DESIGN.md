@@ -47,6 +47,12 @@ Authentication, human-only actions and processing/publication consent are unchan
 
 ## Asset provenance
 
+Current assets are code-drawn: grain.svg and CSS gradients/flag, plus the local
+PHP GD generator bin/brand-assets.php for the 1200×630 English sharing artwork,
+app icons and transparent notification badge. The sharing bitmap was visually
+inspected. No font file, image library or new external runtime dependency ships.
+The superseded flag provenance below is historical; its WebP is no longer served.
+
 Built-in image_gen generated the original transparent PNG. PHP GD exported WebP
 with alpha, quality 86; final asset public_html/assets/white-flag.webp, 102608 bytes.
 No external image service, runtime dependency or image request is used by the site.

@@ -1,3 +1,24 @@
+# Current release: design refinement, language and PWA
+Updated 2026-11-02. Live source **d409253**, release **d0db48bdb8c01b80**.
+The earlier redesign evidence below is historical; this section is current.
+
+- [x] Large flag removed from home/login; warm yellow gradients and subtle grain.
+- [x] Small brief CSS flag animation only in debate result/dialog; reduced motion respected.
+- [x] Browser EN/SV negotiation; explicit choice persists in localStorage and server cookie.
+- [x] Optional PWA installation buttons beside debate/in profile; browser prompt deferred.
+- [x] Opt-in push replaces debate email, with session-bound encrypted endpoints and generic messages; magic links unchanged.
+- [x] Native service worker keeps private pages, API responses and sign-in links out of offline caches.
+- [x] English SEO copy, bilingual canonical/hreflang, OG/Twitter image, app icons and manifest.
+- [x] 183 functional checks, 3 package-integrity checks, PHP/JS syntax and private-value scan.
+- [x] Published after source/config + 23-table backup; six production migrations and all 75 file hashes verified.
+- [x] Selected public HTTPS endpoints and actual scheduled push-worker execution verified.
+- [ ] Actual browser/device visual, install, push-delivery and installed-app login QA unavailable.
+- [ ] Google PageSpeed scores unavailable: API returned HTTP 429. No 100/all-green claim.
+
+See [release checklist](RELEASE_NEXT.md) and [handoff](SESSION_HANDOFF.md).
+
+## Earlier release evidence
+
 # Delivery status
 
 Updated 2026-11-02, Europe/Stockholm. Redesign deployed as source commit 25783ea,

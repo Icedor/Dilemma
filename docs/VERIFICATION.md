@@ -1,3 +1,29 @@
+# Refinement release verification — 2026-11-02
+
+Source d409253, release d0db48bdb8c01b80. 183 functional checks pass:
+74 domain/protocol, 40 HTTP, 4 concurrency, 9 mail, 5 launch, 12 participant flow,
+19 push, 7 language/install-event, 7 service-worker privacy, 6 PWA interactions.
+Three package checks verify entry exclusions, all extracted hashes and tamper detection.
+62 PHP files lint; JavaScript syntax passes. Release scanned against private environment
+values and private-key markers. Generated sharing image inspected as a local bitmap.
+
+New tests cover Accept-Language priorities, cookie/manual override, malformed language,
+localStorage restoration with URL fragments preserved, permission denial, no automatic
+install/notification prompts, encrypted device storage, provider endpoint restrictions,
+CSRF/session boundaries, cross-account claims, dedupe, no debate email after push opt-in,
+ES256 signature verification, session revocation and offline-cache privacy.
+
+Production: 75 authenticated hashes and six migration checksums; home EN/SV, persistent
+language cookie, manifest MIME/display, service-worker JS/no-cache, share PNG and health.
+Existing cron observed running the new worker with no pending messages/errors.
+No real push was sent. No email recipient was used for external delivery tests.
+
+Google PageSpeed returned 429. Native UI was blocked on active-URL verification.
+No browser visual, installed-device push/login result, Google score or field Core Web
+Vitals result is claimed.
+
+## Earlier verification evidence
+
 # Verification
 
 Tests refuse to run outside the explicit isolated local test DB: 127.0.0.1:3317,
