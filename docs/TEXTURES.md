@@ -1,3 +1,32 @@
+# Current correction: bright gradients and readable forms
+
+The owner rejected the image-generated dark/muddy version below. It is historical,
+not an approved direction. Current backgrounds use native PHP/GD graphics from
+bin/gradient-assets.php: bright yellow/gold and energetic orange, gentle broad
+curved transitions and fine grain. No brown pools or white/pink/purple.
+The orange section now has dark text; its dark overlay is removed.
+
+Measured after WebP compression over every pixel, against #191918 text:
+- Yellow minimum 9.87:1 (35,302 bytes), gradient-yellow-v2.webp.
+- Orange minimum 6.68:1 (34,366 bytes), gradient-red.webp (legacy name).
+
+New yellow filename prevents old service workers serving the rejected bitmap.
+Versioned URLs and worker cache v4 refresh other assets. Sharing art and icons
+use the new background. This measures asset contrast, not browser layout.
+
+Account creation/sign-in now pairs a large yellow opinion headline with a compact,
+clear form: actual action heading, concise passwordless explanation, wider submit
+button, grouped consent and quieter secondary links. Mobile uses a compact banner.
+Terms/privacy links in the form and global footer use target=_blank with
+noopener/noreferrer and an accessible new-tab description, preserving form progress.
+All four rendered registration legal links checked locally.
+
+40 HTTP, 7 service-worker and 6 PWA checks pass; touched PHP lint passes.
+Generated sharing artwork/gradient visually inspected. Browser inventory still has
+no accessible browser and reports its access host unavailable. No UI QA claimed.
+
+## Historical rejected version
+
 # Warm reference-led textures
 
 Owner correction, 2026-11-02: use the supplied turquoise image's organic ribbons,

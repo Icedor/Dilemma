@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
-// Brand typography over the approved, reference-led texture asset.
+// Brand typography over the controlled bright gradient asset.
 if (PHP_SAPI !== 'cli') exit(1);
 $font = $argv[1] ?? 'C:/Windows/Fonts/arialbd.ttf';
 if (!is_file($font) || !extension_loaded('gd')) throw new RuntimeException('GD and a local bold sans-serif font are required');
 $directory = dirname(__DIR__) . '/public_html/assets';
 function canvas(int $width, int $height): GdImage {
 	$image = imagecreatetruecolor($width, $height);
-	$texture = imagecreatefromwebp(dirname(__DIR__) . '/public_html/assets/gradient-yellow.webp');
+	$texture = imagecreatefromwebp(dirname(__DIR__) . '/public_html/assets/gradient-yellow-v2.webp');
 	if (!$texture) throw new RuntimeException('Missing yellow texture');
 	imagecopyresampled($image, $texture, 0, 0, 0, 0, $width, $height, imagesx($texture), imagesy($texture));
 	return $image;
