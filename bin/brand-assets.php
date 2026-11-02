@@ -9,20 +9,32 @@ function canvas(int $width, int $height): GdImage {
 	$image = imagecreatetruecolor($width, $height);
 	mt_srand(112026);
 	for ($y = 0; $y < $height; $y++) for ($x = 0; $x < $width; $x++) {
-		$glow = max(0, 1 - hypot(($x / $width - .82) * 1.1, ($y / $height - .35) * .85));
-		$grain = mt_rand(-3, 3);
-		$color = imagecolorallocate($image, min(255, 248 + (int) ($glow * 7) + $grain), max(0, min(255, 190 + (int) ($glow * 41) + $grain)), max(0, min(255, 38 + (int) ($glow * 48) + $grain)));
+		$u = $x / $width; $v = $y / $height;
+		$rgb = [255.0, 220.0, 57.0];
+		$layers = [
+			[.08, .95, .8, .7, [255, 207, 22], .9],
+			[1.1, .95, .7, .9, [255, 112, 100], .95],
+			[.84, .03, .75, .7, [255, 249, 200], 1],
+		];
+		foreach ($layers as [$cx, $cy, $rx, $ry, $tone, $strength]) {
+			$distance = hypot(($u - $cx) / $rx, ($v - $cy) / $ry);
+			$weight = max(0, 1 - $distance); $weight = $weight * $weight * (3 - 2 * $weight) * $strength;
+			foreach ($rgb as $channel => $value) $rgb[$channel] = $value * (1 - $weight) + $tone[$channel] * $weight;
+		}
+		$grain = mt_rand(-2, 2);
+		$color = imagecolorallocate($image, ...array_map(static fn ($value) => max(0, min(255, (int) round($value) + $grain)), $rgb));
 		imagesetpixel($image, $x, $y, $color);
 	}
 	return $image;
 }
 $image = canvas(1200, 630);
 $ink = imagecolorallocate($image, 25, 25, 24);
-imagettftext($image, 20, 0, 65, 68, $ink, $font, 'DILEMMA.SE');
-imagettftext($image, 38, 0, 65, 167, $ink, $font, 'Your AI argues.');
-imagettftext($image, 38, 0, 65, 224, $ink, $font, 'You decide.');
-imagettftext($image, 167, 0, 53, 560, $ink, $font, 'dilemma');
-if (!imagepng($image, $directory . '/share.png', 9)) throw new RuntimeException('Cannot write share image');
+imagettftext($image, 27, 0, 62, 76, $ink, $font, 'dilemma');
+imagettftext($image, 82, 0, 54, 245, $ink, $font, 'What would');
+imagettftext($image, 82, 0, 54, 360, $ink, $font, 'change your');
+imagettftext($image, 82, 0, 54, 475, $ink, $font, 'mind?');
+imagettftext($image, 16, 0, 62, 581, $ink, $font, 'dilemma.se');
+if (!imagepng($image, $directory . '/share-opinion.png', 9)) throw new RuntimeException('Cannot write share image');
 foreach (['icon-192.png' => 192, 'icon-512.png' => 512, 'icon-maskable.png' => 512] as $name => $size) {
 	$image = canvas($size, $size);
 	$ink = imagecolorallocate($image, 25, 25, 24);

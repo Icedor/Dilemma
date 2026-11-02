@@ -1,13 +1,18 @@
 // No page/API caching: private debates and magic links never enter offline storage.
-const CACHE = 'dilemma-shell-v1';
+const CACHE = 'dilemma-shell-v2';
 const OFFLINE = '/offline.html';
 self.addEventListener('install', event => {
-	event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([OFFLINE, '/assets/icon-192.png'])));
+	event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([OFFLINE, '/assets/icon-192.png', '/assets/grain.svg'])));
 });
 self.addEventListener('activate', event => {
 	event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('dilemma-shell-') && key !== CACHE).map(key => caches.delete(key)))));
 });
 self.addEventListener('fetch', event => {
+	const url = new URL(event.request.url);
+	if (event.request.method === 'GET' && url.origin === self.location.origin && ['/assets/icon-192.png', '/assets/grain.svg'].includes(url.pathname)) {
+		event.respondWith(caches.match(url.pathname).then(cached => cached || fetch(event.request)));
+		return;
+	}
 	if (event.request.mode === 'navigate' && new URL(event.request.url).origin === self.location.origin) {
 		event.respondWith(fetch(event.request).catch(() => caches.match(OFFLINE)));
 	}
