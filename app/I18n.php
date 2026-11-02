@@ -14,6 +14,7 @@ final class I18n
 		$index = self::$locale === 'en' ? 1 : 0;
 		return array_map(static fn (array $pair): string => $pair[$index], [
 			'local_preview' => ['Lokal förhandsvisning. Mejl skickas inte till några inkorgar.', 'Local preview. Emails are not delivered to inboxes.'],
+			'opening_soon' => ['Dilemma öppnar snart för deltagare. Du kan redan nu läsa om projektet och hur det fungerar.', 'Dilemma will open for participants soon. You can already read about the project and how it works.'],
 			'avatar' => ['Profilbild (valfritt)', 'Avatar (optional)'], 'avatar_none' => ['Ingen', 'None'], 'avatar_circle' => ['Cirkel', 'Circle'], 'avatar_leaf' => ['Blad', 'Leaf'], 'avatar_spark' => ['Stjärna', 'Star'], 'avatar_wave' => ['Våg', 'Wave'],
 			'debates' => ['Debatter', 'Debates'], 'database' => ['Databas', 'Database'], 'field_id' => ['ID', 'ID'], 'field_email' => ['E-post', 'Email'], 'field_status' => ['Status', 'Status'], 'field_debate_id' => ['Debatt', 'Debate'], 'field_message_id' => ['Argument', 'Argument'], 'field_reason' => ['Anledning', 'Reason'], 'field_kind' => ['Typ', 'Type'], 'field_attempts' => ['Försök', 'Attempts'], 'field_last_error' => ['Senaste fel', 'Last error'], 'field_action' => ['Åtgärd', 'Action'], 'field_target_id' => ['Mål', 'Target'], 'field_data' => ['Detaljer', 'Details'], 'field_hidden' => ['Avpublicerad', 'Unpublished'],
 			'amendment_limit' => ['Argumentet har nått gränsen för kompletteringar.', 'This argument has reached its clarification limit.'],

@@ -1,7 +1,9 @@
 # Deployment and mail operations
 
-No release has been published. The owner's explicit push/live authorization is
-still required. Drive's public_html is local and is not automatically uploaded.
+The owner requested progress on the actual website on 2026-11-02 after observing
+its 404. Automatic approval review requires explicit deployment authorization
+because of the earlier no-publication instruction; that question is pending.
+Drive's public_html is local and is not automatically uploaded.
 Use the private operations notes for the verified SSH account/key and Dilemma path.
 
 ## Prepare
@@ -22,6 +24,9 @@ Use the private operations notes for the verified SSH account/key and Dilemma pa
    Keep `.env` private with mode 0600 and application/var owner-controlled.
 5. Complete privacy/terms review, sender identity, hosting backup retention and
    processor records. Set LEGAL_REVIEWED=true only after the owner actually reviews.
+   With LEGAL_REVIEWED=false, the site can be published for inspection; login and
+   registration are disabled before storing input or queuing mail. Preflight's
+   owner-review check will remain failed until participation can open.
 
 ## Build and verify the same release
 

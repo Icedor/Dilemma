@@ -18,6 +18,12 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
 - [x] Nine mail checks: encrypted queue, duplicate suppression, backoff, retry,
   local spool delivery, payload erasure, UTF-8 and HTML escaping.
 - [x] SSH authenticated after correcting the cPanel username interpretation.
+- [x] Owner supplied production DB/SMTP credentials and confirmed the Dilemma
+  application/public directory layout. Ignored `.env.production` saved locally.
+- [x] Dedicated production DB login verified read-only; MariaDB 11.4.13, zero
+  tables. CLI pdo_mysql, mbstring and openssl available.
+- [x] SMTP STARTTLS on supplied port 587: certificate and authentication passed.
+  No message sent. Owner says incoming mail is blocked; no receiving settings changed.
 - [x] Dilemma server directory identified; its public_html contains cgi-bin and
   .well-known, no application entrypoint. Server CLI PHP is 8.5.12.
 - [x] Owner confirmed Drive public_html requires a separate upload, so local
@@ -25,7 +31,9 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
 - [x] Icey AB contact details verified from https://icey.se/kontakt/ and recorded.
 - [x] MIT license authorized and included. Outbound sender noreply@dilemma.se
   chosen; no reply address, forwarding or incoming email feature.
-- [x] PHP syntax checked across 55 files; JavaScript syntax passes.
+- [x] PHP syntax checked across 57 files; JavaScript syntax passes.
+- [x] Five launch checks: production with unreviewed terms refuses login before
+  storing personal data; both languages explain availability without an email form.
 - [x] Private 60-file release package built; three extraction/integrity checks pass.
 - [x] Existing Chrome extension and native-host registration verified correct.
 - [x] Source and staged secret scans passed; implementation saved in local commit
@@ -59,11 +67,14 @@ Updated 2026-11-02, Europe/Stockholm. Working tree is local and unpublished.
   native Chrome inspection stopped on URL-confidence enforcement. No UI pass claimed.
 - [ ] Verify hosting document-root mapping and web PHP/extensions/DB settings.
   cPanel UAPI cannot run inside the current SSH environment; do not retry blindly.
-- [ ] Dedicated production database and mail configuration; real delivery test.
+- [ ] Production migrations/config installation and real mail delivery test.
+  Database and SMTP login checks passed; application remains unpublished.
 - [ ] Owner review of legal bases, processors/transfers and backup retention.
 - [ ] Real Codex Windows, ChatGPT web/Windows and Claude connector sessions.
   Protocol tests do not establish real-client compatibility.
-- [ ] Explicit authorization for public push/deployment.
+- [ ] Explicit authorization for deployment: requested after the owner reported
+  the site's 404. Automatic approval review rejected staging/upload based on the
+  earlier no-publication instruction. No deployment-side write was executed.
 
 No server files, other projects or Flowstate were changed. No GitHub push or
 production deployment has occurred. The old HTTP 401 was caused by interpreting

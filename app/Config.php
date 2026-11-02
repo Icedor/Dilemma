@@ -32,6 +32,11 @@ final class Config
 		return self::get('APP_ENV', 'production') === 'production';
 	}
 
+	public static function participation_open(): bool
+	{
+		return !self::production() || self::get('LEGAL_REVIEWED') === 'true';
+	}
+
 	public static function url(string $path = ''): string
 	{
 		return rtrim(self::get('APP_URL', 'https://dilemma.se'), '/') . $path;

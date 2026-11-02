@@ -41,6 +41,7 @@ $canonical = $localized_url($language);
 	</header>
 	<noscript><p class="notice"><?= $t('no_script') ?></p></noscript>
 	<?php if (!Config::production()): ?><p class="notice"><?= $t('local_preview') ?></p><?php endif; ?>
+	<?php if (!Config::participation_open()): ?><p class="notice"><?= $t('opening_soon') ?></p><?php endif; ?>
 	<main id="main"><?= $content ?></main>
 	<footer class="site-footer"><a class="wordmark" href="/">dilemma.</a><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy"><?= $t('privacy') ?></a><a href="/terms"><?= $t('terms') ?></a></nav></footer>
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
