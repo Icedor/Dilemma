@@ -1,3 +1,31 @@
+# Latest checkpoint: opinion-first copy and color correction
+2026-11-02, source **b2109f7**, release **a7dbfb83a295b913** is live.
+This supersedes the earlier runtime release details below.
+
+- Sharing artwork now says “What would change your mind?” at /assets/share-opinion.png.
+  Old AI-first sharing asset removed after backup. Intro, SEO and manifest copy
+  center opinions/conviction. AI remains a feature explained in the how-it-works flow.
+- Every large yellow/coral block now has brighter layered gradients and fine grain,
+  including process, login, flag/result dialog, header/hero and offline page.
+- Manifest has improved English description/categories and a fresh link version.
+  **It still has no actual screenshots; Richer Install UI is NOT complete.**
+- Computer Use again stopped on URL verification this turn. Browser inventory had
+  no extension tabs, host unavailable. Native Chrome showed Meta Sharing Debugger;
+  binding the window was stopped by policy. No bypass/alternate automation attempted.
+  Need actual user-supplied captures or a functioning authorized browser connection.
+- 40 HTTP + 7 worker checks passed, PHP lint and 3 package tests passed.
+  New sharing bitmap visually inspected; no actual page/installation visual QA.
+- All 75 installed hashes verified. Public English title/image, new PNG and manifest
+  description verified via three serial HTTPS requests. Six migrations unchanged.
+- ZIP SHA256: 82dafa46983a8e4b88b51cae213b0ee46c2901971f6c6d8ac0b1f5477da922ec.
+- Server staging .deploy-a7dbfb83a295b913; backup .backup-before-a7dbfb83a295b913/
+  previous-release.zip includes prior source, config, manifest and push identity.
+  No new DB snapshot needed; no schema/account/push-preference changes.
+- Local commit only; no GitHub push. No SSH denial, retry loop, email or push test.
+- See docs/COPY_AND_INSTALL.md for exact remaining gallery work and design direction.
+
+## Previous checkpoints
+
 # Latest checkpoint: refinement/PWA deployed
 2026-11-02, same original exclusive session. This section supersedes the prior release details below.
 

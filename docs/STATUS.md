@@ -1,3 +1,16 @@
+# Current correction — 2026-11-02
+Live source **b2109f7**, release **a7dbfb83a295b913**.
+Opinion-first intro/search/install copy, new sharing artwork and complete yellow/
+coral gradient/texture treatment are published. All 75 installed hashes and the
+changed public resources were verified. Focused tests: 40 HTTP, 7 worker, 3 package.
+
+**Still incomplete:** actual wide/narrow app screenshots and Richer Install UI.
+The description is fixed, but the gallery is missing because browser capture was
+stopped by the tool's current-URL verification. No fabricated screenshots were added.
+See [remaining gallery work](COPY_AND_INSTALL.md).
+
+## Earlier release evidence
+
 # Current release: design refinement, language and PWA
 Updated 2026-11-02. Live source **d409253**, release **d0db48bdb8c01b80**.
 The earlier redesign evidence below is historical; this section is current.

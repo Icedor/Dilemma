@@ -4,6 +4,10 @@ Owner correction, 2026-11-02: the idea is testing opinions and changing minds.
 AI is the mechanism, not the headline, proposition or sharing hook. Do not revert
 to “Your AI argues. You decide.” or another AI-first slogan.
 
+Published source b2109f7 / release a7dbfb83a295b913. All 75 installed hashes,
+English page copy, new sharing image and manifest description verified live.
+The installation gallery remains incomplete, as recorded below.
+
 - [x] Sharing headline: “What would change your mind?” New 1200×630 artwork at
   assets/share-opinion.png; new URL avoids reusing the previous social-image URL.
 - [x] Intro, search descriptions and installation description focus on beliefs,
