@@ -17,7 +17,8 @@ final class Views
 		if (in_array($template, ['dashboard', 'new', 'settings', 'admin', 'authorize'], true)) Auth::require_user($user);
 		if ($template === 'admin') Moderation::administrator($actor);
 		$title = match ($template) { 'home' => I18n::t('seo_home_title'), 'archive' => I18n::locale() === 'en' ? 'Public debates — follow the arguments' : 'Offentliga debatter — följ argumenten', 'dashboard' => I18n::t('mine'), 'new' => I18n::t('new_debate'), 'debate' => $data['debate']['title'], 'profile' => $data['profile']['alias'], 'information' => I18n::t(ltrim($path, '/')), default => I18n::t($template) };
-		$content = self::render($template, $data + ['path' => $path, 'user' => $user, 'actor' => $actor]);
+		$view = $template === 'debate' && $data['debate']['status'] === 'open' && !$data['debate']['viewer_member'] ? 'open-debate' : $template;
+		$content = self::render($view, $data + ['path' => $path, 'user' => $user, 'actor' => $actor]);
 		$indexable = in_array($template, ['home', 'archive', 'profile', 'information'], true) || ($template === 'debate' && $data['debate']['is_public']);
 		$description = match (true) {
 			$template === 'debate' => mb_substr($data['debate']['thesis'], 0, 160),

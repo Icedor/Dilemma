@@ -67,6 +67,7 @@ function saveDraft(form) {
 	const values = {};
 	for (const control of form.elements) {
 		if (!control.name || ['hidden', 'password', 'email'].includes(control.type) || control.name === 'chat_link') continue;
+		if (control.type === 'radio' && !control.checked) continue;
 		values[control.name] = control.type === 'checkbox' ? control.checked : control.value;
 	}
 	storageSet(draftKey(form), JSON.stringify(values));
@@ -107,6 +108,13 @@ for (const form of document.querySelectorAll('form[data-draft]')) {
 	}
 	let timer;
 	form.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(() => saveDraft(form), 350); });
+}
+for (const form of document.querySelectorAll('form:has([name="opponent_mode"])')) {
+	const updateMode = () => {
+		form.elements.namedItem('public_consent').required = form.elements.namedItem('opponent_mode').value === 'open';
+	};
+	form.addEventListener('change', updateMode);
+	updateMode();
 }
 for (const scale of document.querySelectorAll('.position-input')) {
 	updateScale(scale);

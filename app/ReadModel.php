@@ -23,7 +23,7 @@ final class ReadModel
 		$topic = Support::text($filters, 'topic', 0, 60);
 		if ($topic !== '') { $where[] = 'd.topic = ?'; $params[] = $topic; }
 		$status = $filters['status'] ?? '';
-		if (in_array($status, ['draft', 'invited', 'active', 'paused', 'flagged', 'ended', 'archived'], true)) { $where[] = 'd.status = ?'; $params[] = $status; }
+		if (in_array($status, ['draft', 'invited', 'open', 'active', 'paused', 'flagged', 'ended', 'archived'], true)) { $where[] = 'd.status = ?'; $params[] = $status; }
 		if (($filters['outcome'] ?? '') === 'changed') $where[] = 'd.flag_user_id IS NOT NULL';
 		if (($filters['outcome'] ?? '') === 'unchanged') $where[] = "d.flag_user_id IS NULL AND d.status IN ('ended', 'archived') AND d.end_reason = 'disagreement'";
 		if (!empty($filters['profile'])) { $where[] = 'EXISTS (SELECT 1 FROM debate_participants pp WHERE pp.debate_id = d.id AND pp.user_id = ?)'; $params[] = Support::uuid($filters['profile']); }

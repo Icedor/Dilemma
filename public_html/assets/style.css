@@ -430,3 +430,38 @@
 	.gradient-preview { max-width:16rem; margin:0 auto; }
 	.my-debates { grid-template-columns:1fr; gap:1.5rem; }
 }
+
+@layer pages {
+	:root { --gap-xs: .5rem; --gap-sm: 1rem; --gap-md: 1.5rem; --gap-lg: 2rem; --gap-xl: 3rem; }
+	.field { gap: var(--gap-xs); margin-bottom: var(--gap-md); }
+	fieldset { margin-block: var(--gap-lg); padding-block: var(--gap-md); }
+	.new-debate-layout { gap: clamp(2rem, 4vw, 4rem); }
+	.opponent-choices { display: grid; gap: var(--gap-sm); }
+	.opponent-choices legend { margin-bottom: var(--gap-sm); }
+	.opponent-choice { display: flex; align-items: start; gap: var(--gap-sm); padding: var(--gap-md); border: .0625rem solid var(--rule); cursor: pointer; }
+	.opponent-choice:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 .0625rem var(--ink); }
+	.opponent-choice input { width: 1.25rem; height: 1.25rem; min-height: 0; flex: none; margin: .2rem 0 0; accent-color: var(--ink); }
+	.opponent-choice strong, .opponent-choice span > span { display: block; }
+	.opponent-choice span > span { margin-top: var(--gap-xs); color: var(--muted); font-size: .95rem; }
+	.share-panel > form, .join-panel > form { margin-top: var(--gap-md); }
+	.open-listing-controls { margin-block: var(--gap-lg); }
+	.open-listing-controls > form { margin-top: var(--gap-md); }
+	.open-debate-page { max-width: 86rem; margin-inline: auto; padding: 4rem var(--space); }
+	.open-debate-page .page-heading { max-width: 65rem; margin-bottom: var(--gap-xl); }
+	.open-debate-page h1 { font-size: clamp(2.5rem, 5vw, 5rem); margin-block: var(--gap-md); overflow-wrap: anywhere; }
+	.open-debate-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+	.open-position { border-top: .25rem solid var(--red); padding-top: var(--gap-md); }
+	.participant-identity { display: flex; align-items: center; gap: var(--gap-sm); margin-bottom: var(--gap-md); }
+	.participant-identity h2, .join-panel h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
+	.open-position > p + p { margin-top: var(--gap-sm); }
+	.join-panel { border-top: .0625rem solid var(--rule); padding-top: var(--gap-md); scroll-margin-top: 2rem; }
+	.join-panel > p { margin-block: var(--gap-sm) var(--gap-md); }
+	.join-panel .legal-links { margin-block: var(--gap-sm); }
+	.debate-ai > p + p { margin-top: var(--gap-sm); }
+	.participant-settings > form { margin-block: var(--gap-lg); }
+	@media (max-width: 48rem) {
+		.open-debate-page { padding-block: 2.5rem; }
+		.open-debate-columns { grid-template-columns: minmax(0, 1fr); gap: var(--gap-xl); }
+		.opponent-choice { padding: var(--gap-sm); }
+	}
+}

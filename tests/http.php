@@ -100,6 +100,31 @@ try {
 	Auth::request_link(['email' => 'qa-invite-' . $run . '@example.test', 'alias' => 'Invite test', 'accept_terms' => true, 'return_to' => $invite], 'invite-' . $run);
 	$record = Db::one('SELECT v.return_target FROM email_verifications v JOIN users u ON u.id = v.user_id WHERE u.email = ?', ['qa-invite-' . $run . '@example.test']);
 	check(!str_contains($record['return_target'], $invite) && Support::unseal($record['return_target']) === $invite, 'Invitation continuation is encrypted at rest');
+	preg_match('/Authorization: Bearer ([A-Za-z0-9_-]{43})/', $setup['json']['setup_text'], $credential);
+	$direct_headers = ['Authorization: Bearer ' . $credential[1], 'MCP-Protocol-Version: 2025-11-25'];
+	foreach (explode("\n", $setup['json']['setup_text']) as $line) {
+		if (!str_starts_with($line, '{')) continue;
+		$request = json_decode($line, true, 32, JSON_THROW_ON_ERROR);
+		if (($request['params']['name'] ?? '') === 'dilemma_test_write') $request['params']['arguments']['idempotency_key'] = Support::id();
+		// JSON-RPC object arguments must remain objects when serialized.
+		if (isset($request['params']['arguments']) && $request['params']['arguments'] === []) $request['params']['arguments'] = (object) [];
+		if (isset($request['params']['capabilities'])) $request['params']['capabilities'] = (object) [];
+		$response = http_request('/mcp', $request, $direct_headers);
+		check($response['status'] === 200 && isset($response['json']['result']) && empty($response['json']['result']['isError']), 'Copied JSON instruction executes through real HTTP: ' . ($request['params']['name'] ?? $request['method']));
+		if (($request['params']['name'] ?? '') === 'dilemma_test_connection') check($response['json']['result']['structuredContent']['read_verified'] === true, 'Direct HTTP confirms authenticated read access');
+		if (($request['params']['name'] ?? '') === 'dilemma_test_write') check($response['json']['result']['structuredContent']['write_verified'] === true, 'Direct HTTP confirms persisted write-test receipt');
+	}
+	check(Db::one('SELECT write_test_at FROM mcp_connections WHERE id = ?', [$setup['json']['connection_id']])['write_test_at'] !== null, 'Direct HTTP receipt is stored on the connection');
+	$open = \Dilemma\Debates::create($a['actor'], ['idempotency_key' => Support::token(), 'title' => 'An open question through HTTP', 'stance' => 'Let someone take the other side.', 'opponent_mode' => 'open', 'public_consent' => true, 'processing_consent' => true]);
+	$claim_path = '/api/debates/' . $open['debate_id'] . '/claim';
+	check(http_request($claim_path, [])['status'] === 401, 'Anonymous HTTP claimant must log in');
+	check(http_request($claim_path, [], [], $cookie)['status'] === 403, 'Claim route enforces CSRF');
+	foreach (['sv', 'en'] as $language) {
+		$page = http_request('/debate/' . $open['debate_id'] . '?lang=' . $language);
+		check($page['status'] === 200 && str_contains($page['body'], 'open-debate-page') && str_contains($page['body'], 'data-auth-return=') && !str_contains($page['body'], 'Authorization: Bearer'), 'Public open-question page renders safely in ' . $language);
+	}
+	\Dilemma\Connections::revoke($a['actor'], $setup['json']['connection_id']);
+	check(http_request('/mcp', ['jsonrpc' => '2.0', 'id' => 99, 'method' => 'tools/list'], $direct_headers)['status'] === 401, 'Revocation immediately blocks direct HTTP access');
 	check(http_request('/api/logout', [], $session_headers, $cookie)['status'] === 200 && http_request('/settings', null, [], $cookie)['status'] === 401, 'Logout revokes the stored session');
 	echo 'SUCCESS: ' . $checks . " HTTP checks. Loopback only.\n";
 } finally {

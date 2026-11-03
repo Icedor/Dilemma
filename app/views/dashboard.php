@@ -5,7 +5,7 @@
 	<div class="my-debates">
 	<?php foreach ($list['items'] as $item): $mine = null; foreach ($item['participants'] as $person) if ($person['user_id'] === $user['id']) $mine = $person; ?>
 		<article class="my-debate" data-my-debate="<?= $e($item['id']) ?>">
-			<div class="debate-heading-meta"><span class="status"><?= $t($item['status']) ?></span><span><?= $e($item['topic']) ?></span></div>
+			<div class="debate-heading-meta"><span class="status"><?= $t($item['status'] === 'open' ? 'looking_for_opponent' : $item['status']) ?></span><span><?= $e($item['topic']) ?></span></div>
 			<h2><a href="/debate/<?= $e($item['id']) ?>"><?= $e($item['title']) ?></a></h2>
 			<div class="my-participants"><?php foreach ($item['participants'] as $person): ?><span><?= Views::avatar($person['avatar']) ?><?= $e($person['alias']) ?></span><?php endforeach; ?></div>
 			<?php if ($item['status'] === 'active'): ?><p class="my-turn"><?= (int) $mine['side'] === (int) $item['turn_side'] ? $t('your_turn') : $t('waiting_turn') ?></p><?php endif; ?>

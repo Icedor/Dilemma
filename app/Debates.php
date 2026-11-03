@@ -6,7 +6,8 @@ namespace Dilemma;
 
 final class Debates
 {
-	public const PUBLIC_SQL = "d.hidden = 0 AND (SELECT COUNT(*) FROM debate_participants pc WHERE pc.debate_id = d.id AND pc.public_consent = 1) = 2";
+	public const OPEN_SQL = "d.status = 'open' AND d.opponent_mode = 'open' AND (SELECT COUNT(*) FROM debate_participants po WHERE po.debate_id = d.id) = 1 AND EXISTS (SELECT 1 FROM debate_participants po JOIN users uo ON uo.id = po.user_id WHERE po.debate_id = d.id AND po.side = 0 AND po.public_consent = 1 AND uo.status = 'active')";
+	public const PUBLIC_SQL = "d.hidden = 0 AND ((" . self::OPEN_SQL . ") OR (SELECT COUNT(*) FROM debate_participants pc WHERE pc.debate_id = d.id AND pc.public_consent = 1) = 2)";
 
 	public static function actor(array $actor, bool $write = false, ?string $debate_id = null): array
 	{
@@ -50,7 +51,7 @@ final class Debates
 			$member = Db::one('SELECT * FROM debate_participants WHERE debate_id = ? AND user_id = ?', [$id, $actor['user_id']]);
 			if (isset($actor['connection_id']) && !$member) throw new Failure(404, 'not_found');
 		}
-		$public = (int) $row['hidden'] === 0 && (int) Db::one('SELECT COUNT(*) AS count FROM debate_participants WHERE debate_id = ? AND public_consent = 1', [$id])['count'] === 2;
+		$public = Db::one('SELECT d.id FROM debates d WHERE d.id = ? AND ' . self::PUBLIC_SQL, [$id]) !== null;
 		if (!$member && !$public) throw new Failure(404, 'not_found');
 		return $row + ['is_public' => $public, 'viewer_member' => $member];
 	}
@@ -81,6 +82,9 @@ final class Debates
 	{
 		self::human($actor);
 		if (($input['processing_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
+		$mode = $input['opponent_mode'] ?? 'invite';
+		if (!in_array($mode, ['invite', 'open'], true)) throw new Failure(422, 'invalid_field', ['field' => 'opponent_mode']);
+		if ($mode === 'open' && ($input['public_consent'] ?? false) !== true) throw new Failure(422, 'open_consent_required');
 		$english = ($input['locale'] ?? '') === 'en';
 		$input['thesis'] = $input['thesis'] ?? $input['title'] ?? '';
 		if (($input['topic'] ?? '') === '') $input['topic'] = $english ? 'Other' : 'Övrigt';
@@ -94,6 +98,7 @@ final class Debates
 			$locale = ($input['locale'] ?? '') === 'en' ? 'en' : 'sv';
 			Db::run('INSERT INTO debates (id, creator_id, title, topic, thesis, introduction, left_label, right_label, locale, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'title', 5, 160), Support::text($input, 'topic', 2, 60), Support::text($input, 'thesis', 5, 4000), Support::text($input, 'introduction', 0, 4000), Support::text($input, 'left_label', 1, 140), Support::text($input, 'right_label', 1, 140), $locale, Support::now(), Support::now()]);
 			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 0, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
+			if (($input['opponent_mode'] ?? 'invite') === 'open') Db::run("UPDATE debates SET opponent_mode = 'open', status = 'open' WHERE id = ?", [$id]);
 			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $id, $actor['user_id']]);
 			self::consent($id, $actor['user_id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			self::event($id, $actor['user_id'], 'created');
@@ -112,9 +117,18 @@ final class Debates
 			$row = self::row($id, true);
 			if ($row['creator_id'] !== $actor['user_id']) throw new Failure(403, 'access_denied');
 			if ($receipt = Idempotency::replay($actor['user_id'], 'invite', $input)) return $receipt;
-			if ($row['hidden'] || !in_array($row['status'], ['draft', 'invited'], true)) throw new Failure(409, 'invalid_transition');
+			if ($row['hidden'] || !in_array($row['status'], ['draft', 'invited', 'open'], true)) throw new Failure(409, 'invalid_transition');
 			$email = Support::text($input, 'email', 0, 254);
 			if ($email !== '') $email = Support::email($email);
+			if ($row['status'] === 'open') {
+				if (!self::readable($id)['is_public']) throw new Failure(409, 'invalid_transition');
+				$url = Config::url('/debate/' . $id);
+				if ($email !== '') {
+					Support::rate('invite:' . $actor['user_id'], 8, 3600);
+					Mail::enqueue('open-invitation:' . Support::id(), 'invitation', $email, $row['locale'], ['url' => $url, 'title' => $row['title']]);
+				}
+				return Idempotency::save($actor['user_id'], 'invite', $input, ['invitation_url' => $url, 'email_sent' => $email !== '', 'expires_in' => null]);
+			}
 			if ($email === '' && ($existing = Db::one("SELECT encrypted_token, expires_at FROM debate_invitations WHERE debate_id = ? AND email IS NULL AND status = 'pending' AND encrypted_token IS NOT NULL AND expires_at > UTC_TIMESTAMP() ORDER BY created_at DESC LIMIT 1", [$id]))) {
 				return Idempotency::save($actor['user_id'], 'invite', $input, ['invitation_url' => Config::url('/invite#' . Support::unseal($existing['encrypted_token'])), 'expires_in' => max(0, strtotime($existing['expires_at'] . ' UTC') - time()), 'email_sent' => false]);
 			}
@@ -175,6 +189,30 @@ final class Debates
 			Connections::setup($actor, ['debate_id' => $row['id']]);
 			Mail::notify($row['id'], $user['id'], 'joined', $event);
 			return Idempotency::save($user['id'], 'accept', $input, ['debate_id' => $row['id'], 'revision' => (int) $row['revision'] + 1, 'stored_at' => Support::now()]);
+		});
+	}
+
+	public static function claim(array $actor, string $id, array $input): array
+	{
+		self::human($actor);
+		$input['debate_id'] = $id;
+		return Db::transaction(static function () use ($actor, $id, $input): array {
+			$user = self::actor($actor, true);
+			if ($receipt = Idempotency::replay($user['id'], 'claim', $input)) return $receipt;
+			$row = self::row($id, true);
+			if ($row['creator_id'] === $user['id']) throw new Failure(403, 'access_denied');
+			if ($row['hidden'] || $row['status'] !== 'open' || $row['opponent_mode'] !== 'open') throw new Failure(409, 'opponent_taken');
+			if (!Db::one('SELECT d.id FROM debates d WHERE d.id = ? AND d.hidden = 0 AND ' . self::OPEN_SQL, [$id])) throw new Failure(409, 'opponent_taken');
+			if (($input['accept_terms'] ?? false) !== true || ($input['processing_consent'] ?? false) !== true || ($input['public_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
+			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 1, ?, ?)', [$id, $user['id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
+			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $id, $user['id']]);
+			self::consent($id, $user['id'], true, ($input['position_consent'] ?? false) === true);
+			Db::run("UPDATE debates SET status = 'active', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $id]);
+			$event = self::event($id, $user['id'], 'joined');
+			self::position($id, $user['id'], $input);
+			Connections::setup($actor, ['debate_id' => $id]);
+			Mail::notify($id, $user['id'], 'joined', $event);
+			return Idempotency::save($user['id'], 'claim', $input, ['debate_id' => $id, 'revision' => (int) $row['revision'] + 1, 'stored_at' => Support::now()]);
 		});
 	}
 

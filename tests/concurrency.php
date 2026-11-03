@@ -42,4 +42,14 @@ $request = ['operation' => 'setup', 'actor' => $a['actor'], 'input' => ['debate_
 $results = simultaneous([$request, $request, $request]);
 check(count(array_unique(array_column(array_column($results, 'result'), 'connection_id'))) === 1 && array_column($results, 'status') === [200, 200, 200], 'Concurrent renewals return one persistent connection');
 check(count(array_unique(array_column(array_column($results, 'result'), 'setup_text'))) === 1, 'Concurrent copies return the same recoverable credential');
+$c = user_fixture('RaceC');
+$open = \Dilemma\Debates::create($a['actor'], ['idempotency_key' => Support::token(), 'title' => 'Who gets the open opponent slot?', 'stance' => 'Only one opponent may join.', 'opponent_mode' => 'open', 'processing_consent' => true, 'public_consent' => true]);
+$claim = ['operation' => 'claim', 'actor' => $b['actor'], 'id' => $open['debate_id'], 'input' => ['idempotency_key' => Support::token(), 'stance' => 'I will argue the other side.', 'accept_terms' => true, 'processing_consent' => true, 'public_consent' => true]];
+$competitor = $claim; $competitor['actor'] = $c['actor']; $competitor['input']['idempotency_key'] = Support::token();
+$results = simultaneous([$claim, $competitor]); $statuses = array_column($results, 'status'); sort($statuses);
+check($statuses === [200, 409], 'Simultaneous opponents produce one winner and one unavailable response');
+check((int) Db::one('SELECT COUNT(*) AS n FROM debate_participants WHERE debate_id = ?', [$open['debate_id']])['n'] === 2 && (int) Db::one("SELECT COUNT(*) AS n FROM debate_events WHERE debate_id = ? AND kind = 'joined'", [$open['debate_id']])['n'] === 1, 'Race creates exactly two participants and one joining event');
+$winner = $results[0]['status'] === 200 ? $claim : $competitor;
+$replays = simultaneous([$winner, $winner]);
+check($replays[0]['status'] === 200 && $replays[1]['status'] === 200 && $replays[0]['result']['idempotent_replay'] && $replays[1]['result']['idempotent_replay'], 'Simultaneous repeated claims return the original receipt');
 echo 'SUCCESS: ' . $checks . " concurrency checks using independent PHP processes.\n";

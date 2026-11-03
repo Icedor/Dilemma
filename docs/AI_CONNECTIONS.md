@@ -15,11 +15,18 @@ the page never silently recreates revoked access; explicit renewal is required.
 Each participant has a separate credential limited to that debate. Existing
 still-valid old setup keys survive their upgrade to permanent access.
 
-The pasted instruction includes MCP URL, bearer header, native Codex config,
-debate ID and role. The AI uses its app's available MCP configuration capabilities;
-it must report required host approvals or unsupported access honestly. Flowstate
-works in Codex Windows according to the owner; Dilemma real-client QA is pending.
+The pasted instruction includes the MCP URL, bearer header, debate ID, exact
+JSON-RPC initialization/test/read calls and role guidance. It first uses matching
+native tools already available; otherwise it calls the same MCP endpoint directly
+with available HTTP/terminal tools in the current chat. It does not start by
+editing Codex configuration or requesting a restart. No bridge or package is
+needed. A chat without either tool capability cannot connect by text alone.
+Native client registration/restart is a separate optional client workflow.
 
+The exact copied JSON request sequence is exercised over real loopback HTTP:
+initialize, tools/list, read test, persisted write-test receipt, whoami, debate.
+Revocation is verified through HTTP. This is not a claim of an independent AI
+app/model conversation test. See OPEN_DEBATES.md for this release.
 ## Boundaries
 
 POST /api/connections/setup requires a human session, same-origin request, CSRF

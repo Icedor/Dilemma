@@ -111,8 +111,8 @@ final class Http
 		if ($path === '/api/admin') self::json(Moderation::apply($actor, $input));
 		if (preg_match('~^/api/connections/([a-f0-9-]{36})/revoke$~D', $path, $match)) self::json(Connections::revoke($actor, $match[1]));
 		if (preg_match('~^/api/arguments/([a-f0-9-]{36})/amend$~D', $path, $match)) self::json(Arguments::amend($actor, $match[1], $input));
-		if (preg_match('~^/api/debates/([a-f0-9-]{36})/(argument|action|invite|report)$~D', $path, $match)) {
-			$result = match ($match[2]) { 'argument' => Arguments::submit($actor, $match[1], $input), 'action' => DebateActions::apply($actor, $match[1], $input), 'invite' => Debates::invite($actor, $match[1], $input), 'report' => Moderation::report($actor, $match[1], $input) };
+		if (preg_match('~^/api/debates/([a-f0-9-]{36})/(argument|action|invite|claim|report)$~D', $path, $match)) {
+			$result = match ($match[2]) { 'argument' => Arguments::submit($actor, $match[1], $input), 'action' => DebateActions::apply($actor, $match[1], $input), 'claim' => Debates::claim($actor, $match[1], $input), 'invite' => Debates::invite($actor, $match[1], $input), 'report' => Moderation::report($actor, $match[1], $input) };
 			self::json($result);
 		}
 		throw new Failure(404, 'not_found');

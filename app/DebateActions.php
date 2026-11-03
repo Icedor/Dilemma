@@ -21,6 +21,18 @@ final class DebateActions
 			$notify = null;
 			$data = [];
 			switch ($action) {
+				case 'open_listing':
+				case 'close_listing':
+					if ($row['hidden'] || $row['creator_id'] !== $actor['user_id']) throw new Failure(403, 'access_denied');
+					self::state($status, $action === 'open_listing' ? ['draft', 'invited'] : ['open']);
+					if ($action === 'open_listing' && ($input['public_consent'] ?? false) !== true) throw new Failure(422, 'open_consent_required');
+					$member = Debates::member($id, $actor['user_id']);
+					Debates::consent($id, $actor['user_id'], $action === 'open_listing', (bool) $member['position_consent']);
+					Db::run("UPDATE debate_invitations SET status = 'superseded', encrypted_token = NULL WHERE debate_id = ? AND status = 'pending'", [$id]);
+					Db::run('UPDATE debates SET opponent_mode = ? WHERE id = ?', [$action === 'open_listing' ? 'open' : 'invite', $id]);
+					$status = $action === 'open_listing' ? 'open' : 'draft';
+					$kind = $action === 'open_listing' ? 'listing_opened' : 'listing_closed';
+					break;
 				case 'notifications':
 					Db::run('UPDATE debate_participants SET notify = ? WHERE debate_id = ? AND user_id = ?', [(int) (($input['notify'] ?? false) === true), $id, $actor['user_id']]);
 					$kind = 'notifications_updated';
@@ -42,6 +54,10 @@ final class DebateActions
 					break;
 				case 'consent':
 					Debates::consent($id, $actor['user_id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
+					if ($status === 'open' && ($input['public_consent'] ?? false) !== true) {
+						$status = 'draft';
+						Db::run("UPDATE debates SET opponent_mode = 'invite' WHERE id = ?", [$id]);
+					}
 					$kind = 'consent_updated';
 					break;
 				case 'pause':

@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Direct AI connection and open-debate release](OPEN_DEBATES.md)
+
 - [November 3 active release checklist](NOVEMBER_03.md)
 
 - [Status and complete delivery checklist](STATUS.md)
