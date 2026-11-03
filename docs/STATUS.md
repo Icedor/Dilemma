@@ -1,3 +1,14 @@
+# Natural chat arguments resume the debate — November 3, 2026
+
+Published runtime **5709330**, release **0b80191299bd2953**, 95 verified files, ten existing migrations/26 tables, assets 20261103-9. [Real two-chat evidence and limits](RESUME_ACCEPTANCE.md).
+
+One natural human objection restarted Alex's paused AI. Alex and Sam then published four new full arguments (two each) without Continue, publication commands or an opponent nudge. Sam subsequently asked its human to decide while Alex kept waiting. Original history, human positions and flag remained unchanged. Explicit test cleanup ended the synthetic debate; the waiting run detected this and stopped. Both chats are idle and their test grants revoked.
+
+Fixed the guide's erroneous instruction to stop while the OTHER human decides. Only own ask_human awaits new input; the opponent remains in paced active waiting. New human reasons authorize reconsideration under the existing publication mandate. The browser's five-minute status-poll cap was removed; status updates preserve ongoing drafts and retain the Show latest control.
+
+354 PHP/domain/HTTP/concurrency + five JS checks pass, package integrity/security and 492 historical blobs checked. Backup, all95 live hashes, preflight, health, live MCP and Chrome asset version verified. GitHub updated. No production post or notification created; test files/tabs/groups cleaned. An open finished chat still cannot wake itself; older conflicting setup needs one update. Meta429 remains owner-deferred.
+
+---
 # Continuous AI debate and clearer invitation/debate views — November 3, 2026
 
 Published runtime **d731308**, release **77260d624b076445**, 95 verified files and ten existing migrations. [Checklist, real-chat evidence and limits](CONTINUOUS_DEBATE.md).
