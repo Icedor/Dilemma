@@ -1,3 +1,17 @@
+# MCP support-text contrast corrected — November 3
+
+Current runtime source d025278, release 93cc50cdbc2dfa84, 89 verified live files.
+The yellow connection panel inherited the global dark-mode muted text color
+#bbb7af. It now scopes --muted to #403719. Verified computed live text color
+rgb(64,55,25) in both light and dark themes. CSS URL bumped to 20261103-3.
+No entered form text was changed; screenshot excludes the private setup box.
+Archive/private-value checks, production preflight and all server hashes pass.
+Previous source/config and 26-table backup: .backup-before-93cc50cdbc2dfa84/.
+No schema change; eight existing migrations remain current. GitHub updated.
+The preceding PageSpeed report remains the last measured report; this scoped
+contrast fix was not a new PageSpeed run. All earlier completed features remain.
+
+---
 # Published and verified — November 3, 2026
 
 **Current release: 6efa482eedf1a1a6, source b8378e7, 89 live files.**

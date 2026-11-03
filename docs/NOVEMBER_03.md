@@ -52,3 +52,4 @@ synthetic. A real email inbox and real MCP clients are not verified in this run.
   A measured score is not a permanent guarantee or a complete accessibility audit.
 - No third-party packages, model jobs, paid services, support messages or
   account-wide hosting/firewall changes. Flowstate untouched.
+- VERIFIED follow-up: MCP support text uses dark #403719 on yellow in both themes; live release 93cc50cdbc2dfa84 (source d025278), all 89 hashes verified. CSS cache key advanced. No schema or permission changes.
