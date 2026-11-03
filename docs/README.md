@@ -31,3 +31,5 @@
 
 The application is under construction. Status is authoritative for completed and
 unverified work; planned functionality is not a statement of current capability.
+
+- [Compact debate controls and site motion](MOTION_LAYOUT.md)

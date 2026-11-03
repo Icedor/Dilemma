@@ -1,4 +1,4 @@
-@layer reset, base, components, pages, responsive;
+@layer reset, base, components, pages, responsive, motion;
 
 @layer reset {
 	*, *::before, *::after { box-sizing: border-box; }
@@ -620,4 +620,55 @@
 @layer pages {
 	.debate-ai #connection-result { margin-top: var(--space-6); }
 	.viewpoints .stance-pair:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+}
+
+@layer pages {
+	/* Keep secondary actions with the argument column, independent of sidebar height. */
+	.debate-management { margin-top: var(--space-8); }
+	.debate-management:empty { display: none; }
+	.debate-main > .compose { margin-bottom: 0; border-bottom: 0; }
+}
+
+@layer motion {
+	:root {
+		--motion-fast: 160ms;
+		--motion-panel: 260ms;
+		--motion-ease: cubic-bezier(.22, .68, 0, 1);
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		/* Native page navigation: no routing interception or delayed content. */
+		@view-transition { navigation: auto; }
+		::view-transition-old(root) { animation: var(--motion-fast) ease-out both page-out; }
+		::view-transition-new(root) { animation: 220ms var(--motion-ease) both page-in; }
+		@keyframes page-out { to { opacity: 0; } }
+		@keyframes page-in { from { opacity: 0; } }
+		@keyframes content-in { from { opacity: 0; translate: 0 .25rem; } }
+		@keyframes surface-in { from { opacity: 0; scale: .985; translate: 0 .375rem; } }
+		.button, .text-button, .dialog-close {
+			transition: background-color var(--motion-fast) ease, color var(--motion-fast) ease, border-color var(--motion-fast) ease, opacity var(--motion-fast) ease, translate var(--motion-fast) var(--motion-ease);
+		}
+		a, summary { transition: color var(--motion-fast) ease, text-decoration-color var(--motion-fast) ease, background-color var(--motion-fast) ease; }
+		input, textarea, select { transition: border-color var(--motion-fast) ease, background-color var(--motion-fast) ease; }
+		.debate-row .row-arrow { transition: translate var(--motion-fast) var(--motion-ease); }
+		@media (hover: hover) and (pointer: fine) {
+			.button:not(:disabled):hover { translate: 0 -.125rem; }
+			.debate-row:has(a:hover) .row-arrow { translate: .25rem 0; }
+		}
+		.button:not(:disabled):active { translate: 0 .0625rem; }
+		.account-menu[open] nav, dialog[open] { animation: surface-in 220ms var(--motion-ease) both; }
+		dialog[open]::backdrop { animation: page-in 220ms ease both; }
+		.toast:not(:empty), .form-feedback:not(:empty), .invitation-result:not([hidden]), .argument-body:not(:empty) { animation: content-in 200ms var(--motion-ease) both; }
+		/* Native details retain keyboard, focus, search and no-JavaScript behavior. */
+		@supports (interpolate-size: allow-keywords) and selector(details::details-content) and (transition-behavior: allow-discrete) {
+			details:not(.account-menu) { interpolate-size: allow-keywords; }
+			details:not(.account-menu)::details-content {
+				block-size: 0;
+				opacity: 0;
+				overflow: clip;
+				overflow-clip-margin: .5rem;
+				transition: block-size var(--motion-panel) var(--motion-ease), opacity var(--motion-fast) ease, content-visibility var(--motion-panel) allow-discrete;
+			}
+			details:not(.account-menu)[open]::details-content { block-size: auto; opacity: 1; }
+		}
+	}
 }
