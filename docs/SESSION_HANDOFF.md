@@ -1,3 +1,18 @@
+# Latest handoff — automatic live arguments and About, 2026-11-03
+
+Owner confirmed Drive ready and publication. Runtime **36f7c43** is pushed and live as **281f062862a14fac**, assets **20261103-11**,96 files, ten existing migrations/26 tables. Full checklist/evidence/limits: LIVE_ARGUMENTS.md. No pending runtime change.
+
+Live browser polls /api/debates/{id}/live?after={ordinal} every20 seconds while visible. New cards share SSR argument-card.php, preserve existing DOM/form state and anchor the reader. Cursor starts at total message_count, with a divider for arrivals while viewing older pagination. Status/counters/publish availability/unused revisions update; existing request fingerprints keep retry identity. Server access is rechecked;20-card response bound and120/min per-reader rate guard. No automatic retry on failure. Try again does not reload. Previously loaded full-body edits and historical position snapshots are outside this new-post stream; don't claim every historical field refreshes live.
+
+About uses existing warm yellow/red textured assets around dark editorial rows; mobile numbers stack so words remain intact.119 PHP/domain/render/continuation checks, six JS and three package checks pass. 518 historical blobs and release private values/keys scanned; final CSS refinement package rescanned. Live hashes/preflight/health and authenticated Chrome poll verified; no production error. No production argument, invitation, settings change or notification created.
+
+Isolated UI fixtures:9b13737f-45a5-49d2-b00a-52bb91867982 (four posts) and b07aa32b-1f4a-4776-9ab8-91f7f22427b0 (three posts) are ended. Private var/live-ui-proof.json records bodies. Helpers var/live-ui.php, var/live-empty.php, var/cleanup-live-ui.php are already used; do not rerun blindly. No new credentials. Test drafts cleared; first-post draft successfully submitted only in the local fixture. Preexisting preview8787 stays running; previous real-chat grants remain revoked/idle.
+
+Archive var/releases/dilemma-281f062862a14fac.zip; SHA256 ff86f382444ac2e03a0d1ca2e5cb47034629d45e325e03ff827dc31b510d3c56. Backup /home/superpeppse/dilemma.se/.backup-before-281f062862a14fac/. var/stage-live-arguments.php and var/deploy-live-arguments.php already used; do not rerun. Earlier aeccc archive was not deployed. Source file count increased95→96 for the shared card template. No schema or firewall changes. No hosting denial/401/403/429; Meta429 still owner-deferred.
+
+Original user tab138435717 left at the user's own page; own tab/group gone. Viewport, media and cache emulation reset. Local locale restored toSV; production user's EN preference untouched. Git database stays outside Drive. Final documentation commit follows; release own lock only after remote equality and clean tree.
+
+---
 # Latest handoff — compact controls and motion, 2026-11-03
 
 Owner confirmed Drive ready and live publication. Runtime **3fd5406** is pushed and deployed as **df80f05326bb8b12**, assets **20261103-10**, 95 verified files, ten existing migrations/26 tables. Details/checklist: MOTION_LAYOUT.md. No remaining runtime changes.

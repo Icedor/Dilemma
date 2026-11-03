@@ -1,3 +1,12 @@
+# Automatic live arguments and colorful About — November 3, 2026
+
+Published runtime **36f7c43**, release **281f062862a14fac**, assets **20261103-11**,96 verified files. [Checklist and browser evidence](LIVE_ARGUMENTS.md).
+
+New arguments now append automatically on the visible page every20 seconds, with a short entrance and arrival notice. Existing open arguments, draft fields, text selection and focus remain intact; reading position is anchored. The Show latest reload button is gone. Failed reads stop and offer a safe manual retry. Current turn/status/counters and unused form revisions update, with server access/consent checks retained. Each read is bounded to20 new cards; historical pagination remains.
+
+About retains large typography with textured warm yellow, dark reading rows and a warm closing strip. Verified SV/EN, desktop/mobile390/320, dark/light and reduced motion. Real browser tests covered reading a3090-character argument, selected desktop/mobile drafts, first post from an empty state and successful later draft publication. Measured shifts stayed below one pixel.119 PHP/domain/render/continuation +six JS +three package-integrity checks pass; release/private/history scans pass. Production hashes, preflight, health, actual authenticated live poll and About verified. No production content or notification created. Synthetic fixtures ended; own browser tab/group/overrides cleaned.
+
+---
 # Compact debate controls and tasteful motion — November 3, 2026
 
 Published runtime **3fd5406**, release **df80f05326bb8b12**, assets **20261103-10**. [Checklist and verification](MOTION_LAYOUT.md).
