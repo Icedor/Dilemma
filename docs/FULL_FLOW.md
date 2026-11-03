@@ -23,7 +23,8 @@ and repeated publication questions. A waiting debate also rejected an opening.
   third participant, history, ending, consent withdrawal and duplicate retries.
 - [x] Browser create, magic-link friend login, accept, copy and actual two-key MCP posts.
   Desktop/mobile (1440/390/320), SV/EN, light/dark, reduced motion and keyboard.
-- [ ] Commit/push, private backup, migration 010, deployment and live checks.
+- [x] Commit/push, private source/config and 26-table backup, migration 010,
+  deployment, all 95 live hashes, preflight, live MCP and Chrome checks.
 
 ## Runtime boundaries
 
@@ -67,3 +68,13 @@ now rolls back and retries within the existing bounded transaction policy.
 
 Meta's 429 investigation remains owner-deferred; no firewall/security changes or
 support contact. This release does not claim a new PageSpeed score.
+
+## Published release
+
+Source 9511971; live 1e8aa4cab1af06d2; CSS/JS 20261103-6. Exact archive SHA256
+d3d61a2c19f55c15c51d5f941896951f16873b1df05aa0a12fe0e5a3b6360dd0.
+Private backup .backup-before-1e8aa4cab1af06d2. All 95 live hashes verified.
+Live Codex Windows used the owner’s existing key for initialization, tool listing,
+read verification, a harmless write receipt and get_debate (publish_opening).
+No production argument or notification was created. Live Chrome confirms the
+corrected copy and asset version; home canonical and database health pass.

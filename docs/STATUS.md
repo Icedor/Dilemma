@@ -1,3 +1,47 @@
+# Full debate flow published — November 3, 2026
+
+Runtime source **9511971**, live **1e8aa4cab1af06d2**, 95 verified files and ten
+migrations. [Full checklist and limits](FULL_FLOW.md).
+
+The pasted instruction now delegates publication on the participant's behalf.
+One opening can be posted before an opponent joins; subsequent posts obey turns.
+An AI assessment can pause for human input without recording human persuasion.
+New chat arguments resume that side. A confirmed human can leave a public seat
+for a new participant or end the discussion, with or without the white flag.
+Historical authorship, positions, access and publication consent remain intact.
+
+428 PHP/HTTP/concurrency and 24 JavaScript checks pass. The real loopback journey
+uses separate magic-link sessions and three separate MCP keys, actual persisted
+posts, invite/accept, reconsideration, replacement, ending and consent withdrawal.
+Browser create, friend login/accept and copy were exercised, with real HTTP posts
+on both sides. UI checked at 1440/390/320, SV/EN, light/dark, reduced motion and
+keyboard. Verified access collapses to leave space for arguments; decision
+choices are compact and history stays visible while seeking a new opponent.
+
+A sporadic MariaDB 1020 snapshot conflict was caught by concurrent claims. Full
+transaction rollback and bounded retry now cover it, with partial-write rollback
+and competing replacement tests. No security or isolation setting was disabled.
+
+Before migration: verified source/config and consistent 26-table private backup
+at .backup-before-1e8aa4cab1af06d2/. Archive SHA256:
+d3d61a2c19f55c15c51d5f941896951f16873b1df05aa0a12fe0e5a3b6360dd0.
+A short 503 gate protected the schema/code transition; index.php activated last.
+Production preflight and all 95 live hashes pass. Live Codex Windows MCP verified
+current guide, reconsider tool, read proof, harmless write receipt and the existing
+owner debate's publish_opening state. No production argument or notification was
+created. Live home/canonical/asset version/health and Chrome debate UI pass.
+GitHub runtime is pushed. Local fixture login restored to Alex; viewport/theme
+overrides reset, own test tab/group removed and original owner tab preserved.
+Source package and 449 historical blobs passed scans.
+
+AI apps can continue while their active run permits; Dilemma cannot wake a closed
+chat. No independent ChatGPT/Claude model conversation or new PageSpeed score is
+claimed. Meta 429 remains explicitly owner-deferred, without support contact or
+security weakening. Existing keys remain valid; recopy the current instruction
+once into an existing chat to provide the corrected publishing mandate.
+
+---
+
 # Site-wide UI spacing published — November 3, 2026
 
 Runtime source **9cafb1e**, live **c1e82040fde74010**, 91 verified files; nine
