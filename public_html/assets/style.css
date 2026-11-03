@@ -280,7 +280,7 @@
 	.connect-page { max-width: 64rem; margin: auto; padding: 3.5rem var(--space); }
 	.connect-page h1 { font-size: clamp(2.5rem,5vw,4.5rem); }
 	.connect-page .page-heading { margin-bottom: 2rem; }
-	.connect-start { padding: clamp(1.5rem,4vw,3rem); background: #ffdb24 url('/assets/gradient-yellow-v2.webp?v=20261102-6') center/cover; color: #191918; }
+	.connect-start { --muted: #403719; padding: clamp(1.5rem,4vw,3rem); background: #ffdb24 url('/assets/gradient-yellow-v2.webp?v=20261102-6') center/cover; color: #191918; }
 	.connect-start form { margin: 0; }
 	.connect-start h2 { font-size: clamp(1.8rem,3vw,2.7rem); margin-bottom: 1rem; }
 	.connect-start .button { background: #191918; color: #fffdf7; border-color: #191918; }
