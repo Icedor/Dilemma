@@ -24,6 +24,13 @@ final class I18n
 	{
 		$index = self::$locale === 'en' ? 1 : 0;
 		return array_map(static fn (array $pair): string => $pair[$index], [
+			'ai_wait_start' => ['Vänta på svar i 2 timmar', 'Wait for replies for 2 hours'],
+			'ai_wait_stop' => ['Stäng av väntan', 'Stop waiting'],
+			'ai_wait_note' => ['Valfritt. Kollar var 15:e minut och använder din AI-apps kvot. Annars ber du bara din AI fortsätta när du fått svar.', 'Optional. Checks every 15 minutes and uses your AI app’s allowance. Or just ask your AI to continue when a reply arrives.'],
+			'ai_wait_ready' => ['Valt. Kopiera instruktionen till din AI för att börja vänta.', 'Selected. Copy the instructions into your AI to start waiting.'],
+			'ai_wait_off' => ['Väntan är avstängd. En pågående AI ser det vid nästa koll. Du kan stoppa den direkt i appen.', 'Waiting is off. A running AI sees this at its next check. You can stop it immediately in the app.'],
+			'ai_wait_until' => ['Väntan vald till', 'Waiting selected until'],
+			'ai_wait_expired' => ['Tiden har gått ut. Du kan fortsätta manuellt i din AI-app.', 'Time is up. You can continue manually in your AI app.'],
 			'awaiting_human' => ['Väntar på ett beslut', 'Waiting for a decision'],
 			'flow_publish_opening' => ['Redo för ditt första argument', 'Ready for your opening argument'],
 			'flow_publish_argument' => ['Din sida har ordet', 'Your side has the floor'],

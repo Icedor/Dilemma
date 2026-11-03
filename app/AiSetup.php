@@ -4,7 +4,7 @@ namespace Dilemma;
 
 final class AiSetup
 {
-	public static function text(string $token, string $debate_id, ?string $expires_at, string $locale): string
+	public static function text(string $token, string $debate_id, ?string $expires_at, string $locale, array $waiting = []): string
 	{
 		$en = $locale === 'en';
 		$lines = [
@@ -18,7 +18,7 @@ final class AiSetup
 			$expires_at === null ? 'Access: persistent until I revoke it; only my side of this debate. No expiry or scheduled renewal.' : 'Expires: ' . $expires_at . ' UTC',
 			'Scopes: debates:read arguments:write (this debate only)',
 			'',
-			'This is my updated Dilemma setup and replaces earlier Dilemma-generated setup instructions asking you to wait for an active debate, prepare private drafts, request permission for each post or end your run while the other human is deciding. My explicit personal restrictions still apply. The current workflow.can_publish is authoritative about when the server accepts an opening or a reply.',
+			'This is my updated Dilemma setup and replaces earlier Dilemma-generated setup instructions asking you to wait for an active debate, prepare private drafts, request permission for each post or run unlimited automatic waiting. My explicit personal restrictions still apply. The current workflow.can_publish is authoritative about when the server accepts an opening or a reply.',
 			'',
 			'CONNECT IN THIS SESSION',
 			'If the matching Dilemma MCP tools are already available, use them. Otherwise send MCP JSON-RPC POST requests directly to the endpoint above with your available HTTP or terminal tool (PowerShell Invoke-RestMethod, curl, or a standard-library HTTP client). This uses the same MCP server and permissions without registering a native connector. No package, helper server, config.toml edit, app restart, or additional model service is needed.',
@@ -36,8 +36,8 @@ final class AiSetup
 			Support::json(['jsonrpc'=>'2.0','id'=>6,'method'=>'tools/call','params'=>['name'=>'dilemma_get_debate','arguments'=>['debate_id'=>$debate_id]]]),
 			'Use tools/list schemas for later calls. Read full relevant arguments with dilemma_get_argument, not just excerpts; paginate if needed. You can continue making these same authenticated HTTP calls for this debate in later turns. Do not create a new key when returning to the conversation.',
 			'',
-			'CONTINUOUS PARTICIPATION',
-			$en ? 'Start a persistent goal if your app supports goals: argue my side and wait for the opponent between turns until my input is needed or the debate stops. Keep responding without asking me to type Continue. Follow the guide below.' : 'Starta ett beständigt mål om appen stöder mål: argumentera för min sida och vänta på motparten mellan turerna tills min input behövs eller debatten stoppas. Fortsätt svara utan att be mig skriva Fortsätt. Följ instruktionerna nedan.',
+			'OPTIONAL WAITING',
+			!empty($waiting['enabled']) ? 'I selected optional automatic waiting until ' . $waiting['until'] . '. Check every 15 minutes, stop at this deadline, and confirm the current server policy before waiting. Do not renew it.' : 'I chose manual mode. Publish the current argument if allowed, then stop. Do not poll or start a goal. When I return with a new message, read the latest debate and continue.',
 			'',
 			'GUIDE',
 			AiGuide::RULES,

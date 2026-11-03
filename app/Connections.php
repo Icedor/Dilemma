@@ -30,7 +30,8 @@ final class Connections
 	private static function setup_result(array $row): array
 	{
 		$revoked = $row['revoked_at'] !== null;
-		return ['connection_id' => $row['connection_id'], 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale())];
+		$waiting = AiWaiting::policy(Debates::member($row['debate_id'], $row['user_id']));
+		return ['connection_id' => $row['connection_id'], 'waiting' => $waiting, 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale(), $waiting)];
 	}
 
 	public static function setup(array $actor, array $input): array
@@ -50,7 +51,7 @@ final class Connections
 			Db::run("INSERT INTO mcp_tokens (token_hash, connection_id, kind, resource, expires_at) VALUES (?, ?, 'access', ?, NULL)", [Support::hash($token), $connection_id, Config::url('/mcp')]);
 			if ($legacy) Db::run("UPDATE mcp_tokens SET expires_at = NULL WHERE connection_id = ? AND kind = 'access' AND client_id IS NULL AND expires_at > UTC_TIMESTAMP()", [$connection_id]);
 			Db::run('INSERT INTO debate_ai_access (debate_id, user_id, connection_id, encrypted_token, created_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE connection_id = VALUES(connection_id), encrypted_token = VALUES(encrypted_token)', [$debate_id, $actor['user_id'], $connection_id, Support::seal($token), Support::now()]);
-			return self::setup_result(['connection_id' => $connection_id, 'debate_id' => $debate_id, 'encrypted_token' => Support::seal($token), 'revoked_at' => null]);
+			return self::setup_result(['user_id' => $actor['user_id'], 'connection_id' => $connection_id, 'debate_id' => $debate_id, 'encrypted_token' => Support::seal($token), 'revoked_at' => null]);
 		});
 	}
 
@@ -86,6 +87,7 @@ final class Connections
 			$connection = Db::one('SELECT id FROM mcp_connections WHERE id = ? AND user_id = ? FOR UPDATE', [$id, $actor['user_id']]);
 			if (!$connection) throw new Failure(404, 'not_found');
 			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?) WHERE id = ?', [Support::now(), $id]);
+			Db::run('UPDATE debate_participants p JOIN debate_ai_access a ON a.debate_id = p.debate_id AND a.user_id = p.user_id SET p.ai_wait_until = NULL WHERE a.connection_id = ?', [$id]);
 			Db::run('UPDATE debate_ai_access SET encrypted_token = NULL WHERE connection_id = ?', [$id]);
 			return ['revoked' => true];
 		});

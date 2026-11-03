@@ -10,6 +10,11 @@ $revoked = $setup['revoked'] ?? false;
 <p id="connection-copy-status" role="status" aria-live="polite"><?= !$setup ? $t('working') : ($revoked ? $t('setup_removed') : '') ?></p>
 <div id="connection-result" <?= !$setup || $revoked ? 'hidden' : '' ?>>
 <div class="actions"><button class="button" type="button" data-copy-target="ai-setup"><?= $t('copy_setup') ?></button></div>
+<div class="ai-wait-control">
+<button type="button" class="text-button" id="ai-wait-toggle" aria-pressed="<?= !empty($setup['waiting']['enabled']) ? 'true' : 'false' ?>" data-until="<?= $e($setup['waiting']['until'] ?? '') ?>"><?= $t(!empty($setup['waiting']['enabled']) ? 'ai_wait_stop' : 'ai_wait_start') ?></button>
+<p id="ai-wait-status" role="status" aria-live="polite"></p>
+<p class="ai-wait-note"><?= $t('ai_wait_note') ?></p>
+</div>
 <p class="connect-secret-note"><?= $t('setup_update_hint') ?></p>
 <details class="setup-text-disclosure"><summary><?= $t('show_setup') ?></summary>
 <label class="visually-hidden" for="ai-setup"><?= $t('copy_setup') ?></label>

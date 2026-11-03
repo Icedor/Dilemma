@@ -47,8 +47,8 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-2">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script src="/assets/language.js?v=20261103-2"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261103-11">
-	<script type="module" src="/assets/app.js?v=20261103-11"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261103-12">
+	<script type="module" src="/assets/app.js?v=20261103-12"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
@@ -68,7 +68,7 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 	<?php if (!Config::production()): ?><p class="notice preview-notice"><?= $t('local_preview') ?></p><?php endif; ?>
 	<main id="main"><?= $content ?></main>
 	</div>
-	<footer class="site-footer"><a class="wordmark" href="/">dilemma</a><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $t('privacy') ?><span class="visually-hidden"> — <?= $t('opens_new_tab') ?></span></a><a href="/terms" target="_blank" rel="noopener noreferrer"><?= $t('terms') ?><span class="visually-hidden"> — <?= $t('opens_new_tab') ?></span></a></nav></footer>
+	<footer class="site-footer"><div class="footer-brand"><a class="wordmark" href="/">dilemma</a><a class="icey_made_by" href="https://icey.se" target="_blank" rel="noopener noreferrer">By Icey</a></div><nav><a href="/about"><?= $t('about') ?></a><a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $t('privacy') ?><span class="visually-hidden"> — <?= $t('opens_new_tab') ?></span></a><a href="/terms" target="_blank" rel="noopener noreferrer"><?= $t('terms') ?><span class="visually-hidden"> — <?= $t('opens_new_tab') ?></span></a></nav></footer>
 	<div id="toast" class="toast" role="status" aria-live="polite"></div>
 	<template id="translations"><?= $e(Support::json(I18n::all())) ?></template>
 </body>

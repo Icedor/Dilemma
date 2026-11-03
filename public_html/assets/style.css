@@ -705,3 +705,13 @@
 		.about-page .step-number { font-size: 2.5rem; }
 	}
 }
+
+@layer components {
+	.footer-brand { display: grid; justify-items: start; gap: var(--space-2); }
+	.icey_made_by { font-size: .9rem; text-decoration: none; color: inherit; line-height: 1.5; }
+	.icey_made_by:hover { text-decoration: underline; text-underline-offset: .2em; }
+	.ai-wait-control { display: grid; justify-items: start; gap: var(--space-2); margin-block: var(--space-6); }
+	.ai-wait-control .text-button { text-align: start; min-height: var(--touch-target); }
+	.ai-wait-control p { margin: 0; font-size: .875rem; line-height: 1.5; }
+	.ai-wait-control p:empty { display: none; }
+}

@@ -21,6 +21,7 @@ check(ReadModel::debate($id, $read['actor'])['workflow']['next_action'] === 'rea
 $input = ['debate_id' => $id, 'revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token(), 'body' => 'The opposing position warrants a decision.', 'outcome' => 'needs_human'];
 rejects(fn () => ToolRegistry::invoke($ta['actor'], 'dilemma_submit_argument', (object) array_replace($input, ['outcome' => 'flag'])), 422, 'Unknown outcome cannot masquerade as a human decision');
 Arguments::submit($ta['actor'], $id, $input);
+Db::run('UPDATE debate_participants SET ai_wait_until = ? WHERE debate_id = ?', [gmdate('Y-m-d H:i:s', time() + 7200), $id]);
 $own_wait = ReadModel::debate($id, $ta['actor'])['workflow'];
 $other_wait = ReadModel::debate($id, $tb['actor'])['workflow'];
 check($own_wait['next_action'] === 'ask_human' && $own_wait['can_reconsider'] && !$own_wait['keep_waiting'] && !$own_wait['can_publish'], 'Own AI waits for fresh human input without self-resuming or publishing');

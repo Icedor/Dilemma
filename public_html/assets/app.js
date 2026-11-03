@@ -196,11 +196,31 @@ function clearPrivateStorage() {
 	try { for (const key of Object.keys(sessionStorage)) if (key.startsWith('dilemma:')) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
 }
 
+let waitingExpiry;
+function renderWaiting(waiting = {}) {
+	const button = document.querySelector('#ai-wait-toggle');
+	if (!button) return;
+	clearTimeout(waitingExpiry);
+	const until = Date.parse(waiting.until || '');
+	const enabled = Boolean(waiting.enabled && until > Date.now());
+	button.setAttribute('aria-pressed', String(enabled));
+	button.dataset.until = enabled ? waiting.until : '';
+	button.textContent = t(enabled ? 'ai_wait_stop' : 'ai_wait_start');
+	document.querySelector('#ai-wait-status').textContent = enabled ? t('ai_wait_until') + ' ' + new Intl.DateTimeFormat(document.documentElement.lang, { hour: '2-digit', minute: '2-digit' }).format(until) + '.' : '';
+	if (enabled) waitingExpiry = setTimeout(() => {
+		renderWaiting();
+		document.querySelector('#ai-wait-status').textContent = t('ai_wait_expired');
+	}, Math.min(until - Date.now() + 50, 7200050));
+}
+const waitingButton = document.querySelector('#ai-wait-toggle');
+if (waitingButton) renderWaiting({ enabled: waitingButton.getAttribute('aria-pressed') === 'true', until: waitingButton.dataset.until });
+
 function renderSetup(data) {
 	const section = document.querySelector('[data-debate-ai]');
 	const target = document.querySelector('[data-private-setup]');
 	if (!section || !target) return;
 	target.value = data.setup_text || '';
+	renderWaiting(data.waiting);
 	document.querySelector('#connection-result').hidden = data.revoked || !target.value;
 	document.querySelector('#connection-copy-status').textContent = data.revoked ? t('setup_removed') : '';
 	const revoke = document.querySelector('#revoke-new-connection');
@@ -238,6 +258,17 @@ window.addEventListener('pageshow', event => { if (event.persisted) loadDebateSe
 if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDebateSetup();
 
 document.addEventListener('click', async event => {
+	const waitToggle = event.target.closest('#ai-wait-toggle');
+	if (waitToggle && !waitToggle.disabled) {
+		const enabled = waitToggle.getAttribute('aria-pressed') !== 'true';
+		waitToggle.disabled = true;
+		try {
+			const data = await request('/api/connections/waiting', { debate_id: document.querySelector('[data-debate-ai]').dataset.debateAi, enabled });
+			renderSetup(data);
+			document.querySelector('#connection-copy-status').textContent = t(enabled ? 'ai_wait_ready' : 'ai_wait_off');
+		} catch (error) { document.querySelector('#connection-copy-status').textContent = error.message; }
+		finally { waitToggle.disabled = false; }
+	}
 	const share = event.target.closest('[data-share]');
 	if (share) {
 		try {
@@ -579,3 +610,12 @@ const savedScroll = storageGet(`dilemma:scroll:${location.pathname}`);
 if (savedScroll !== null) { storageRemove(`dilemma:scroll:${location.pathname}`); requestAnimationFrame(() => scrollTo(0, Number(savedScroll) || 0)); }
 
 if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261102-3').then(module => module.setup({ request, t })).catch(() => {});
+
+// Exact cross-browser console credit from Secret.icey.se.
+console.log('%c' + String.raw`██╗ ██████╗███████╗██╗   ██╗
+██║██╔════╝██╔════╝╚██╗ ██╔╝
+██║██║     █████╗   ╚████╔╝
+██║██║     ██╔══╝    ╚██╔╝
+██║╚██████╗███████╗   ██║
+╚═╝ ╚═════╝╚══════╝   ╚═╝
+Icey.se`, 'font-family:Menlo,Consolas,monospace;font-size:11px;line-height:1.2;white-space:pre');

@@ -118,6 +118,7 @@ final class Http
 		if ($path === '/api/profile') self::json(Accounts::update($actor, $input));
 		if ($path === '/api/delete') { $result = Accounts::delete($actor, $input); Auth::cookie(''); self::json($result); }
 		if ($path === '/api/connections') self::json(Connections::create($actor, $input), 201);
+		if ($path === '/api/connections/waiting') self::json(AiWaiting::update($actor, $input));
 		if ($path === '/api/connections/setup') self::json(Connections::setup($actor, $input), 201);
 		if ($path === '/api/oauth/authorize') self::json(OAuth::authorize($actor, $input));
 		if ($path === '/api/admin') self::json(Moderation::apply($actor, $input));

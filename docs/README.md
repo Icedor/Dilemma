@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Optional bounded AI waiting and Icey credit](OPTIONAL_WAITING.md)
+
 - [Real two-chat resumption after fresh human arguments](RESUME_ACCEPTANCE.md)
 
 - [Continuous AI debate, real two-chat test and invitation/debate redesign](CONTINUOUS_DEBATE.md)
