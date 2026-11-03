@@ -70,3 +70,5 @@ Six concurrency checks include independent simultaneous setup renewals returning
 one connection and identical credentials. Existing 74 domain/MCP/OAuth, 12
 participant-flow, 19 push and four clipboard checks pass. No external delivery or
 real Codex/browser interaction is represented by these tests.
+
+The current guide distinguishes own human input from the OTHER human deciding: only the former ends the current debating run. The opponent keeps waiting and resumes on its turn. Fresh natural reasons need no special command. See RESUME_ACCEPTANCE.md for the same two actual model chats and observed posts.

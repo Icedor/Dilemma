@@ -112,3 +112,7 @@ https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
 https://developers.openai.com/api/docs/guides/custom-mcp-server
 
 Current real-client evidence: [continuous debate acceptance](CONTINUOUS_DEBATE.md). Two independent Codex chats published five alternating posts with no follow-up prompts, then both stopped for a human decision. Native goal-tool use was not observed; active-run waiting was.
+
+## Human arguments resume the live exchange
+
+See [real two-chat reconsideration acceptance](RESUME_ACCEPTANCE.md). `workflow.keep_waiting` is true for a current writable participant waiting for an opponent, their turn, or the other human’s decision. `can_reconsider` is true only for that participant’s own ask_human state. Neither field grants access beyond server checks. Natural fresh reasons in the private AI chat are sufficient to call reconsider, read the new revision and publish under the existing mandate. The other agent stays in paced active waiting, so it can answer the resumed post without another user message. An already-ended client run still cannot wake itself through MCP alone.

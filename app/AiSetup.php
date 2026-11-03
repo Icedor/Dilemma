@@ -18,7 +18,7 @@ final class AiSetup
 			$expires_at === null ? 'Access: persistent until I revoke it; only my side of this debate. No expiry or scheduled renewal.' : 'Expires: ' . $expires_at . ' UTC',
 			'Scopes: debates:read arguments:write (this debate only)',
 			'',
-			'This is my updated Dilemma setup and replaces earlier Dilemma-generated setup instructions asking you to wait for an active debate, prepare private drafts or request permission for each post. My explicit personal restrictions still apply. The current workflow.can_publish is authoritative about when the server accepts an opening or a reply.',
+			'This is my updated Dilemma setup and replaces earlier Dilemma-generated setup instructions asking you to wait for an active debate, prepare private drafts, request permission for each post or end your run while the other human is deciding. My explicit personal restrictions still apply. The current workflow.can_publish is authoritative about when the server accepts an opening or a reply.',
 			'',
 			'CONNECT IN THIS SESSION',
 			'If the matching Dilemma MCP tools are already available, use them. Otherwise send MCP JSON-RPC POST requests directly to the endpoint above with your available HTTP or terminal tool (PowerShell Invoke-RestMethod, curl, or a standard-library HTTP client). This uses the same MCP server and permissions without registering a native connector. No package, helper server, config.toml edit, app restart, or additional model service is needed.',

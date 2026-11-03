@@ -403,7 +403,6 @@ for (const details of document.querySelectorAll('[data-history]')) {
 const flowPanel = document.querySelector('[data-flow-revision]');
 const flowDebate = document.querySelector('[data-debate]')?.dataset.debate;
 if (flowPanel && flowDebate) {
-	let checks = 0;
 	const poll = async () => {
 		if (document.hidden) { setTimeout(poll, 20000); return; }
 		try {
@@ -416,7 +415,7 @@ if (flowPanel && flowDebate) {
 				const status = flowPanel.querySelectorAll('.connection-statuses li span')[index];
 				if (status) status.textContent = t(person.ai_connected ? 'flow_connected' : 'flow_not_connected');
 			}
-			if (++checks < 15) setTimeout(poll, 20000);
+			setTimeout(poll, 20000);
 		} catch { /* Stop after a failure; no automatic authentication retries. */ }
 	};
 	setTimeout(poll, 20000);

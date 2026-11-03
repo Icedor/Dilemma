@@ -81,6 +81,8 @@ flow_publish($mb, $fid, 'Quiet access may work, but the paths closest to homes s
 flow_publish($ma, $fid, 'Unrestricted access is too broad. I cannot defend keeping every path open regardless of repeated disturbance; I need my participant’s input.', 'needs_human');
 $state = flow_ok(flow_tool($ma, 'get_debate', ['debate_id' => $fid]), 'read human decision state');
 check($state['status'] === 'awaiting_human' && $state['workflow']['next_action'] === 'ask_human' && !$state['flag_user_id'] && count($state['positions']) === 2, 'Full flow: AI assessment does not change human opinion or flag');
+$opponent_pause = flow_ok(flow_tool($mb, 'get_debate', ['debate_id' => $fid]), 'read opponent human-decision wait');
+check($opponent_pause['workflow']['keep_waiting'] && !$opponent_pause['workflow']['can_reconsider'] && !$state['workflow']['keep_waiting'] && $state['workflow']['can_reconsider'], 'Full flow: only the side needing new human reasons stops; opponent keeps waiting');
 $wrong = flow_tool($mb, 'reconsider', ['debate_id' => $fid, 'revision' => (int) $state['revision'], 'idempotency_key' => Support::token()]);
 check(!empty($wrong['json']['result']['isError']), 'Full flow: opponent cannot resume the other side');
 $decision_page = http_request('/debate/' . $fid, null, [], $fa['cookie']);

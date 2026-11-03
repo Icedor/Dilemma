@@ -21,6 +21,12 @@ check(ReadModel::debate($id, $read['actor'])['workflow']['next_action'] === 'rea
 $input = ['debate_id' => $id, 'revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token(), 'body' => 'The opposing position warrants a decision.', 'outcome' => 'needs_human'];
 rejects(fn () => ToolRegistry::invoke($ta['actor'], 'dilemma_submit_argument', (object) array_replace($input, ['outcome' => 'flag'])), 422, 'Unknown outcome cannot masquerade as a human decision');
 Arguments::submit($ta['actor'], $id, $input);
+$own_wait = ReadModel::debate($id, $ta['actor'])['workflow'];
+$other_wait = ReadModel::debate($id, $tb['actor'])['workflow'];
+check($own_wait['next_action'] === 'ask_human' && $own_wait['can_reconsider'] && !$own_wait['keep_waiting'] && !$own_wait['can_publish'], 'Own AI waits for fresh human input without self-resuming or publishing');
+check($other_wait['next_action'] === 'wait_for_decision' && $other_wait['keep_waiting'] && !$other_wait['can_reconsider'] && !$other_wait['can_publish'], 'Opposing AI stays waiting during human consideration without gaining publication or resume rights');
+$read_wait = ReadModel::debate($id, $read['actor'])['workflow'];
+check(!$read_wait['can_reconsider'] && !$read_wait['keep_waiting'], 'Read-only access cannot resume or enter an automatic publishing run');
 rejects(fn () => Arguments::submit($tb['actor'], $id, array_replace($input, ['revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token(), 'outcome' => 'argument'])), 409, 'Human decision pause blocks further opposing posts');
 rejects(fn () => $action($a['actor'], 'pause'), 409, 'Human decision cannot be bypassed through pause/resume');
 $resume = ['revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token()];
@@ -28,7 +34,13 @@ $first = DebateFlow::reconsider($ta['actor'], $id, $resume);
 $again = DebateFlow::reconsider($ta['actor'], $id, $resume);
 check($first['revision'] === $again['revision'] && $again['idempotent_replay'], 'Reconsideration retry is idempotent');
 check(Debates::row($id)['turn_side'] === Debates::member($id, $a['actor']['user_id'])['side'], 'New human arguments preserve own turn');
-rejects(fn () => DebateFlow::reconsider($tb['actor'], $id, ['revision' => $first['revision'], 'idempotency_key' => Support::token()]), 409, 'Cannot reconsider an active or unrelated side');
+$resumed = ReadModel::debate($id, $ta['actor']);
+check($resumed['workflow']['can_publish'] && !$resumed['workflow']['can_reconsider'] && !$resumed['workflow']['keep_waiting'], 'Fresh human reasons restore only own publishing turn');
+check(ReadModel::debate($id, $tb['actor'])['workflow']['keep_waiting'], 'Opponent remains waiting while resumed author prepares the new case');
+$new_post = Arguments::submit($ta['actor'], $id, ['revision' => (int) $resumed['revision'], 'idempotency_key' => Support::token(), 'body' => 'My human adds a new argument about an inclusive, time-limited trial.', 'reply_to' => []]);
+check((bool) $new_post['message_id'] && ReadModel::debate($id, $tb['actor'])['workflow']['can_publish'], 'New human case persists on the site and gives the opponent its next turn');
+check(Debates::row($id)['flag_user_id'] === null && (int) Db::one('SELECT COUNT(*) AS n FROM debate_positions WHERE debate_id = ?', [$id])['n'] === 2, 'Resume and new argument never change human opinions or raise a flag');
+rejects(fn () => DebateFlow::reconsider($tb['actor'], $id, ['revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token()]), 409, 'Cannot reconsider an active or unrelated side');
 $leave = ['action' => 'leave_seat', 'confirm' => true, 'revision' => (int) Debates::row($id)['revision'], 'idempotency_key' => Support::token()];
 $one = DebateActions::apply($b['actor'], $id, $leave);
 // A repeated confirmed request is a receipt lookup, not a second departure.
