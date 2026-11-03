@@ -1,5 +1,5 @@
-<?php use Dilemma\{Views, Config}; $id = $debate['id']; $member = null; $creator = $debate['participants'][0]; ?>
-<article class="open-debate-page">
+<?php use Dilemma\{Views, Config}; $id = $debate['id']; $member = null; $creator = array_values(array_filter($debate['participants'], static fn ($p) => $p['left_at'] === null))[0]; ?>
+<article class="open-debate-page" data-debate="<?= $e($id) ?>">
 <header class="page-heading"><span class="status status-open"><?= $t('looking_for_opponent') ?></span><h1><?= $e($debate['title']) ?></h1><p class="lead"><?= $t('open_join_intro') ?></p></header>
 <div class="open-debate-columns">
 <section class="open-position"><div class="participant-identity"><?= Views::avatar($creator['avatar']) ?><h2><?= $e($creator['alias']) ?></h2></div><p class="user-text"><?= $e($creator['stance']) ?></p><?php if ($debate['introduction'] !== ''): ?><p class="user-text"><?= $e($debate['introduction']) ?></p><?php endif; ?><?= Views::render('sharing', compact('member', 'debate', 'id')) ?></section>
@@ -16,5 +16,6 @@
 <?= Views::submit('claim_opponent') ?></form>
 <?php endif; ?></section>
 </div>
+<?php if ((int) $debate['message_count'] > 0): ?><?= Views::render('debate-record', compact('debate', 'member', 'id', 'user')) ?><?php endif; ?>
 <?php if ($user): ?><details class="report-panel"><summary><?= $t('report') ?></summary><?= Views::form('/api/debates/' . $id . '/report', 'report') ?><?= Views::area('reason', 'reason', '', true, 2000) ?><?= Views::submit('send_report', 'secondary') ?></form></details><?php endif; ?>
 </article>

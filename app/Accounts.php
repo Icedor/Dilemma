@@ -52,7 +52,7 @@ final class Accounts
 				$row = Debates::row($item['debate_id'], true);
 				Db::run("UPDATE debate_participants SET stance = '', processing_consent_at = NULL WHERE debate_id = ? AND user_id = ?", [$row['id'], $user['id']]);
 				Debates::consent($row['id'], $user['id'], false, false);
-				Db::run("UPDATE debates SET end_reason = CASE WHEN status IN ('draft','invited','open','active','paused') THEN 'account_deleted' ELSE end_reason END, status = CASE WHEN status IN ('draft','invited','open','active','paused') THEN 'ended' ELSE status END, end_proposed_by = NULL, revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);
+				Db::run("UPDATE debates SET end_reason = CASE WHEN status IN ('draft','invited','open','active','paused','awaiting_human') THEN 'account_deleted' ELSE end_reason END, status = CASE WHEN status IN ('draft','invited','open','active','paused','awaiting_human') THEN 'ended' ELSE status END, end_proposed_by = NULL, revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);
 				if ($row['creator_id'] === $user['id']) Db::run("UPDATE debates SET title = '[deleted]', thesis = '', introduction = '', left_label = '', right_label = '' WHERE id = ?", [$row['id']]);
 				Db::run('DELETE FROM debate_invitations WHERE debate_id = ?', [$row['id']]);
 				Debates::event($row['id'], $user['id'], 'account_deleted');

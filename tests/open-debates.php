@@ -43,7 +43,7 @@ rejects(fn () => Debates::accept($b['actor'], $input + ['token' => parse_url($in
 $link = Debates::invite($a['actor'], $private['debate_id'], ['idempotency_key' => Support::token()]);
 check($link['invitation_url'] === \Dilemma\Config::url('/debate/' . $private['debate_id']) && $link['expires_in'] === null, 'Open question shares its durable public URL');
 Auth::request_link(['email' => $c['email'], 'return_to' => '/debate/' . $private['debate_id'] . '#join'], 'open-return-' . $run);
-$record = Db::one('SELECT return_target FROM email_verifications WHERE user_id = ? ORDER BY expires_at DESC LIMIT 1', [$c['actor']['user_id']]);
+$record = Db::one('SELECT return_target FROM email_verifications WHERE user_id = ? AND used_at IS NULL ORDER BY expires_at DESC LIMIT 1', [$c['actor']['user_id']]);
 check(Support::unseal($record['return_target']) === '/debate/' . $private['debate_id'] . '#join', 'Magic link preserves intended debate destination');
 Db::run("UPDATE users SET status = 'blocked' WHERE id = ?", [$a['actor']['user_id']]);
 rejects(fn () => Debates::claim($b['actor'], $private['debate_id'], $input), 409, 'Blocked creator cannot receive a new opponent');

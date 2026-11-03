@@ -50,7 +50,8 @@ final class Db
 			} catch (\Throwable $error) {
 				if ($db->inTransaction()) $db->rollBack();
 				// Transaction callbacks contain database operations only, never delivery.
-				if ($error instanceof \PDOException && in_array((int) ($error->errorInfo[1] ?? 0), [1205, 1213], true) && $attempt < 2) {
+				// MariaDB snapshot conflicts (1020) require the same full rollback as deadlocks.
+				if ($error instanceof \PDOException && in_array((int) ($error->errorInfo[1] ?? 0), [1020, 1205, 1213], true) && $attempt < 2) {
 					usleep(random_int(10000, 50000));
 					continue;
 				}

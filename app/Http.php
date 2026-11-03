@@ -79,6 +79,11 @@ final class Http
 			if ($path === '/api/push') { Auth::require_user($user); self::json(Push::status($user)); }
 			if ($path === '/api/i18n') self::json(I18n::all());
 			if ($path === '/api/debates') self::json(ReadModel::list($_GET));
+			if (preg_match('~^/api/debates/([a-f0-9-]{36})/status$~D', $path, $match)) {
+				$row = Debates::readable($match[1], $actor);
+				$flow = DebateFlow::state($row, ReadModel::participants($match[1]));
+				self::json(['revision' => (int) $row['revision'], 'active_participants' => $flow['active_participants']]);
+			}
 			if ($path === '/api/mine') { Auth::require_user($user); self::json(ReadModel::list($_GET, $actor)); }
 			if ($path === '/api/export') { Auth::require_user($user); Support::rate('export:' . $user['id'], 4, 3600); header('Content-Disposition: attachment; filename="dilemma-export.json"'); self::json(Accounts::export($actor)); }
 			if (preg_match('~^/api/arguments/([a-f0-9-]{36})$~D', $path, $match)) self::json(ReadModel::argument($match[1], $actor));

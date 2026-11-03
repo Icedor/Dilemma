@@ -34,8 +34,11 @@ final class Arguments
 			$member = Debates::member($id, $actor['user_id']);
 			if ($receipt = Idempotency::replay($actor['user_id'], 'argument', $input)) return $receipt;
 			Debates::revision($row, $input);
-			if ($row['status'] !== 'active' || (int) $row['hidden'] === 1) throw new Failure(409, 'debate_not_active');
+			if ($member['left_at'] !== null || ($row['status'] !== 'active' && !DebateFlow::opening($row)) || (int) $row['hidden'] === 1) throw new Failure(409, 'debate_not_active');
 			if ((int) $row['turn_side'] !== (int) $member['side']) throw new Failure(409, 'not_your_turn');
+			$outcome = $input['outcome'] ?? 'argument';
+			if (!in_array($outcome, ['argument', 'needs_human'], true)) throw new Failure(422, 'invalid_field', ['field' => 'outcome']);
+			if ($outcome === 'needs_human' && $row['status'] !== 'active') throw new Failure(409, 'debate_not_active');
 			Support::rate('argument:' . $actor['user_id'], 30, 3600);
 			$parents = $input['reply_to'] ?? [];
 			if (!is_array($parents) || !array_is_list($parents) || count($parents) > 12) throw new Failure(422, 'invalid_field', ['field' => 'reply_to']);
@@ -51,7 +54,11 @@ final class Arguments
 			self::sources($message_id, $input);
 			$event = Debates::event($id, $actor['user_id'], 'argument_published', ['message_id' => $message_id, 'ordinal' => (int) $row['message_count'] + 1, 'reply_to' => array_values(array_unique($parents))]);
 			if ($assessment !== '') Debates::event($id, $actor['user_id'], 'agent_assessment', ['message_id' => $message_id]);
-			Db::run('UPDATE debates SET turn_side = ?, message_count = message_count + 1, revision = revision + 1, updated_at = ? WHERE id = ?', [1 - (int) $member['side'], Support::now(), $id]);
+			if ($outcome === 'needs_human') {
+				Db::run("UPDATE debate_participants SET agent_state = 'needs_human' WHERE debate_id = ? AND user_id = ?", [$id, $actor['user_id']]);
+				Debates::event($id, $actor['user_id'], 'agent_needs_human', ['message_id' => $message_id]);
+			}
+			Db::run('UPDATE debates SET status = ?, turn_side = ?, message_count = message_count + 1, revision = revision + 1, updated_at = ? WHERE id = ?', [$outcome === 'needs_human' ? 'awaiting_human' : $row['status'], $outcome === 'needs_human' ? (int) $member['side'] : 1 - (int) $member['side'], Support::now(), $id]);
 			Mail::notify($id, $actor['user_id'], 'argument', $event);
 			$stored = Db::one('SELECT created_at FROM debate_messages WHERE id = ? AND debate_id = ?', [$message_id, $id]);
 			if (!$stored) throw new \RuntimeException('Publication postcondition failed');
@@ -68,7 +75,7 @@ final class Arguments
 			if (!$message) throw new Failure(404, 'not_found');
 			Debates::actor($actor, true, $message['debate_id']);
 			$row = Debates::row($message['debate_id'], true);
-			Debates::member($row['id'], $actor['user_id']);
+			if (Debates::member($row['id'], $actor['user_id'])['left_at'] !== null) throw new Failure(403, 'access_denied');
 			if ($message['author_id'] !== $actor['user_id']) throw new Failure(403, 'access_denied');
 			if ($receipt = Idempotency::replay($actor['user_id'], 'amend', $input)) return $receipt;
 			Debates::revision($row, $input);

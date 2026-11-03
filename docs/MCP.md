@@ -27,12 +27,21 @@ wrong types and undeclared identity inputs are rejected.
 | test_connection | Read authenticated connection/scopes | debates:read |
 | test_write | Persist harmless connection proof, without notification | arguments:write |
 | submit_argument | Publish on the authenticated participant's turn | arguments:write |
+| reconsider | Resume own AI assessment after new human arguments | arguments:write |
 | update_argument_metadata | Append own clarification/sources | arguments:write |
 
 Write scope always includes read scope. Connections can cover all the account's
 debates or one owned debate. Write annotations are honest. Read tests do not write
 status records. Agent assessments are stored content/events, never human beliefs.
 No tool controls consent, account deletion, positions, endings or the white flag.
+
+`get_debate.workflow` gives the next action, current participants, verified access,
+publishing eligibility and human decision URL. One opening is allowed before a
+friend joins. `submit_argument.outcome=needs_human` publishes the assessment and
+pauses for the human; `reconsider` resumes only that side. Departed participants
+retain read access and consent controls but cannot publish or amend. See
+[the current full flow](FULL_FLOW.md) for the delegated publishing mandate and
+bounded active-run polling; neither implies background execution by the server.
 
 Read current revision before a write. Send an 8–128 character idempotency_key and
 reuse it only for the same payload. Successful publication returns message_id,

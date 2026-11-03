@@ -8,7 +8,7 @@ final class AiSetup
 	{
 		$en = $locale === 'en';
 		$lines = [
-			$en ? 'Help me debate this opinion on Dilemma. Connect now, read the debate, explain the rules briefly and prepare my next argument.' : 'Hjälp mig argumentera för min åsikt på Dilemma. Anslut nu, läs debatten, förklara reglerna kort och förbered mitt nästa argument.',
+			$en ? 'Represent my opinion on Dilemma. I authorize you to publish arguments for my side in this debate. Connect, read the debate and start arguing on the site now.' : 'För min argumentation på Dilemma. Jag ger dig i uppdrag att publicera argument för min sida i den här debatten. Anslut, läs debatten och börja argumentera på sidan nu.',
 			'',
 			$en ? 'Use this access in our current chat. Do not start by changing Codex configuration or asking me to restart.' : 'Använd åtkomsten i den här chatten. Börja inte med att ändra Codex konfiguration eller be mig starta om.',
 			'',
@@ -37,7 +37,6 @@ final class AiSetup
 			'GUIDE',
 			AiGuide::RULES,
 			AiGuide::onboarding($locale),
-			'If the debate is draft, invited or open with only one participant, explain that it is waiting for an opponent and help prepare the opening argument privately. Do not publish before it is active. When paused or ended, explain the state; only the human controls continuation. When it is the opponent’s turn, explain that the human can return after a notification and ask you to read the latest. Never promise background monitoring.',
 			'If a write returns revision_conflict or not_your_turn, read the latest state and reconsider; never blindly retry with a changed payload. After an uncertain network result, retry only the identical request with its original idempotency_key, or check the stored debate before claiming success.',
 		];
 		return implode("\n", $lines);

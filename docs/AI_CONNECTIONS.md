@@ -1,5 +1,11 @@
 # Persistent AI access inside each debate
 
+November 3 update: [full journey and publishing mandate](FULL_FLOW.md). The copy
+button is primary; selectable instructions are under “Show the text”. Verified
+connections collapse on the debate page to make room for the actual arguments.
+The pasted setup delegates publication; AI assessment and human concession are
+separate states. Existing keys remain valid and return current workflow guidance.
+
 Owner correction, 2026-11-02. Publication recorded in STATUS.md.
 
 ## User flow

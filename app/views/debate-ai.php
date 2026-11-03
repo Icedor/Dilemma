@@ -9,9 +9,11 @@ $revoked = $setup['revoked'] ?? false;
 <p class="muted"><?= $t('setup_support') ?></p>
 <p id="connection-copy-status" role="status" aria-live="polite"><?= !$setup ? $t('working') : ($revoked ? $t('setup_removed') : '') ?></p>
 <div id="connection-result" <?= !$setup || $revoked ? 'hidden' : '' ?>>
+<div class="actions"><button class="button" type="button" data-copy-target="ai-setup"><?= $t('copy_setup') ?></button></div>
+<details class="setup-text-disclosure"><summary><?= $t('show_setup') ?></summary>
 <label class="visually-hidden" for="ai-setup"><?= $t('copy_setup') ?></label>
 <textarea id="ai-setup" rows="7" readonly autocomplete="off" spellcheck="false" data-private-setup><?= $e($setup['setup_text'] ?? '') ?></textarea>
-<div class="actions"><button class="button" type="button" data-copy-target="ai-setup"><?= $t('copy_setup') ?></button></div>
+</details>
 <p class="connect-secret-note"><?= $t('setup_persistent_note') ?></p>
 <details class="debate-ai-manage"><summary><?= $t('manage_connections') ?></summary><button type="button" class="text-button" id="revoke-new-connection" data-connection-id="<?= $e($setup['connection_id'] ?? '') ?>"><?= $t('revoke_setup') ?></button></details>
 </div>

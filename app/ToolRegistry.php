@@ -25,7 +25,8 @@ final class ToolRegistry
 			$define('get_argument', 'Read the full published argument, sources, explicit rationale, append-only clarifications and reply relationships.', ['message_id' => $id], ['message_id']),
 			$define('test_connection', 'Read the authenticated connection and scopes. Does not write a test record.', []),
 			$define('test_write', 'Persist a harmless connection-test receipt. This is a WRITE. It does not publish an argument or notify anyone. Reuse the idempotency key only for the same test.', ['idempotency_key' => $key], ['idempotency_key'], true),
-			$define('submit_argument', 'Publish a durable argument on behalf of this participant when the human asks. Read current revision and turn first. A retry with the same key and content returns the existing receipt. Never treats an agent assessment as a human change of mind. Cannot raise the white flag or change measured positions.', ['debate_id' => $id, 'revision' => $revision, 'idempotency_key' => $key, 'body' => $text(20000, 5), 'reply_to' => $list($id), 'subarguments' => $list($text(2000, 1)), 'objections' => $list($text(2000, 1)), 'sources' => $list($source), 'rationale' => $text(4000), 'conclusion' => $text(4000), 'agent_assessment' => $text(4000)], ['debate_id', 'revision', 'idempotency_key', 'body'], true),
+			$define('submit_argument', 'Publish a durable argument on behalf of this participant under the publishing mandate in the pasted setup, on your own turn. Do not ask again for every post. Read current revision and turn first. Use outcome=needs_human when the opposing case convinces you or you cannot defend the position; this publishes your assessment and waits for your human, without changing their position. A retry with the same key and content returns the existing receipt. Never treats an agent assessment as a human change of mind. Cannot raise the white flag or change measured positions.', ['debate_id' => $id, 'revision' => $revision, 'idempotency_key' => $key, 'body' => $text(20000, 5), 'reply_to' => $list($id), 'subarguments' => $list($text(2000, 1)), 'objections' => $list($text(2000, 1)), 'sources' => $list($source), 'rationale' => $text(4000), 'conclusion' => $text(4000), 'agent_assessment' => $text(4000), 'outcome' => $text(24) + ['enum' => ['argument', 'needs_human']]], ['debate_id', 'revision', 'idempotency_key', 'body'], true),
+			$define('reconsider', 'Resume your own side after needs_human ONLY when your human has supplied new arguments in this chat. Read the debate first, then resume and publish your reconsidered case on the returned revision. Does not change human positions, consent or flags.', ['debate_id' => $id, 'revision' => $revision, 'idempotency_key' => $key], ['debate_id', 'revision', 'idempotency_key'], true),
 			$define('update_argument_metadata', 'Append sources or a clarification to your own argument. Never rewrites the original or its history. Requires current debate revision and an idempotency key.', ['message_id' => $id, 'revision' => $revision, 'idempotency_key' => $key, 'clarification' => $text(4000), 'sources' => $list($source)], ['message_id', 'revision', 'idempotency_key'], true),
 		];
 	}
@@ -53,6 +54,7 @@ final class ToolRegistry
 			'dilemma_test_connection' => Connections::test($actor, $input, false),
 			'dilemma_test_write' => Connections::test($actor, $input, true),
 			'dilemma_submit_argument' => Arguments::submit($actor, $input['debate_id'], $input),
+			'dilemma_reconsider' => DebateFlow::reconsider($actor, $input['debate_id'], $input),
 			'dilemma_update_argument_metadata' => Arguments::amend($actor, $input['message_id'], $input),
 		};
 	}
@@ -63,6 +65,7 @@ final class ToolRegistry
 			'object' => is_object($value), 'array' => is_array($value) && array_is_list($value),
 			'string' => is_string($value), 'integer' => is_int($value), default => false,
 		};
+		if (isset($schema['enum']) && !in_array($value, $schema['enum'], true)) throw new Failure(422, 'invalid_field', ['field' => $path]);
 		if (!$valid) throw new Failure(422, 'invalid_field', ['field' => $path]);
 		if ($schema['type'] === 'object') {
 			$properties = (array) $schema['properties'];

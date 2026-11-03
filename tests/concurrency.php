@@ -52,4 +52,12 @@ check((int) Db::one('SELECT COUNT(*) AS n FROM debate_participants WHERE debate_
 $winner = $results[0]['status'] === 200 ? $claim : $competitor;
 $replays = simultaneous([$winner, $winner]);
 check($replays[0]['status'] === 200 && $replays[1]['status'] === 200 && $replays[0]['result']['idempotent_replay'] && $replays[1]['result']['idempotent_replay'], 'Simultaneous repeated claims return the original receipt');
+\Dilemma\DebateActions::apply($a['actor'], $open['debate_id'], ['action' => 'leave_seat', 'confirm' => true, 'revision' => (int) \Dilemma\Debates::row($open['debate_id'])['revision'], 'idempotency_key' => Support::token()]);
+$d = user_fixture('RaceD'); $e = user_fixture('RaceE');
+$claim['actor'] = $d['actor']; $claim['input']['idempotency_key'] = Support::token();
+$competitor = $claim; $competitor['actor'] = $e['actor']; $competitor['input']['idempotency_key'] = Support::token();
+$results = simultaneous([$claim, $competitor]); $statuses = array_column($results, 'status'); sort($statuses);
+check($statuses === [200, 409], 'Concurrent replacements cannot share a vacated seat');
+check((int) Db::one('SELECT COUNT(*) AS n FROM debate_participants WHERE debate_id = ?', [$open['debate_id']])['n'] === 3 && (int) Db::one('SELECT COUNT(*) AS n FROM debate_participants WHERE debate_id = ? AND left_at IS NULL', [$open['debate_id']])['n'] === 2, 'Seat replacement retains previous participant with exactly two current participants');
+
 echo 'SUCCESS: ' . $checks . " concurrency checks using independent PHP processes.\n";

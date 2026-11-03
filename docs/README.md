@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Full participant journey, AI publishing and human decisions](FULL_FLOW.md)
+
 - [Site-wide UI spacing and polish](UI_SPACING.md)
 
 - [Direct AI connection and open-debate release](OPEN_DEBATES.md)

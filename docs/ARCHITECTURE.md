@@ -1,5 +1,18 @@
 # Architecture and data
 
+## Current continuation model — November 3
+
+[Full flow](FULL_FLOW.md) adds `awaiting_human`, a single opening while waiting,
+and historical participants with nullable occupied seats. The human can confirm
+`leave_seat` to open their public seat for a new participant. All earlier authors,
+posts and consent remain. `reconsider` resumes the same AI side after new human
+arguments; it cannot change human positions or end the debate.
+
+Database transactions also retry MariaDB snapshot conflict 1020 after a complete
+rollback, within the existing two-retry limit. The real concurrency test exposed
+this error, and an injected partial-write test verifies rollback before retry.
+Reference: [MariaDB ER_CHECKREAD](https://mariadb.com/docs/server/reference/error-codes/mariadb-error-codes-1000-to-1099/e1020).
+
 ## Participant-flow correction, 2026-11-02
 
 Debate creation accepts an opinion and reason; duplicate thesis input is unnecessary.
@@ -37,10 +50,15 @@ inside a retried transaction.
 | Current state | Human action | Result |
 | --- | --- | --- |
 | draft | invite | invited |
-| invited | accept by another verified person | active; creator takes first turn |
+| draft/invited/open | publish first opening | status unchanged; opponent gets next turn |
+| invited | accept by another verified person | active; existing turn preserved |
 | invited | decline | draft |
 | active | publish own turn | active; other participant's turn |
 | active | pause | paused |
+| active | agent publishes needs_human | awaiting_human; no human concession |
+| awaiting_human | own AI reconsiders after fresh human input | active; own turn |
+| active/paused/awaiting_human | confirmed human leaves public seat | open; history retained |
+| open | first verified new participant claims | active; vacant side filled |
 | paused | resume | active |
 | active/paused | propose ending | pending proposal; state unchanged |
 | active/paused | other participant accepts | ended |

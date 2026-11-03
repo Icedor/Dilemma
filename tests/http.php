@@ -126,6 +126,7 @@ try {
 	\Dilemma\Connections::revoke($a['actor'], $setup['json']['connection_id']);
 	check(http_request('/mcp', ['jsonrpc' => '2.0', 'id' => 99, 'method' => 'tools/list'], $direct_headers)['status'] === 401, 'Revocation immediately blocks direct HTTP access');
 	check(http_request('/api/logout', [], $session_headers, $cookie)['status'] === 200 && http_request('/settings', null, [], $cookie)['status'] === 401, 'Logout revokes the stored session');
+	require __DIR__ . '/full-flow-http.php';
 	echo 'SUCCESS: ' . $checks . " HTTP checks. Loopback only.\n";
 } finally {
 	proc_terminate($process);

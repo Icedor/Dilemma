@@ -6,8 +6,9 @@ namespace Dilemma;
 
 final class Debates
 {
-	public const OPEN_SQL = "d.status = 'open' AND d.opponent_mode = 'open' AND (SELECT COUNT(*) FROM debate_participants po WHERE po.debate_id = d.id) = 1 AND EXISTS (SELECT 1 FROM debate_participants po JOIN users uo ON uo.id = po.user_id WHERE po.debate_id = d.id AND po.side = 0 AND po.public_consent = 1 AND uo.status = 'active')";
-	public const PUBLIC_SQL = "d.hidden = 0 AND ((" . self::OPEN_SQL . ") OR (SELECT COUNT(*) FROM debate_participants pc WHERE pc.debate_id = d.id AND pc.public_consent = 1) = 2)";
+	public const CONSENT_SQL = "NOT EXISTS (SELECT 1 FROM debate_participants pc WHERE pc.debate_id = d.id AND pc.public_consent = 0)";
+	public const OPEN_SQL = "d.status = 'open' AND d.opponent_mode = 'open' AND (SELECT COUNT(*) FROM debate_participants po WHERE po.debate_id = d.id AND po.left_at IS NULL) = 1 AND " . self::CONSENT_SQL . " AND EXISTS (SELECT 1 FROM debate_participants po JOIN users uo ON uo.id = po.user_id WHERE po.debate_id = d.id AND po.left_at IS NULL AND uo.status = 'active')";
+	public const PUBLIC_SQL = "d.hidden = 0 AND " . self::CONSENT_SQL . " AND ((" . self::OPEN_SQL . ") OR (SELECT COUNT(*) FROM debate_participants pc WHERE pc.debate_id = d.id) >= 2)";
 
 	public static function actor(array $actor, bool $write = false, ?string $debate_id = null): array
 	{
@@ -97,7 +98,7 @@ final class Debates
 			$id = Support::id();
 			$locale = ($input['locale'] ?? '') === 'en' ? 'en' : 'sv';
 			Db::run('INSERT INTO debates (id, creator_id, title, topic, thesis, introduction, left_label, right_label, locale, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'title', 5, 160), Support::text($input, 'topic', 2, 60), Support::text($input, 'thesis', 5, 4000), Support::text($input, 'introduction', 0, 4000), Support::text($input, 'left_label', 1, 140), Support::text($input, 'right_label', 1, 140), $locale, Support::now(), Support::now()]);
-			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 0, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
+			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, active_side, stance, joined_at) VALUES (?, ?, 0, 0, ?, ?)', [$id, $actor['user_id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
 			if (($input['opponent_mode'] ?? 'invite') === 'open') Db::run("UPDATE debates SET opponent_mode = 'open', status = 'open' WHERE id = ?", [$id]);
 			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $id, $actor['user_id']]);
 			self::consent($id, $actor['user_id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
@@ -115,7 +116,7 @@ final class Debates
 		return Db::transaction(static function () use ($actor, $id, $input): array {
 			self::actor($actor, true, $id);
 			$row = self::row($id, true);
-			if ($row['creator_id'] !== $actor['user_id']) throw new Failure(403, 'access_denied');
+			if (self::member($id, $actor['user_id'])['left_at'] !== null) throw new Failure(403, 'access_denied');
 			if ($receipt = Idempotency::replay($actor['user_id'], 'invite', $input)) return $receipt;
 			if ($row['hidden'] || !in_array($row['status'], ['draft', 'invited', 'open'], true)) throw new Failure(409, 'invalid_transition');
 			$email = Support::text($input, 'email', 0, 254);
@@ -152,7 +153,7 @@ final class Debates
 		if (!$invitation || ($invitation['email'] !== null && $invitation['email'] !== $user['email'])) throw new Failure(404, 'expired_link');
 		$row = self::row($invitation['debate_id']);
 		if ($row['hidden'] || $row['status'] !== 'invited') throw new Failure(409, 'invalid_transition');
-		$creator = Db::one('SELECT u.alias, p.stance, p.public_consent FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.side = 0', [$row['id']]);
+		$creator = Db::one('SELECT u.alias, p.stance, p.public_consent FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.left_at IS NULL', [$row['id']]);
 		return ['debate' => array_intersect_key($row, array_flip(['id', 'title', 'topic', 'thesis', 'introduction', 'left_label', 'right_label', 'locale'])), 'creator' => $creator];
 	}
 
@@ -168,7 +169,7 @@ final class Debates
 			$row = self::row($invitation['debate_id'], true);
 			$invitation = Db::one('SELECT * FROM debate_invitations WHERE id = ? FOR UPDATE', [$invitation['id']]);
 			if ($invitation['status'] !== 'pending' || $invitation['expires_at'] < Support::now() || ($invitation['email'] !== null && $invitation['email'] !== $user['email'])) throw new Failure(404, 'expired_link');
-			if ($row['hidden'] || $row['status'] !== 'invited' || $row['creator_id'] === $user['id']) throw new Failure(409, 'invalid_transition');
+			if ($row['hidden'] || $row['status'] !== 'invited' || Db::one('SELECT user_id FROM debate_participants WHERE debate_id = ? AND user_id = ?', [$row['id'], $user['id']])) throw new Failure(409, 'invalid_transition');
 			if (($input['accept'] ?? true) === false) {
 				// A shared link stays available when one reader declines it.
 				if ($invitation['email'] !== null) Db::run("UPDATE debate_invitations SET status = 'declined', encrypted_token = NULL WHERE id = ?", [$invitation['id']]);
@@ -178,7 +179,8 @@ final class Debates
 				return Idempotency::save($user['id'], 'accept', $input, ['declined' => true]);
 			}
 			if (($input['accept_terms'] ?? false) !== true || ($input['processing_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
-			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 1, ?, ?)', [$row['id'], $user['id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
+			$side = 1 - (int) Db::one('SELECT side FROM debate_participants WHERE debate_id = ? AND left_at IS NULL', [$row['id']])['side'];
+			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, active_side, stance, joined_at) VALUES (?, ?, ?, ?, ?, ?)', [$row['id'], $user['id'], $side, $side, Support::text($input, 'stance', 5, 4000), Support::now()]);
 			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $row['id'], $user['id']]);
 			self::consent($row['id'], $user['id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			Db::run("UPDATE debate_invitations SET status = 'accepted' WHERE id = ?", [$invitation['id']]);
@@ -200,11 +202,12 @@ final class Debates
 			$user = self::actor($actor, true);
 			if ($receipt = Idempotency::replay($user['id'], 'claim', $input)) return $receipt;
 			$row = self::row($id, true);
-			if ($row['creator_id'] === $user['id']) throw new Failure(403, 'access_denied');
+			if (Db::one('SELECT user_id FROM debate_participants WHERE debate_id = ? AND user_id = ?', [$id, $user['id']])) throw new Failure(403, 'access_denied');
 			if ($row['hidden'] || $row['status'] !== 'open' || $row['opponent_mode'] !== 'open') throw new Failure(409, 'opponent_taken');
 			if (!Db::one('SELECT d.id FROM debates d WHERE d.id = ? AND d.hidden = 0 AND ' . self::OPEN_SQL, [$id])) throw new Failure(409, 'opponent_taken');
 			if (($input['accept_terms'] ?? false) !== true || ($input['processing_consent'] ?? false) !== true || ($input['public_consent'] ?? false) !== true) throw new Failure(422, 'consent_required');
-			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, stance, joined_at) VALUES (?, ?, 1, ?, ?)', [$id, $user['id'], Support::text($input, 'stance', 5, 4000), Support::now()]);
+			$side = 1 - (int) Db::one('SELECT side FROM debate_participants WHERE debate_id = ? AND left_at IS NULL', [$id])['side'];
+			Db::run('INSERT INTO debate_participants (debate_id, user_id, side, active_side, stance, joined_at) VALUES (?, ?, ?, ?, ?, ?)', [$id, $user['id'], $side, $side, Support::text($input, 'stance', 5, 4000), Support::now()]);
 			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $id, $user['id']]);
 			self::consent($id, $user['id'], true, ($input['position_consent'] ?? false) === true);
 			Db::run("UPDATE debates SET status = 'active', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $id]);

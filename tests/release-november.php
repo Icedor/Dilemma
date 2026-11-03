@@ -35,7 +35,7 @@ $rpc = static fn ($method, $params = []) => Mcp::handle('POST', $headers, Suppor
 check(isset($rpc('initialize', ['protocolVersion' => Mcp::LEGACY])['body']['result']['capabilities']['prompts']), 'MCP advertises its prompts capability');
 check($rpc('prompts/list')['body']['result']['prompts'][0]['name'] === 'dilemma_debate', 'AI apps can discover the debate prompt');
 $prompt = $rpc('prompts/get', ['name' => 'dilemma_debate', 'arguments' => (object) ['debate_id' => $id, 'locale' => 'sv']]);
-check($prompt['status'] === 200 && str_contains(Support::json($prompt['body']), 'Förbered ett svar') && !str_contains(Support::json($prompt['body']), $match[1]), 'Prompt supplies human guidance and scoped context without credentials');
+check($prompt['status'] === 200 && str_contains(Support::json($prompt['body']), 'Jag för din argumentation på Dilemma.') && !str_contains(Support::json($prompt['body']), $match[1]), 'Prompt supplies human guidance and scoped context without credentials');
 check($rpc('prompts/get', ['name' => 'dilemma_debate', 'arguments' => (object) ['debate_id' => Support::id()]])['status'] === 400, 'Prompt cannot bypass the debate scope');
 $actor = Connections::authenticate('Bearer ' . $match[1]);
 rejects(fn () => Moderation::apply($a['actor'], ['action' => 'hide_debate', 'target_id' => $id, 'reason' => 'Not allowed']), 403, 'Only an administrator can close debates');

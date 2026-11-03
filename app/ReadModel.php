@@ -23,7 +23,7 @@ final class ReadModel
 		$topic = Support::text($filters, 'topic', 0, 60);
 		if ($topic !== '') { $where[] = 'd.topic = ?'; $params[] = $topic; }
 		$status = $filters['status'] ?? '';
-		if (in_array($status, ['draft', 'invited', 'open', 'active', 'paused', 'flagged', 'ended', 'archived'], true)) { $where[] = 'd.status = ?'; $params[] = $status; }
+		if (in_array($status, ['draft', 'invited', 'open', 'active', 'paused', 'awaiting_human', 'flagged', 'ended', 'archived'], true)) { $where[] = 'd.status = ?'; $params[] = $status; }
 		if (($filters['outcome'] ?? '') === 'changed') $where[] = 'd.flag_user_id IS NOT NULL';
 		if (($filters['outcome'] ?? '') === 'unchanged') $where[] = "d.flag_user_id IS NULL AND d.status IN ('ended', 'archived') AND d.end_reason = 'disagreement'";
 		if (!empty($filters['profile'])) { $where[] = 'EXISTS (SELECT 1 FROM debate_participants pp WHERE pp.debate_id = d.id AND pp.user_id = ?)'; $params[] = Support::uuid($filters['profile']); }
@@ -38,13 +38,15 @@ final class ReadModel
 
 	public static function participants(string $id): array
 	{
-		return Db::all('SELECT p.user_id, p.side, p.stance, p.public_consent, p.position_consent, u.alias, u.avatar, u.status AS account_status FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? ORDER BY p.side', [$id]);
+		return Db::all('SELECT p.user_id, p.side, p.stance, p.public_consent, p.position_consent, p.left_at, p.joined_at, p.agent_state, u.alias, u.avatar, u.status AS account_status, EXISTS (SELECT 1 FROM mcp_connections c WHERE c.debate_id = p.debate_id AND c.user_id = p.user_id AND c.revoked_at IS NULL AND c.write_test_at IS NOT NULL) AS ai_connected FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? ORDER BY p.side, p.joined_at, p.user_id', [$id]);
 	}
 
 	public static function debate(string $id, ?array $actor = null, int $page = 1, int $position_page = 1): array
 	{
 		$row = Debates::readable($id, $actor);
 		$row['participants'] = self::participants($id);
+		$row['workflow'] = DebateFlow::state($row, $row['participants'], $actor);
+		$row['latest_assessment'] = $row['status'] === 'awaiting_human' ? Db::one('SELECT id, LEFT(body, 500) AS excerpt FROM debate_messages WHERE debate_id = ? ORDER BY ordinal DESC LIMIT 1', [$id]) : null;
 		$page = Support::integer($page, 1, 100000, 'page');
 		$row['messages'] = Db::all('SELECT m.id, m.author_id, m.ordinal, LEFT(m.body, 650) AS excerpt, CHAR_LENGTH(m.body) AS body_length, m.channel, m.client_label, m.created_at FROM debate_messages m WHERE m.debate_id = ? ORDER BY m.ordinal LIMIT 20 OFFSET ' . (($page - 1) * 20), [$id]);
 		$row['page'] = $page;

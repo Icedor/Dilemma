@@ -399,6 +399,30 @@ for (const details of document.querySelectorAll('[data-history]')) {
 	details.querySelector('[data-event-filter]').addEventListener('change', () => loadEvents(details, true));
 }
 
+// Announce changes without replacing the page or losing an unfinished form.
+const flowPanel = document.querySelector('[data-flow-revision]');
+const flowDebate = document.querySelector('[data-debate]')?.dataset.debate;
+if (flowPanel && flowDebate) {
+	let checks = 0;
+	const poll = async () => {
+		if (document.hidden) { setTimeout(poll, 20000); return; }
+		try {
+			const state = await request(`/api/debates/${encodeURIComponent(flowDebate)}/status`);
+			if (String(state.revision) !== flowPanel.dataset.flowRevision) {
+				flowPanel.querySelector('.debate-update').hidden = false;
+				return;
+			}
+			for (const [index, person] of (state.active_participants || []).entries()) {
+				const status = flowPanel.querySelectorAll('.connection-statuses li span')[index];
+				if (status) status.textContent = t(person.ai_connected ? 'flow_connected' : 'flow_not_connected');
+			}
+			if (++checks < 15) setTimeout(poll, 20000);
+		} catch { /* Stop after a failure; no automatic authentication retries. */ }
+	};
+	setTimeout(poll, 20000);
+	flowPanel.querySelector('[data-refresh-debate]').addEventListener('click', () => location.reload());
+}
+
 const fragmentForm = document.querySelector('form[data-fragment]');
 if (fragmentForm) {
 	const token = location.hash.slice(1);
@@ -418,7 +442,9 @@ async function invitation() {
 	try {
 		const data = await request('/api/invitation', { token });
 		const context = document.querySelector('#invitation-context');
-		context.append(element('h2', data.debate.title), element('p', data.debate.thesis, 'user-text'), element('h3', data.creator.alias), element('p', data.creator.stance, 'user-text'));
+		context.append(element('h2', data.debate.title));
+		if (data.debate.thesis !== data.debate.title) context.append(element('p', data.debate.thesis, 'user-text'));
+		context.append(element('h3', data.creator.alias), element('p', data.creator.stance, 'user-text'));
 		context.append(element('p', t(Number(data.creator.public_consent) === 1 ? 'creator_public' : 'creator_private'), 'notice'));
 		const form = document.querySelector('#invitation-form'); form.elements.namedItem('token').value = token;
 		const labels = form.querySelectorAll('.scale-labels span'); labels[0].textContent = data.debate.left_label; labels[1].textContent = data.debate.right_label;
@@ -429,7 +455,14 @@ invitation();
 
 function showFlag() { const dialog = document.querySelector('#flag-dialog'); if (dialog && !dialog.open) dialog.showModal(); }
 if (storageGet('dilemma:flag-replay') === location.pathname) { storageRemove('dilemma:flag-replay'); showFlag(); }
-if (location.hash.startsWith('#argument-')) { const details = document.getElementById(location.hash.slice(1)); if (details instanceof HTMLDetailsElement) details.open = true; }
+function revealAnchor() {
+	const target = document.getElementById(location.hash.slice(1));
+	if (!target) return;
+	for (let node = target; node; node = node.parentElement) if (node instanceof HTMLDetailsElement) node.open = true;
+	if (location.hash) target.scrollIntoView({ block: 'start' });
+}
+window.addEventListener('hashchange', revealAnchor);
+revealAnchor();
 const savedScroll = storageGet(`dilemma:scroll:${location.pathname}`);
 if (savedScroll !== null) { storageRemove(`dilemma:scroll:${location.pathname}`); requestAnimationFrame(() => scrollTo(0, Number(savedScroll) || 0)); }
 

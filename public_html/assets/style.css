@@ -466,6 +466,38 @@
 
 @layer pages {
 	.new-debate-layout { gap: clamp(var(--space-8), 4vw, var(--space-16)); }
+	.debate-progress { margin-block: var(--space-8); padding-block: var(--space-6); border-block: .0625rem solid var(--rule); display: grid; gap: var(--space-4); }
+	.debate-progress h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+	.debate-progress .section-heading { margin: 0; gap: var(--space-4); flex-wrap: wrap; }
+	.connection-statuses { display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); padding: 0; margin: 0; list-style: none; }
+	.connection-statuses li { display: grid; gap: var(--space-1); }
+	.connection-statuses span { color: var(--muted); font-size: .875rem; }
+	.debate-update { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
+	.decision-panel { scroll-margin-top: var(--space-8); margin-bottom: var(--space-8); }
+	.debate-progress:has(+ .decision-panel) { border-bottom: 0; margin-bottom: 0; }
+	.decision-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-8); margin-top: var(--space-6); }
+	.decision-options section { display: flex; flex-direction: column; gap: var(--space-4); align-items: start; }
+	.decision-options form, .decision-options section > a, .decision-options section > .actions { margin: 0; }
+	.decision-options .button { white-space: normal; text-align: start; }
+	.current-assessment { margin: 0; border-inline-start: .1875rem solid var(--ink); padding-inline-start: var(--space-6); max-width: 58rem; display: grid; gap: var(--space-3); }
+	.connection-disclosure { margin-block: var(--space-8); }
+	.connection-disclosure > summary { min-height: var(--touch-target); padding-block: var(--space-3); font-weight: 700; }
+	@media (max-width: 56rem) {
+		.decision-options { grid-template-columns: minmax(0, 1fr); }
+		.decision-options section + section { border-top: .0625rem solid var(--rule); padding-top: var(--space-6); }
+	}
+	.decision-options h3 { font-size: 1.4rem; letter-spacing: -.035em; }
+	.decision-options p { max-width: 48rem; }
+	.decision-options .actions { display: grid; gap: var(--space-4); }
+	.setup-text-disclosure { margin-top: var(--space-4); }
+	.setup-text-disclosure summary { width: fit-content; min-height: var(--touch-target); display: flex; align-items: center; text-decoration: underline; text-underline-offset: .25em; }
+	.setup-text-disclosure textarea { margin-top: var(--space-4); }
+	.invitation-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--space-12); align-items: start; margin-top: var(--space-8); }
+	#invitation-context { display: grid; gap: var(--space-6); }
+	#invitation-context h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); }
+	#invitation-context h3 { font-size: 1.25rem; }
+	#invitation-form { margin: 0; }
+	@media (max-width: 52rem) { .invitation-layout { grid-template-columns: minmax(0, 1fr); gap: var(--space-8); } }
 	.opponent-choices { padding-block: 0; display: grid; gap: var(--space-4); }
 	.opponent-choices legend { margin-bottom: var(--space-4); }
 	.opponent-choice { display: flex; align-items: start; gap: var(--space-4); padding: var(--space-6); border: .0625rem solid var(--rule); cursor: pointer; }
