@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [November 3 active release checklist](NOVEMBER_03.md)
+
 - [Status and complete delivery checklist](STATUS.md)
 - [Current design, language, PWA and SEO release](RELEASE_NEXT.md)
 - [Opinion-first copy, color surfaces and missing install screenshots](COPY_AND_INSTALL.md)

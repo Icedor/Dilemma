@@ -109,6 +109,7 @@ final class Views
 
 	public static function avatar(string $name): string
 	{
+		if ($name === '' || str_starts_with($name, '[')) return Avatar::svg($name);
 		$shape = match ($name) {
 			'circle' => '<circle cx="24" cy="24" r="17"/><circle cx="29" cy="18" r="5" class="avatar-cutout"/>',
 			'leaf' => '<path d="M8 40C3 12 20 7 40 8C42 31 27 46 8 40Z"/><path d="M12 36L33 15" class="avatar-line"/>',

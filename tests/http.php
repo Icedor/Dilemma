@@ -34,6 +34,15 @@ try {
 	check($ready && proc_get_status($process)['running'], 'Isolated loopback HTTP server starts');
 	$home = http_request('/');
 	check($home['status'] === 200 && str_contains($home['body'], '<html lang="sv">'), 'Swedish home is server rendered');
+	foreach (['/', '/?lang=sv', '/?lang=en'] as $seo_path) {
+		foreach (['sv', 'en'] as $browser_language) {
+			$seo = http_request($seo_path, null, ['Accept-Language: ' . $browser_language]);
+			$dom = new DOMDocument(); @$dom->loadHTML($seo['body']); $xpath = new DOMXPath($dom);
+			$canonicals = $xpath->query('//head/link[@rel="canonical"]');
+			check($canonicals->length === 1 && $canonicals[0]->getAttribute('href') === Config::url($seo_path), 'Canonical is self-referencing independent of browser locale: ' . $seo_path . '/' . $browser_language);
+			foreach (['sv' => '/?lang=sv', 'en' => '/?lang=en', 'x-default' => '/'] as $locale => $alternate) check($xpath->query('//head/link[@hreflang="' . $locale . '"]')[0]->getAttribute('href') === Config::url($alternate), 'Reciprocal alternate: ' . $seo_path . '/' . $browser_language . '/' . $locale);
+		}
+	}
 	check(str_contains($home['headers']['content-security-policy'][0], "frame-ancestors 'none'") && $home['headers']['cache-control'][0] === 'no-store', 'HTTP responses enforce CSP and no-store caching');
 	check(http_request('/?lang=en')['status'] === 200 && str_contains(http_request('/?lang=en')['body'], '<html lang="en">'), 'English language selection changes server rendering');
 	foreach (['en-US,en;q=0.9' => 'en', 'en;q=0.5,sv-SE;q=0.9' => 'sv', 'fr-FR' => 'en', 'sv;q=0,en;q=0.2' => 'en'] as $accept => $expected) check(str_contains(http_request('/', null, ['Accept-Language: ' . $accept])['body'], '<html lang="' . $expected . '">'), 'Browser language negotiation: ' . $accept);
@@ -61,6 +70,9 @@ try {
 	check($connect['status'] === 303 && $connect['headers']['location'][0] === '/debate/' . $setup_debate['id'] . '#connect-ai', 'Old connection links redirect directly to the debate');
 	$debate_page = http_request('/debate/' . $setup_debate['id'], null, [], $cookie);
 	check($debate_page['status'] === 200 && str_contains($debate_page['body'], 'data-private-setup') && str_contains($debate_page['body'], 'Authorization: Bearer ') && $debate_page['headers']['cache-control'][0] === 'no-store', 'Own debate shows the ready-to-copy setup without caching');
+	$overview = http_request('/app', null, [], $cookie);
+	check($overview['status'] === 200 && str_contains($overview['body'], 'data-my-debate="' . $setup_debate['id'] . '"') && str_contains($overview['body'], 'data-overview-setup') && !str_contains($overview['body'], 'Authorization: Bearer '), 'Overview has debate-specific controls without eagerly disclosing credentials');
+	check(!str_contains(http_request('/settings', null, [], $cookie)['body'], 'name="chat_link"'), 'Profile no longer asks for an AI conversation URL');
 	check(!str_contains(http_request('/debate/' . $setup_debate['id'])['body'], 'Authorization: Bearer '), 'Public debate page never exposes participant credentials');
 	check(http_request('/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/invalid', 'consent' => true], [], $cookie)['status'] === 403, 'Push subscription requires CSRF protection');
 	check(http_request('/api/profile', ['alias' => 'New alias'], [], $cookie)['status'] === 403, 'Session alone cannot bypass CSRF');

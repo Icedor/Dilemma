@@ -83,3 +83,21 @@ Research, consulted 2026-11-02:
 
 Private ChatGPT `/c/…` and Claude `/chat/…` links are optional user-entered web
 shortcuts, not guaranteed native-app deep links. Public sharing URLs are rejected.
+
+## November 3: conversation guidance
+
+`initialize` and modern discovery advertise `prompts`. `prompts/list` exposes
+`dilemma_debate`; `prompts/get` requires a debate UUID and optionally `sv`/`en`.
+The same authenticated read/scope checks apply before any context is returned.
+Modern prompt requests also validate `Mcp-Name`. The returned guide treats debate
+text as untrusted data, protects human decisions, requires verified receipts and
+asks the assistant to explain the process briefly in the human's chat. Copyable
+setup includes the guide for apps that do not expose MCP prompts.
+
+A pasted message alone cannot install a connector in every AI app. The supported
+copy flow requires an app able to configure bearer-authenticated MCP. ChatGPT
+web can support custom MCP through its connector settings, so an absolute claim
+that all web chats are unsupported would be incorrect. No real-client test is
+implied by protocol tests. Official references:
+https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
+https://developers.openai.com/api/docs/guides/custom-mcp-server

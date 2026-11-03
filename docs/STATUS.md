@@ -1,3 +1,23 @@
+# November 3 release prepared — publication in progress
+
+See [the current checklist](NOVEMBER_03.md). Release 56920eb5d9487656 contains
+87 files; all archive hashes and private-value checks passed. Implemented:
+stable invitation links/email sharing, per-debate overview connections, scoped MCP
+prompts and first-chat guidance, gradient avatars, removal of chat URL UI, and
+self-referencing canonical/hreflang. The owner is already a verified live admin.
+
+Chrome verified desktop/mobile, both languages, drag and keyboard movement,
+saving/reloading, light/dark and reduced-motion presentation. Color pickers were
+corrected after owner feedback: all three measure exactly 48 x 48 CSS pixels on
+desktop and 390px mobile. Local tests: 74 domain, 32 connection, 72 HTTP, 29 mail,
+21 new feature, 6 concurrency, 12 participant flow; JS clipboard/language/PWA/
+service-worker checks 4/7/6/7. No production test email or fixture created.
+
+Meta 429 is explicitly deferred to Claude by the owner; no support contact.
+Actual AI app connections and a fresh PageSpeed score are not yet verified.
+Source/DB backup, migration 008, deployment, final hashes and GitHub pending.
+
+---
 # Replacement sharing image published — 2026-11-02
 
 - [x] Owner-requested replacement published at /assets/share-change-your-mind.jpg.

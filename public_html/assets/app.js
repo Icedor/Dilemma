@@ -1,4 +1,5 @@
 import { copyText } from './clipboard.js?v=20261102-7';
+import { initAvatars } from './avatar.js?v=20261103-1';
 const translations = JSON.parse(document.querySelector('#translations')?.content.textContent || '{}');
 const t = key => translations[key] || translations.unexpected_error || key;
 const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -90,6 +91,7 @@ try {
 		}
 	}
 } catch { storageRemove(languageSnapshotKey); }
+initAvatars(t);
 
 for (const form of document.querySelectorAll('form[data-draft]')) {
 	const saved = storageGet(draftKey(form));
@@ -155,11 +157,15 @@ document.addEventListener('submit', async event => {
 			case 'flag': storageSet('dilemma:flag-replay', location.pathname); location.reload(); break;
 			case 'oauth': location.assign(data.redirect); break;
 			case 'invitation': {
-				const result = form.parentElement.querySelector('.invitation-result');
+				if (data.email_sent) { feedback.textContent = t('invitation_queued'); break; }
+				const result = form.closest('.share-panel').querySelector('.invitation-result');
 				result.replaceChildren();
-				const link = document.createElement('a'); link.href = data.invitation_url; link.textContent = data.invitation_url;
-				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy'); copy.dataset.copy = data.invitation_url;
-				result.append(link, copy); result.hidden = false; break;
+				const label = document.createElement('label'); label.textContent = t('copy_link');
+				const link = document.createElement('input'); link.type = 'url'; link.readOnly = true; link.value = data.invitation_url; label.append(link);
+				const actions = document.createElement('div'); actions.className = 'actions';
+				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy_link'); copy.dataset.copy = data.invitation_url;
+				const share = document.createElement('button'); share.type = 'button'; share.className = 'button'; share.textContent = t('share'); share.dataset.share = data.invitation_url;
+				actions.append(share, copy); result.append(label, actions); result.hidden = false; feedback.textContent = ''; share.focus(); break;
 			}
 			case 'report': feedback.textContent = t('report_sent'); form.reset(); break;
 			case 'saved': announce(t('saved')); break;
@@ -211,9 +217,9 @@ async function loadDebateSetup(renew = false) {
 }
 
 function clearSetup() {
-	const target = document.querySelector('[data-private-setup]');
-	if (!target) return;
-	target.value = '';
+	for (const target of document.querySelectorAll('[data-private-setup]')) target.value = '';
+	for (const overview of document.querySelectorAll('.overview-setup')) overview.hidden = true;
+	if (!document.querySelector('[data-debate-ai]')) return;
 	document.querySelector('#connection-result').hidden = true;
 	document.querySelector('[data-debate-ai]').dataset.setupReady = 'false';
 	delete document.querySelector('#revoke-new-connection').dataset.connectionId;
@@ -223,6 +229,27 @@ window.addEventListener('pageshow', event => { if (event.persisted) loadDebateSe
 if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDebateSetup();
 
 document.addEventListener('click', async event => {
+	const share = event.target.closest('[data-share]');
+	if (share) {
+		try {
+			if (navigator.share) await navigator.share({ title: 'Dilemma', url: share.dataset.share });
+			else announce(t(await copyText(share.dataset.share) ? 'copied' : 'setup_copy_failed'));
+		} catch (error) { if (error.name !== 'AbortError') announce(t('network_error')); }
+	}
+	const setupButton = event.target.closest('[data-overview-setup]');
+	if (setupButton && !setupButton.disabled) {
+		const card = setupButton.closest('[data-my-debate]'); const feedback = card.querySelector('.form-feedback');
+		setupButton.disabled = true; feedback.textContent = t('working');
+		try {
+			const data = await request('/api/connections/setup', { debate_id: card.dataset.myDebate });
+			if (data.revoked) { feedback.textContent = t('setup_removed'); }
+			else {
+				const text = card.querySelector('[data-private-setup]'); text.value = data.setup_text; text.closest('label').hidden = false;
+				feedback.textContent = t(await copyText(text.value, text) ? 'setup_copied' : 'setup_copy_failed');
+			}
+		} catch (error) { feedback.textContent = error.message; }
+		finally { setupButton.disabled = false; }
+	}
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {
 		const target = copy.dataset.copyTarget ? document.getElementById(copy.dataset.copyTarget) : null;

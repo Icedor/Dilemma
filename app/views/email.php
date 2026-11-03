@@ -17,12 +17,14 @@
 	<table role="presentation" width="100%" bgcolor="#f0eee7" style="width:100%;background-color:#f0eee7;"><tr><td class="outer" align="center" style="padding:40px 16px;">
 	<!--[if mso]><table role="presentation" width="600" align="center"><tr><td><![endif]-->
 	<table role="presentation" width="100%" style="width:100%;max-width:600px;">
+		<?php if ($kind === 'invitation'): ?><tr><td bgcolor="#191918"><img src="<?= $e(\Dilemma\Config::url('/assets/share-change-your-mind.jpg')) ?>" width="600" alt="<?= $en ? 'What would change your mind?' : 'Vad skulle få dig att ändra dig?' ?>" style="display:block;width:100%;max-width:600px;height:auto;border:0;color:#ffdb24;"></td></tr><?php endif; ?>
 		<tr><td class="panel" bgcolor="#ffdb24" style="padding:36px 40px 42px;background-color:#ffdb24;background-image:linear-gradient(120deg,#ffe12b 0%,#ffdb24 50%,#ffc127 100%);color:#191918;">
 			<table role="presentation" width="100%" style="width:100%;">
 				<tr><td style="padding:0 0 40px;font-family:Arial,Helvetica,sans-serif;font-size:34px;line-height:38px;font-weight:900;letter-spacing:-2px;color:#191918;">dilemma</td></tr>
 				<tr><td><h1 class="headline" style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:44px;line-height:1.08;letter-spacing:-1.8px;font-weight:800;color:#191918;"><?= $e($heading) ?></h1></td></tr>
 				<?php if ($title !== ''): ?><tr><td style="padding:22px 0 0;"><p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:1.5;color:#191918;overflow-wrap:anywhere;word-break:break-word;"><?= $e($title) ?></p></td></tr><?php endif; ?>
 				<?php if ($kind === 'login'): ?><tr><td style="padding:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#383019;"><?= $e($expiry) ?></td></tr><?php endif; ?>
+				<?php if ($kind === 'invitation'): ?><tr><td style="padding:18px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.6;color:#191918;"><?= $e($invitation_copy) ?></td></tr><?php endif; ?>
 				<tr><td style="padding:30px 0 0;">
 					<table role="presentation" style="border-collapse:separate;"><tr><td bgcolor="#191918" align="center" style="background-color:#191918;mso-padding-alt:17px 26px;"><a href="<?= $e($data['url']) ?>" target="_blank" style="display:inline-block;border:1px solid #191918;padding:17px 26px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:22px;font-weight:bold;text-align:center;text-decoration:none;background-color:#191918;color:#fffdf7;mso-padding-alt:0;"><?= $e($action) ?></a></td></tr></table>
 				</td></tr>

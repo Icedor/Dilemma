@@ -7,7 +7,10 @@ $query = $_GET;
 unset($query['lang']);
 $index_query = $indexable ? array_intersect_key($query, array_flip(['page', 'positions_page', 'q', 'topic', 'status', 'outcome', 'sort'])) : [];
 $localized_url = static fn (string $lang): string => Config::url($path) . '?' . http_build_query($index_query + ['lang' => $lang]);
-$canonical = $localized_url($language);
+$canonical_query = $index_query;
+if (in_array($_GET['lang'] ?? null, ['sv', 'en'], true)) $canonical_query['lang'] = $_GET['lang'];
+$canonical = Config::url($path) . ($canonical_query ? '?' . http_build_query($canonical_query) : '');
+$default_url = Config::url($path) . ($index_query ? '?' . http_build_query($index_query) : '');
 ?>
 <!doctype html>
 <html lang="<?= $language ?>">
@@ -24,7 +27,7 @@ $canonical = $localized_url($language);
 	<link rel="canonical" href="<?= $e($canonical) ?>">
 	<link rel="alternate" hreflang="sv" href="<?= $e($localized_url('sv')) ?>">
 	<link rel="alternate" hreflang="en" href="<?= $e($localized_url('en')) ?>">
-	<link rel="alternate" hreflang="x-default" href="<?= $e(Config::url($path)) ?>">
+	<link rel="alternate" hreflang="x-default" href="<?= $e($default_url) ?>">
 	<meta property="og:type" content="website">
 	<meta property="og:site_name" content="Dilemma">
 	<meta property="og:title" content="<?= $e($indexable ? $title : I18n::t('seo_home_title')) ?>">
@@ -39,12 +42,12 @@ $canonical = $localized_url($language);
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-change-your-mind.jpg')) ?>">
 	<meta name="twitter:image:alt" content="Dilemma. What would change your mind?">
-	<link rel="manifest" href="/manifest.webmanifest?v=20261102-9">
-	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261102-9">
+	<link rel="manifest" href="/manifest.webmanifest?v=20261103-1">
+	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-1">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<script src="/assets/language.js?v=20261102-9"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261102-9">
-	<script type="module" src="/assets/app.js?v=20261102-9"></script>
+	<script src="/assets/language.js?v=20261103-1"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261103-1">
+	<script type="module" src="/assets/app.js?v=20261103-1"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>

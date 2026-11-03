@@ -392,3 +392,41 @@
 		*, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 	}
 }
+
+/* Personal gradients and the participant overview. */
+.gradient-editor { border:0; padding:0; margin:2.5rem 0; min-width:0; }
+.gradient-editor legend { font-size:1.35rem; font-weight:750; }
+.gradient-workspace { display:grid; grid-template-columns:minmax(12rem, 18rem) 1fr; gap:3rem; align-items:center; margin:2rem 0; }
+.gradient-preview { position:relative; width:100%; aspect-ratio:1; border-radius:50%; box-shadow:0 .6rem 2.2rem #0002; }
+.gradient-preview svg { display:block; width:100%; height:100%; border-radius:50%; }
+.gradient-handles { position:absolute; inset:0; pointer-events:none; }
+.gradient-point { position:absolute; transform:translate(-50%,-50%); width:2.75rem; height:2.75rem; border:3px solid #191918; border-radius:50%; box-shadow:0 0 0 2px #fffdf7; color:#191918; font-size:.8rem; font-weight:900; cursor:grab; touch-action:none; pointer-events:auto; }
+.gradient-point:active { cursor:grabbing; }
+.gradient-point:focus-visible { outline:3px solid #fffdf7; outline-offset:5px; box-shadow:0 0 0 8px #191918; }
+.gradient-color { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #8885; padding:.7rem 0; }
+.gradient-color label { display:flex; gap:1rem; align-items:center; cursor:pointer; }
+.gradient-color input[type=color] { flex:0 0 3rem; width:3rem; min-width:3rem; max-width:3rem; height:3rem; min-height:3rem; max-height:3rem; aspect-ratio:1; box-sizing:border-box; appearance:none; padding:.15rem; border:1px solid #8888; border-radius:50%; background:transparent; cursor:pointer; }
+.gradient-color input[type=color]::-webkit-color-swatch-wrapper { padding:0; }
+.gradient-color input[type=color]::-webkit-color-swatch { border:0; border-radius:50%; }
+.gradient-color input[type=color]::-moz-color-swatch { border:0; border-radius:50%; }
+.gradient-controls > button { margin-top:1rem; }
+.gradient-tip { max-width:23rem; font-size:.85rem; margin-top:1rem; }
+.gradient-avatar { border-radius:50%; flex-shrink:0; }
+.my-debates { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2.5rem; }
+.my-debate { border-top:2px solid currentColor; padding:1.5rem 0; min-width:0; }
+.my-debate h2 { font-size:clamp(1.6rem,3vw,2.6rem); line-height:1.1; margin:1rem 0 1.5rem; overflow-wrap:anywhere; }
+.my-debate h2 a { text-decoration:none; }
+.my-participants { display:flex; flex-wrap:wrap; gap:1.3rem; margin-bottom:1.5rem; }
+.my-participants > span { display:inline-flex; align-items:center; gap:.5rem; }
+.my-participants .avatar { width:1.8rem; height:1.8rem; }
+.my-turn { font-weight:700; }
+.overview-setup textarea { width:100%; font-size:.8rem; margin-top:.6rem; }
+.share-panel { margin-bottom:2rem; }
+.invitation-result label { display:grid; gap:.4rem; font-size:.9rem; }
+.invitation-result input { width:100%; min-width:0; }
+.debate-sharing { margin:2rem 0; }
+@media (max-width:42rem) {
+	.gradient-workspace { grid-template-columns:1fr; gap:2rem; }
+	.gradient-preview { max-width:16rem; margin:0 auto; }
+	.my-debates { grid-template-columns:1fr; gap:1.5rem; }
+}

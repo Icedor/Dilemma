@@ -11,9 +11,8 @@ final class Accounts
 		Debates::human($actor);
 		return Db::transaction(static function () use ($actor, $input): array {
 			$user = Debates::actor($actor, true);
-			$avatar = Support::text($input, 'avatar', 0, 16);
-			if (!in_array($avatar, ['', 'circle', 'leaf', 'spark', 'wave'], true)) throw new Failure(422, 'invalid_field', ['field' => 'avatar']);
-			$link = Support::url(Support::text($input, 'chat_link', 0, 2000), true);
+			$avatar = Avatar::normalize($input['avatar'] ?? $user['avatar']);
+			$link = array_key_exists('chat_link', $input) ? Support::url(Support::text($input, 'chat_link', 0, 2000), true) : ($user['chat_link'] ? Support::unseal($user['chat_link']) : '');
 			Db::run('UPDATE users SET alias = ?, bio = ?, locale = ?, notify = ?, chat_link = ? WHERE id = ?', [Support::text($input, 'alias', 2, 60), Support::text($input, 'bio', 0, 500), ($input['locale'] ?? '') === 'en' ? 'en' : 'sv', (int) (($input['notify'] ?? false) === true), $link !== '' ? Support::seal($link) : null, $user['id']]);
 			Db::run('UPDATE users SET avatar = ? WHERE id = ?', [$avatar, $user['id']]);
 			return ['saved' => true];

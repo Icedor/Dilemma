@@ -17,7 +17,7 @@ final class Mail
 		$debate = Db::one('SELECT title FROM debates WHERE id = ?', [$debate_id]);
 		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND u.status = 'active' AND (u.push_enabled = 1 OR (u.notify = 1 AND p.notify = 1))", [$debate_id, $actor_id]) as $user) {
 			if ($user['push_enabled']) { Push::enqueue($user['id'], $sequence); continue; }
-			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title'], 'chat_link' => $user['chat_link'] ? Support::unseal($user['chat_link']) : ''], $user['id']);
+			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title']], $user['id']);
 		}
 	}
 
@@ -86,10 +86,12 @@ final class Mail
 		$ignore = $en ? 'Didn’t request this? You can ignore this email.' : 'Har du inte begärt länken? Bortse från det här mejlet.';
 		$settings = !in_array($kind, ['login', 'invitation'], true);
 		$settings_label = $en ? 'Notification settings' : 'Ändra dina notiser';
-		$chat = $kind !== 'login' && !empty($data['chat_link']) ? Support::url($data['chat_link'], true) : '';
+		$chat = '';
+		$invitation_copy = $en ? 'Think differently? Explore the arguments together. Your own AI assistants help you debate; you decide what changes your mind.' : 'Tycker du annorlunda? Pröva argumenten tillsammans. Era egna AI-assistenter hjälper er debattera; ni avgör vad som övertygar.';
 		$chat_label = $en ? 'Your AI conversation' : 'Din AI-konversation';
 		$preview = $kind === 'login' ? $expiry : ($title !== '' ? $title : $subject);
 		$text = $subject . "\n\n" . ($title !== '' ? $title . "\n\n" : '') . $action . ":\n" . $data['url'];
+		if ($kind === 'invitation') $text = $subject . "\n\n" . $title . "\n\n" . $invitation_copy . "\n\n" . $action . ":\n" . $data['url'];
 		if ($kind === 'login') $text .= "\n\n" . $expiry . "\n" . $ignore;
 		if ($chat !== '') $text .= "\n\n" . $chat_label . ': ' . $chat;
 		if ($settings) $text .= "\n\n" . $settings_label . ': ' . Config::url('/settings');

@@ -112,19 +112,22 @@ final class Debates
 			$row = self::row($id, true);
 			if ($row['creator_id'] !== $actor['user_id']) throw new Failure(403, 'access_denied');
 			if ($receipt = Idempotency::replay($actor['user_id'], 'invite', $input)) return $receipt;
-			if (!in_array($row['status'], ['draft', 'invited'], true)) throw new Failure(409, 'invalid_transition');
-			Support::rate('invite:' . $actor['user_id'], 8, 3600);
+			if ($row['hidden'] || !in_array($row['status'], ['draft', 'invited'], true)) throw new Failure(409, 'invalid_transition');
 			$email = Support::text($input, 'email', 0, 254);
 			if ($email !== '') $email = Support::email($email);
+			if ($email === '' && ($existing = Db::one("SELECT encrypted_token, expires_at FROM debate_invitations WHERE debate_id = ? AND email IS NULL AND status = 'pending' AND encrypted_token IS NOT NULL AND expires_at > UTC_TIMESTAMP() ORDER BY created_at DESC LIMIT 1", [$id]))) {
+				return Idempotency::save($actor['user_id'], 'invite', $input, ['invitation_url' => Config::url('/invite#' . Support::unseal($existing['encrypted_token'])), 'expires_in' => max(0, strtotime($existing['expires_at'] . ' UTC') - time()), 'email_sent' => false]);
+			}
+			Support::rate('invite:' . $actor['user_id'], 8, 3600);
 			$token = Support::token();
-			Db::run("UPDATE debate_invitations SET status = 'superseded' WHERE debate_id = ? AND status = 'pending'", [$id]);
 			$invitation_id = Support::id();
 			Db::run('INSERT INTO debate_invitations (id, debate_id, token_hash, email, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)', [$invitation_id, $id, Support::hash($token), $email ?: null, gmdate('Y-m-d H:i:s', time() + 604800), Support::now()]);
+			Db::run('UPDATE debate_invitations SET encrypted_token = ? WHERE id = ?', [Support::seal($token), $invitation_id]);
 			Db::run("UPDATE debates SET status = 'invited', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $id]);
 			self::event($id, $actor['user_id'], 'invited');
 			$url = Config::url('/invite#' . $token);
 			if ($email !== '') Mail::enqueue('invitation:' . $invitation_id, 'invitation', $email, $row['locale'], ['url' => $url, 'title' => $row['title']]);
-			return Idempotency::save($actor['user_id'], 'invite', $input, ['invitation_url' => $url, 'expires_in' => 604800]);
+			return Idempotency::save($actor['user_id'], 'invite', $input, ['invitation_url' => $url, 'expires_in' => 604800, 'email_sent' => $email !== '']);
 		});
 	}
 
@@ -134,7 +137,7 @@ final class Debates
 		$invitation = Db::one("SELECT * FROM debate_invitations WHERE token_hash = ? AND status = 'pending' AND expires_at > UTC_TIMESTAMP()", [Support::hash($token)]);
 		if (!$invitation || ($invitation['email'] !== null && $invitation['email'] !== $user['email'])) throw new Failure(404, 'expired_link');
 		$row = self::row($invitation['debate_id']);
-		if ($row['status'] !== 'invited') throw new Failure(409, 'invalid_transition');
+		if ($row['hidden'] || $row['status'] !== 'invited') throw new Failure(409, 'invalid_transition');
 		$creator = Db::one('SELECT u.alias, p.stance, p.public_consent FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.side = 0', [$row['id']]);
 		return ['debate' => array_intersect_key($row, array_flip(['id', 'title', 'topic', 'thesis', 'introduction', 'left_label', 'right_label', 'locale'])), 'creator' => $creator];
 	}
@@ -151,10 +154,12 @@ final class Debates
 			$row = self::row($invitation['debate_id'], true);
 			$invitation = Db::one('SELECT * FROM debate_invitations WHERE id = ? FOR UPDATE', [$invitation['id']]);
 			if ($invitation['status'] !== 'pending' || $invitation['expires_at'] < Support::now() || ($invitation['email'] !== null && $invitation['email'] !== $user['email'])) throw new Failure(404, 'expired_link');
-			if ($row['status'] !== 'invited' || $row['creator_id'] === $user['id']) throw new Failure(409, 'invalid_transition');
+			if ($row['hidden'] || $row['status'] !== 'invited' || $row['creator_id'] === $user['id']) throw new Failure(409, 'invalid_transition');
 			if (($input['accept'] ?? true) === false) {
-				Db::run("UPDATE debate_invitations SET status = 'declined' WHERE id = ?", [$invitation['id']]);
-				Db::run("UPDATE debates SET status = 'draft', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);
+				// A shared link stays available when one reader declines it.
+				if ($invitation['email'] !== null) Db::run("UPDATE debate_invitations SET status = 'declined', encrypted_token = NULL WHERE id = ?", [$invitation['id']]);
+				$pending = Db::one("SELECT id FROM debate_invitations WHERE debate_id = ? AND status = 'pending' AND expires_at > UTC_TIMESTAMP() LIMIT 1", [$row['id']]);
+				Db::run('UPDATE debates SET status = ?, revision = revision + 1, updated_at = ? WHERE id = ?', [$pending ? 'invited' : 'draft', Support::now(), $row['id']]);
 				self::event($row['id'], null, 'invitation_declined');
 				return Idempotency::save($user['id'], 'accept', $input, ['declined' => true]);
 			}
@@ -163,6 +168,7 @@ final class Debates
 			Db::run('UPDATE debate_participants SET processing_consent_at = ?, notify = ? WHERE debate_id = ? AND user_id = ?', [Support::now(), (int) (($input['notify'] ?? false) === true), $row['id'], $user['id']]);
 			self::consent($row['id'], $user['id'], ($input['public_consent'] ?? false) === true, ($input['position_consent'] ?? false) === true);
 			Db::run("UPDATE debate_invitations SET status = 'accepted' WHERE id = ?", [$invitation['id']]);
+			Db::run("UPDATE debate_invitations SET encrypted_token = NULL, status = CASE WHEN status = 'pending' THEN 'superseded' ELSE status END WHERE debate_id = ?", [$row['id']]);
 			Db::run("UPDATE debates SET status = 'active', revision = revision + 1, updated_at = ? WHERE id = ?", [Support::now(), $row['id']]);
 			$event = self::event($row['id'], $user['id'], 'joined');
 			self::position($row['id'], $user['id'], $input);
