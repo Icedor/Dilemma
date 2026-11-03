@@ -167,12 +167,14 @@ document.addEventListener('submit', async event => {
 				if (data.email_sent) { feedback.textContent = t('invitation_queued'); break; }
 				const result = form.closest('.share-panel').querySelector('.invitation-result');
 				result.replaceChildren();
-				const label = document.createElement('label'); label.textContent = t('copy_link');
+				const label = document.createElement('label'); label.textContent = t('invitation_link');
 				const link = document.createElement('input'); link.type = 'url'; link.readOnly = true; link.value = data.invitation_url; label.append(link);
 				const actions = document.createElement('div'); actions.className = 'actions';
 				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy_link'); copy.dataset.copy = data.invitation_url;
 				const share = document.createElement('button'); share.type = 'button'; share.className = 'button'; share.textContent = t('share'); share.dataset.share = data.invitation_url;
-				actions.append(share, copy); result.append(label, actions); result.hidden = false; feedback.textContent = ''; share.focus(); break;
+				actions.append(share, copy); result.append(label, actions); result.hidden = false; feedback.textContent = '';
+				if (form.classList.contains('share-link-form')) form.hidden = true;
+				share.focus(); break;
 			}
 			case 'report': feedback.textContent = t('report_sent'); form.reset(); break;
 			case 'saved': announce(t('saved')); break;

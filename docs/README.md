@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Site-wide UI spacing and polish](UI_SPACING.md)
+
 - [Direct AI connection and open-debate release](OPEN_DEBATES.md)
 
 - [November 3 active release checklist](NOVEMBER_03.md)

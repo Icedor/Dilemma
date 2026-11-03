@@ -6,7 +6,7 @@ $tab = in_array($_GET['tab'] ?? '', ['users', 'debates', 'reports', 'mail_queue'
 $page = Support::integer($_GET['page'] ?? 1, 1, 100000, 'page');
 $offset = ($page - 1) * 25;
 ?>
-<section class="section"><h1><?= $t('admin') ?></h1><nav class="subnav"><?php foreach (['reports', 'debates', 'users', 'mail_queue', 'system', 'audit'] as $item): ?><a href="?tab=<?= $item ?>" <?= $tab === $item ? 'aria-current="page"' : '' ?>><?= $t($item) ?></a><?php endforeach; ?></nav>
+<section class="section admin-page"><h1><?= $t('admin') ?></h1><nav class="subnav"><?php foreach (['reports', 'debates', 'users', 'mail_queue', 'system', 'audit'] as $item): ?><a href="?tab=<?= $item ?>" <?= $tab === $item ? 'aria-current="page"' : '' ?>><?= $t($item) ?></a><?php endforeach; ?></nav>
 <?php if ($tab === 'system'): ?><dl class="system-status"><dt>PHP</dt><dd><?= $e(PHP_VERSION) ?></dd><dt><?= $t('database') ?></dt><dd><?= $e(Db::one('SELECT VERSION() AS version')['version']) ?></dd><dt>MCP</dt><dd>2026-07-28 · 2025-11-25</dd><dt><?= $t('mail_queue') ?></dt><dd><?= $e(Dilemma\Config::get('MAIL_TRANSPORT')) ?></dd></dl>
 <?php else:
 $table = ['users' => 'users', 'debates' => 'debates', 'reports' => 'moderation_reports', 'mail_queue' => 'notification_outbox', 'audit' => 'audit_events'][$tab];

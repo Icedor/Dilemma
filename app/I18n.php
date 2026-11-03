@@ -24,6 +24,7 @@ final class I18n
 	{
 		$index = self::$locale === 'en' ? 1 : 0;
 		return array_map(static fn (array $pair): string => $pair[$index], [
+			'invitation_link' => ['Din inbjudningslänk', 'Your invitation link'],
 			'choose_opponent' => ['Vem vill du möta?', 'Who will you debate?'],
 			'friend_mode' => ['Bjud in en vän', 'Invite a friend'],
 			'friend_mode_help' => ['Dold tills din vän ansluter. Visas sedan om ni båda godkänner det.', 'Hidden until your friend joins. Public after you both agree.'],
