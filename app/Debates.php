@@ -146,15 +146,22 @@ final class Debates
 		});
 	}
 
-	public static function invitation(array $actor, string $token): array
+	public static function invitation(?array $actor, string $token): array
 	{
-		$user = self::actor($actor);
+		$user = $actor ? self::actor($actor) : null;
 		$invitation = Db::one("SELECT * FROM debate_invitations WHERE token_hash = ? AND status = 'pending' AND expires_at > UTC_TIMESTAMP()", [Support::hash($token)]);
-		if (!$invitation || ($invitation['email'] !== null && $invitation['email'] !== $user['email'])) throw new Failure(404, 'expired_link');
+		if (!$invitation) throw new Failure(404, 'expired_link');
 		$row = self::row($invitation['debate_id']);
 		if ($row['hidden'] || $row['status'] !== 'invited') throw new Failure(409, 'invalid_transition');
-		$creator = Db::one('SELECT u.alias, p.stance, p.public_consent FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.left_at IS NULL', [$row['id']]);
-		return ['debate' => array_intersect_key($row, array_flip(['id', 'title', 'topic', 'thesis', 'introduction', 'left_label', 'right_label', 'locale'])), 'creator' => $creator];
+		// A shared invitation grants a limited preview, not access to the debate history.
+		// Invitations addressed to an email remain private until that recipient signs in.
+		if ($invitation['email'] !== null) {
+			if (!$user) return ['sign_in_required' => true];
+			if ($invitation['email'] !== $user['email']) throw new Failure(404, 'expired_link');
+		}
+		$creator = Db::one('SELECT u.alias, p.stance, p.public_consent FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.left_at IS NULL AND u.status = \'active\'', [$row['id']]);
+		if (!$creator) throw new Failure(404, 'expired_link');
+		return ['debate' => array_intersect_key($row, array_flip(['id', 'title', 'topic', 'thesis', 'introduction', 'left_label', 'right_label', 'locale'])), 'creator' => $creator, 'sign_in_required' => $user === null, 'already_member' => $user !== null && Db::one('SELECT user_id FROM debate_participants WHERE debate_id = ? AND user_id = ?', [$row['id'], $user['id']]) !== null];
 	}
 
 	public static function accept(array $actor, array $input): array

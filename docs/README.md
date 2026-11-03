@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Continuous AI debate, real two-chat test and invitation/debate redesign](CONTINUOUS_DEBATE.md)
+
 - [Full participant journey, AI publishing and human decisions](FULL_FLOW.md)
 
 - [Site-wide UI spacing and polish](UI_SPACING.md)

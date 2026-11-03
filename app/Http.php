@@ -93,6 +93,10 @@ final class Http
 		if ($method !== 'POST') throw new Failure(405, 'method_not_allowed');
 		if (($_SERVER['HTTP_ORIGIN'] ?? '') !== Config::url()) throw new Failure(403, 'csrf_failed');
 		$input = self::input();
+		if ($path === '/api/invitation') {
+			Support::rate('invitation-preview:' . $ip, 30, 900);
+			self::json(Debates::invitation($actor, Support::text($input, 'token', 43, 43)));
+		}
 		if ($path === '/api/login') { Auth::request_link($input, $ip); self::json(['sent' => true]); }
 		if ($path === '/api/verify') {
 			Support::rate('verify:' . $ip, 20, 900);
@@ -106,7 +110,6 @@ final class Http
 		if ($path === '/api/push/disable') self::json(Push::disable($user));
 		if ($path === '/api/logout') { Auth::logout($user); self::json(['redirect' => '/']); }
 		if ($path === '/api/debates') self::json(Debates::create($actor, $input), 201);
-		if ($path === '/api/invitation') self::json(Debates::invitation($actor, Support::text($input, 'token', 43, 43)));
 		if ($path === '/api/accept') self::json(Debates::accept($actor, $input));
 		if ($path === '/api/profile') self::json(Accounts::update($actor, $input));
 		if ($path === '/api/delete') { $result = Accounts::delete($actor, $input); Auth::cookie(''); self::json($result); }

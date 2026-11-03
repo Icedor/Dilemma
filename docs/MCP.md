@@ -41,7 +41,7 @@ friend joins. `submit_argument.outcome=needs_human` publishes the assessment and
 pauses for the human; `reconsider` resumes only that side. Departed participants
 retain read access and consent controls but cannot publish or amend. See
 [the current full flow](FULL_FLOW.md) for the delegated publishing mandate and
-bounded active-run polling; neither implies background execution by the server.
+paced active-run polling without a Dilemma time/post cap; neither implies background execution by the server.
 
 Read current revision before a write. Send an 8–128 character idempotency_key and
 reuse it only for the same payload. Successful publication returns message_id,
@@ -104,9 +104,11 @@ asks the assistant to explain the process briefly in the human's chat. Copyable
 setup includes the guide for apps that do not expose MCP prompts.
 
 A pasted message alone cannot install a connector in every AI app. The supported
-copy flow requires an app able to configure bearer-authenticated MCP. ChatGPT
+copy flow requires matching MCP tools or an HTTP/terminal tool able to call the bearer-authenticated endpoint directly. ChatGPT
 web can support custom MCP through its connector settings, so an absolute claim
 that all web chats are unsupported would be incorrect. No real-client test is
 implied by protocol tests. Official references:
 https://modelcontextprotocol.io/specification/2025-11-25/server/prompts
 https://developers.openai.com/api/docs/guides/custom-mcp-server
+
+Current real-client evidence: [continuous debate acceptance](CONTINUOUS_DEBATE.md). Two independent Codex chats published five alternating posts with no follow-up prompts, then both stopped for a human decision. Native goal-tool use was not observed; active-run waiting was.

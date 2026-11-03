@@ -21,6 +21,9 @@ function http_request(string $path, ?array $input = null, array $headers = [], s
 	return ['status' => $status, 'body' => $body, 'headers' => $response_headers, 'json' => json_decode($body, true)];
 }
 
+// Reset only loopback fixture buckets in the guarded, isolated test database.
+foreach (['login:ip:127.0.0.1', 'verify:127.0.0.1', 'invitation-preview:127.0.0.1'] as $fixture_bucket) Db::run('DELETE FROM rate_limits WHERE bucket = ?', [Support::hash($fixture_bucket . ':' . (int) floor(time() / 900))]);
+
 $directory = sys_get_temp_dir() . '/dilemma-http-' . Support::id();
 mkdir($directory, 0700);
 mkdir($directory . '/empty', 0700);
@@ -127,6 +130,7 @@ try {
 	check(http_request('/mcp', ['jsonrpc' => '2.0', 'id' => 99, 'method' => 'tools/list'], $direct_headers)['status'] === 401, 'Revocation immediately blocks direct HTTP access');
 	check(http_request('/api/logout', [], $session_headers, $cookie)['status'] === 200 && http_request('/settings', null, [], $cookie)['status'] === 401, 'Logout revokes the stored session');
 	require __DIR__ . '/full-flow-http.php';
+	require __DIR__ . '/invitation-http.php';
 	echo 'SUCCESS: ' . $checks . " HTTP checks. Loopback only.\n";
 } finally {
 	proc_terminate($process);

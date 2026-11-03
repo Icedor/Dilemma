@@ -31,8 +31,7 @@ Native client registration/restart is a separate optional client workflow.
 
 The exact copied JSON request sequence is exercised over real loopback HTTP:
 initialize, tools/list, read test, persisted write-test receipt, whoami, debate.
-Revocation is verified through HTTP. This is not a claim of an independent AI
-app/model conversation test. See OPEN_DEBATES.md for this release.
+Revocation is verified through HTTP. Two real Codex model chats have additionally completed an autonomous five-post exchange; see CONTINUOUS_DEBATE.md for evidence and limits.
 ## Boundaries
 
 POST /api/connections/setup requires a human session, same-origin request, CSRF

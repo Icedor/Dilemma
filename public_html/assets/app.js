@@ -436,20 +436,47 @@ async function invitation() {
 	const fragment = location.hash.slice(1);
 	if (/^[A-Za-z0-9_-]{43}$/.test(fragment)) storageSet('dilemma:invitation', fragment);
 	history.replaceState(null, '', location.pathname + location.search);
-	if (root.dataset.signedIn !== 'true') return;
-	const token = storageGet('dilemma:invitation') || '';
+	const token = /^[A-Za-z0-9_-]{43}$/.test(fragment) ? fragment : storageGet('dilemma:invitation') || '';
 	const status = document.querySelector('#invitation-status');
+	if (!token) {
+		status.hidden = true; document.querySelector('#invitation-empty').hidden = false; return;
+	}
 	try {
 		const data = await request('/api/invitation', { token });
-		const context = document.querySelector('#invitation-context');
-		context.append(element('h2', data.debate.title));
-		if (data.debate.thesis !== data.debate.title) context.append(element('p', data.debate.thesis, 'user-text'));
-		context.append(element('h3', data.creator.alias), element('p', data.creator.stance, 'user-text'));
-		context.append(element('p', t(Number(data.creator.public_consent) === 1 ? 'creator_public' : 'creator_private'), 'notice'));
-		const form = document.querySelector('#invitation-form'); form.elements.namedItem('token').value = token;
-		const labels = form.querySelectorAll('.scale-labels span'); labels[0].textContent = data.debate.left_label; labels[1].textContent = data.debate.right_label;
-		form.hidden = false; status.textContent = '';
-	} catch (error) { status.textContent = error.message; }
+		status.hidden = true;
+		if (!data.debate) { document.querySelector('#invitation-locked').hidden = false; return; }
+		document.querySelector('#invitation-title').textContent = data.debate.title;
+		const premise = document.querySelector('.invitation-premise');
+		const thesis = document.querySelector('[data-invite-thesis]');
+		thesis.textContent = data.debate.thesis !== data.debate.title ? data.debate.thesis : '';
+		thesis.hidden = !thesis.textContent;
+		const introduction = document.querySelector('[data-invite-introduction]');
+		introduction.textContent = data.debate.introduction; introduction.hidden = !introduction.textContent;
+		premise.hidden = !thesis.textContent && !introduction.textContent;
+		document.querySelector('[data-invite-author]').textContent = data.creator.alias;
+		document.querySelector('[data-invite-stance]').textContent = data.creator.stance;
+		document.querySelector('[data-invite-visibility]').textContent = t(Number(data.creator.public_consent) === 1 ? 'creator_public' : 'creator_private');
+		document.querySelector('#invitation-content').hidden = false;
+		const form = document.querySelector('#invitation-form');
+		if (form && data.already_member) {
+			const message = element('p', t('invite_already_joined'));
+			const link = element('a', t('invite_go_debate'), 'button');
+			link.href = '/debate/' + encodeURIComponent(data.debate.id);
+			const actions = element('div', undefined, 'actions'); actions.append(link);
+			form.after(message, actions);
+		} else if (form) {
+			form.elements.namedItem('token').value = token;
+			form.dataset.draft = 'invitation-' + data.debate.id;
+			let draftTimer;
+			form.addEventListener('input', () => { clearTimeout(draftTimer); draftTimer = setTimeout(() => saveDraft(form), 350); });
+			try {
+				const draft = JSON.parse(storageGet(draftKey(form)) || 'null');
+				if (draft?.stance && !form.elements.namedItem('stance').value) form.elements.namedItem('stance').value = draft.stance;
+			} catch { /* Ignore a damaged local draft. */ }
+			const labels = form.querySelectorAll('.scale-labels span'); labels[0].textContent = data.debate.left_label; labels[1].textContent = data.debate.right_label;
+			form.hidden = false;
+		}
+	} catch (error) { status.hidden = false; status.textContent = error.message; }
 }
 invitation();
 

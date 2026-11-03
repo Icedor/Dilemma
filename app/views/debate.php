@@ -14,17 +14,23 @@ $action_form = static function (string $action, string $label, string $class = '
 };
 ?>
 <article class="debate-page" data-debate="<?= $e($id) ?>">
-<header class="debate-heading"><div class="debate-heading-meta"><a href="/explore?topic=<?= rawurlencode($debate['topic']) ?>"><?= $e($debate['topic']) ?></a><span class="status status-<?= $e($debate['status']) ?>"><?= $t($debate['status'] === 'open' ? 'looking_for_opponent' : $debate['status']) ?></span><span><?= $t($debate['is_public'] ? 'public' : 'private') ?></span></div><h1><?= $e($debate['title']) ?></h1><?php if ($debate['thesis'] !== $debate['title']): ?><p class="thesis user-text"><?= $e($debate['thesis']) ?></p><?php endif; ?><?php if ($debate['introduction'] !== ''): ?><p class="user-text introduction"><?= $e($debate['introduction']) ?></p><?php endif; ?><?php if ($debate['hidden']): ?><p class="notice"><?= $t('hidden') ?></p><?php endif; ?></header>
-<div class="stance-pair"><?php foreach ($current_participants as $participant): ?><section class="stance side-<?= (int) $participant['side'] ?>"><div class="participant-mark" aria-hidden="true"><?= (int) $participant['side'] === 0 ? 'A' : 'B' ?></div><div><?= Views::avatar($participant['avatar']) ?><h2><?php if ($participant['account_status'] !== 'deleted'): ?><a href="/profile/<?= $e($participant['user_id']) ?>"><?= $e($participant['alias']) ?></a><?php else: ?><?= $t('deleted_participant') ?><?php endif; ?></h2><p class="user-text"><?= $e($participant['stance']) ?></p></div></section><?php endforeach; ?></div>
+<header class="debate-heading"><div class="debate-heading-meta"><a href="/explore?topic=<?= rawurlencode($debate['topic']) ?>"><?= $e($debate['topic']) ?></a><span class="status status-<?= $e($debate['status']) ?>"><?= $t($debate['status'] === 'open' ? 'looking_for_opponent' : $debate['status']) ?></span><span><?= $t($debate['is_public'] ? 'public' : 'private') ?></span></div><h1><?= $e($debate['title']) ?></h1><?php if ($debate['thesis'] !== $debate['title']): ?><p class="thesis user-text"><?= $e($debate['thesis']) ?></p><?php endif; ?><?php if ($debate['introduction'] !== ''): ?><details class="debate-background"><summary><?= $t('debate_background') ?></summary><p class="user-text introduction"><?= $e($debate['introduction']) ?></p></details><?php endif; ?><?php if ($debate['hidden']): ?><p class="notice"><?= $t('hidden') ?></p><?php endif; ?></header>
+
 <?php if ($debate['flag_user_id']): ?><section class="flag-result"><span class="mini-flag" aria-hidden="true"></span><div><h2><?= $t('flag_title') ?></h2><p><?= $e($participants[$debate['flag_user_id']]['alias'] ?? '') ?></p></div><button class="button secondary" type="button" data-replay-flag><?= $t('replay_flag') ?></button></section><?php elseif ($debate['end_reason'] && !$debate['end_proposed_by']): ?><p class="notice"><?= $t($debate['end_reason']) ?></p><?php endif; ?>
-<?= Views::render('sharing', compact('member', 'debate', 'id')) ?>
 <?= Views::render('debate-flow', compact('debate', 'member', 'action_form', 'user')) ?>
-<?php if ($active && $turn && $debate['status'] !== 'awaiting_human'): ?><div class="turn-indicator"><span class="turn-dot side-<?= (int) $turn['side'] ?>" aria-hidden="true"></span><p><?= $member && $turn['user_id'] === $user['id'] ? $t('your_turn') : $t('waiting_turn') . ' ' . $e($turn['alias']) ?></p></div><?php endif; ?>
-<?php if ($member): ?><?php $connection_verified = (bool) ($participants[$member['user_id']]['ai_connected'] ?? false); ?><?php if ($connection_verified): ?><details class="connection-disclosure"><summary><?= $t('flow_connection_details') ?></summary><?php endif; ?><?= Views::render('debate-ai', compact('debate', 'user', 'actor')) ?><?php if ($connection_verified): ?></details><?php endif; ?><?php endif; ?>
-<?php if ((int) $debate['message_count'] > 0 || !in_array($debate['status'], ['draft', 'invited', 'open'], true)): ?>
-<?= Views::render('debate-record', compact('debate', 'member', 'id', 'user')) ?>
-<?php endif; ?>
-<?php if ($member): ?><?= Views::render('pwa', []) ?><?php endif; ?>
+<div class="debate-workspace">
+	<div class="debate-main">
+		<details class="viewpoints disclosure"><summary><?= $t('debate_viewpoints') ?></summary><div class="stance-pair"><?php foreach ($current_participants as $participant): ?><section class="stance side-<?= (int) $participant['side'] ?>"><div class="participant-mark" aria-hidden="true"><?= (int) $participant['side'] === 0 ? 'A' : 'B' ?></div><div><?= Views::avatar($participant['avatar']) ?><h2><?php if ($participant['account_status'] !== 'deleted'): ?><a href="/profile/<?= $e($participant['user_id']) ?>"><?= $e($participant['alias']) ?></a><?php else: ?><?= $t('deleted_participant') ?><?php endif; ?></h2><p class="user-text"><?= $e($participant['stance']) ?></p></div></section><?php endforeach; ?></div></details>
+		<?= Views::render('debate-record', compact('debate', 'member', 'id', 'user')) ?>
+	</div>
+	<aside class="debate-sidebar" aria-label="<?= $t('debate_tools') ?>">
+	<?php if ($member): ?>
+		<?= Views::render('debate-ai', compact('debate', 'user', 'actor')) ?>
+	<?php endif; ?>
+		<?= Views::render('sharing', compact('member', 'debate', 'id')) ?>
+		<?php if ($member): ?><?= Views::render('pwa', []) ?><?php endif; ?>
+	</aside>
+</div>
 <?php if ($member): ?><details class="participant-settings"><summary><?= $t('debate_settings') ?></summary>
 <?php if ($active): ?><div class="human-actions"><?php if ($debate['status'] !== 'awaiting_human') echo $action_form($debate['status'] === 'paused' ? 'resume' : 'pause', $debate['status'] === 'paused' ? 'resume' : 'pause'); ?><?= $action_form('stand', 'stand') ?></div>
 <?= Views::form('/api/debates/' . $id . '/action') ?><?= Views::hidden('revision', $debate['revision']) ?><?= Views::hidden('action', 'position') ?><?= Views::scale($debate['left_label'], $debate['right_label']) ?><?= Views::submit('save_position') ?></form>

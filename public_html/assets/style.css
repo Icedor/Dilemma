@@ -527,3 +527,92 @@
 		.opponent-choice { padding: var(--space-4); }
 	}
 }
+
+@layer pages {
+	.invitation-page { max-width: 90rem; margin-inline: auto; padding: var(--space-8) var(--space) var(--space-16); }
+	.invitation-hero { background: #ffda3d url('/assets/gradient-yellow-v2.webp?v=20261102-6') center/cover; color: #191918; padding: clamp(var(--space-8), 5vw, var(--space-16)); display: grid; gap: var(--space-6); }
+	.invitation-hero h1 { max-width: 20ch; font-size: clamp(2rem, 5.4vw, 5rem); line-height: 1.07; text-wrap: balance; }
+	.eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+	.invitation-tagline { font-size: 1.1rem; }
+	.invitation-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(var(--space-8), 6vw, var(--space-20)); margin-top: var(--space-12); }
+	#invitation-context { gap: var(--space-8); }
+	.invitation-premise { display: grid; gap: var(--space-4); }
+	#invitation-context .invitation-premise h2 { font-size: 1.1rem; letter-spacing: -.02em; }
+	.invitation-opinion { border-top: .125rem solid var(--ink); padding-top: var(--space-6); display: grid; gap: var(--space-4); }
+	.invitation-opinion blockquote { margin: 0; font-size: clamp(1.15rem, 1.6vw, 1.4rem); line-height: 1.65; }
+	.invitation-response { border-left: .0625rem solid var(--rule); padding-left: clamp(var(--space-6), 4vw, var(--space-12)); min-width: 0; }
+	.invitation-response h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: var(--space-4); }
+	.invitation-response > p { color: var(--muted); }
+	#invitation-form, #invitation-login { margin-top: var(--space-8); }
+	.invitation-steps { list-style: none; counter-reset: invite-step; padding: var(--space-6) 0 0; margin: var(--space-8) 0 0; border-top: .0625rem solid var(--rule); display: grid; gap: var(--space-4); font-size: .95rem; }
+	.invitation-steps li { display: flex; gap: var(--space-3); align-items: baseline; counter-increment: invite-step; }
+	.invitation-steps li::before { content: counter(invite-step, decimal-leading-zero); font-size: .75rem; font-weight: 700; color: var(--muted); }
+	.invitation-notice { margin-top: var(--space-8); }
+	.invitation-empty { padding-block: var(--space-12); max-width: 38rem; display: grid; gap: var(--space-6); justify-items: start; }
+	.invitation-empty h2 { font-size: var(--section-title); }
+	.debate-page { max-width: 100rem; }
+	.debate-heading { max-width: 62rem; margin-bottom: var(--space-8); }
+	.debate-heading h1 { font-size: clamp(2.4rem, 4.6vw, 4.7rem); line-height: 1.08; }
+	.debate-heading .thesis { font-size: clamp(1.15rem, 1.7vw, 1.4rem); margin-top: var(--space-6); }
+	.debate-background { margin-top: var(--space-6); }
+	.debate-background summary { font-weight: 700; }
+	.debate-background .introduction { margin-top: var(--space-4); }
+	.debate-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem); gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: start; }
+	.debate-main, .debate-sidebar { min-width: 0; }
+	.debate-main .argument-section { margin-block: var(--space-8); }
+	.debate-main .section-heading { margin-bottom: var(--space-6); }
+	.viewpoints { margin: 0; border-top: 0; }
+	.viewpoints .stance-pair { margin: var(--space-6) 0; gap: var(--space-6); }
+	.viewpoints .stance { padding: 0; border: 0; gap: var(--space-3); }
+	.viewpoints .stance h2 { font-size: 1.3rem; }
+	.viewpoints .participant-mark { display: none; }
+	.viewpoints .stance .avatar { width: 2rem; height: 2rem; margin-bottom: var(--space-3); }
+	.viewpoints .stance p { font-size: .95rem; }
+	.debate-sidebar { display: grid; gap: var(--space-8); }
+	.debate-sidebar .connect-start { padding: var(--space-6); }
+	.debate-sidebar h2, .debate-sidebar .connect-start h2 { font-size: 1.45rem; letter-spacing: -.035em; }
+	.debate-sidebar .participant-panel { margin: 0; padding-block: var(--space-6); border-top: 0; }
+	.debate-sidebar .participant-panel > p, .debate-sidebar .connect-start > p { font-size: .95rem; }
+	.debate-sidebar .actions { gap: var(--space-3); }
+	.debate-sidebar .button { padding-inline: var(--space-4); font-size: .95rem; }
+	.debate-sidebar .disclosure { margin-block: 0; }
+	.debate-sidebar .invitation-result { gap: var(--space-4); }
+	.debate-sidebar .pwa-panel { margin: 0; padding: 0; }
+	.connection-help { margin-top: var(--space-4); font-size: .875rem; }
+	.connection-help summary { min-height: var(--touch-target); display: list-item; align-content: center; }
+	.connection-help p { margin-top: var(--space-3); }
+	.debate-main .positions-panel { margin-block: var(--space-8); }
+	.debate-progress { margin-top: 0; margin-bottom: var(--space-8); }
+	.debate-progress h2 { font-size: 1.35rem; letter-spacing: -.03em; }
+	.debate-progress .connection-statuses { font-size: .875rem; gap: var(--space-3) var(--space-6); }
+	.connection-statuses li { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+	@media (max-width: 62rem) {
+		.debate-workspace { grid-template-columns: minmax(0, 1fr); }
+		.debate-sidebar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	}
+	@media (max-width: 52rem) {
+		.invitation-layout { grid-template-columns: minmax(0, 1fr); }
+		.invitation-response { border-left: 0; border-top: .0625rem solid var(--rule); padding: var(--space-8) 0 0; }
+		.invitation-hero { padding: var(--space-8) var(--space-6); }
+	}
+	@media (max-width: 38rem) {
+		.debate-sidebar { grid-template-columns: minmax(0, 1fr); }
+		.invitation-page { padding-top: var(--space-4); }
+	}
+}
+
+@layer pages {
+	.viewpoints .stance { grid-template-columns: minmax(0, 1fr); }
+	.debate-main .argument { margin-inline: 0; padding: var(--space-6); }
+	.debate-sidebar .pwa-controls { margin: 0; padding: 0; border: 0; }
+}
+
+@layer pages { @media (max-width: 38rem) { .viewpoints .stance-pair { grid-template-columns: minmax(0, 1fr); } } }
+
+@layer pages {
+	.debate-page .debate-progress h2 { font-size: 1.35rem; }
+	.assessment-disclosure { font-size: .95rem; }
+	.assessment-disclosure .current-assessment { margin-top: var(--space-4); }
+	.decision-panel:not([open]) { margin-block: 0 var(--space-6); padding-block: 0; }
+	.decision-panel:not([open]) > summary { padding-block: var(--space-4); }
+}

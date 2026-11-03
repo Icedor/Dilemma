@@ -30,10 +30,9 @@ and repeated publication questions. A waiting debate also rejected an opening.
 
 The existing AI app performs model work. No paid server model, automatic server
 responder or agent wake service was added. The guide permits serial checking
-every 20 seconds during an active client run, bounded to five minutes and six
-published arguments. It stops for human input, ended/paused/hidden states, app
+every 20 seconds during an active client run, without a Dilemma time or post cap. It stops for human input, ended/paused/hidden states, app
 execution limits or errors. It explicitly cannot monitor after a run ends or an
-app closes. Independent ChatGPT/Claude model conversations are not claimed tested.
+app closes. Two independent Codex Windows chats now exercised actual model turns; see CONTINUOUS_DEBATE.md. Other clients are not claimed tested.
 
 `workflow.next_action` and `can_publish` accompany current debate context.
 `submit_argument.outcome=needs_human` publishes the AI assessment and pauses for
