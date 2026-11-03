@@ -12,7 +12,7 @@ Owner: publish everything; Drive ready. Same sole-writer session. Baseline
   opponent; one verified human can claim it atomically with explicit consent.
 - VERIFIED: safe first-claim race, login return, sharing, cancellation/moderation.
 - VERIFIED: consistent UI spacing, responsive layouts and both language/theme checks.
-- PENDING: migration backup, release integrity, GitHub, deployment and live checks.
+- VERIFIED: migration backup, release integrity, GitHub, deployment and live checks.
 
 Flowstate's ai-panel.js includes a direct API base/context route as well as MCP
 configuration. Dilemma's earlier config-first prompt stopped at native client
@@ -39,3 +39,12 @@ reduced motion, keyboard mode selection, publication-required toggle and no
 horizontal overflow checked. Legal links open separately. Empty debate/history
 sections stay hidden while waiting; shared spacing tokens align the forms.
 No production post, invitation email or account was created by these tests.
+Published source 419d0b5 as e6c9e587a27ca216 (91 files, nine migrations).
+Verified live HTTPS sequence from both server and this Codex Windows tool with
+existing owner access: initialize, tools/list, read proof, stored write receipt,
+whoami and debate. Credential stayed private in memory; no argument/notification
+was sent. Native connector registration was not required for these direct calls.
+Live creation UI, root canonical/share metadata and health pass. Source/config
+and all 26 DB tables backed up under .backup-before-e6c9e587a27ca216/ first.
+Final open-debate suite count is 23 including account deletion. All requested work
+in this release is verified; historical Meta 429 is owner-deferred, not resolved.

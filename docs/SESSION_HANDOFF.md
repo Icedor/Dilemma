@@ -1,3 +1,40 @@
+# Direct access and opponent choices published — November 3, 2026
+
+Runtime source **419d0b5**, live release **e6c9e587a27ca216**, 91 verified files,
+nine applied migrations. GitHub source is pushed. All earlier completed features
+remain; see [the reconciled checklist](OPEN_DEBATES.md).
+
+Copyable access now uses existing native MCP tools or direct JSON-RPC HTTP in the
+current chat, not config-first/restart instructions. Same permanent per-debate
+keys; no new expiry, widening or rotation. Actual live initialize/list/read test/
+write-test receipt/whoami/debate succeeded both through public HTTPS from the
+server and through this Codex Windows PowerShell tool. No argument or notification
+was created. Independent model/app conversations are not claimed tested.
+
+Creation offers private friend invitation or immediately public open question.
+One verified human can claim the open opponent slot; competing claims are atomic.
+Explicit publication/processing consent, login continuation, share/copy/email,
+closing/reopening, moderation and deletion boundaries are verified. Existing
+debates stay in invite mode. Pending debates no longer show empty history panels.
+Form spacing is standardized, draft radio choices survive restoration, and legal
+links preserve progress in separate tabs. New copy describes both start modes.
+
+23 open-debate, 9 concurrency, 86 HTTP and 32 persistent-access checks pass, plus
+all affected existing domain/UI/notification suites (details in OPEN_DEBATES.md).
+Chrome QA: local synthetic claim -> active -> ready setup; SV/EN, 1440/390 widths,
+light/dark, reduced motion, keyboard. Live /new shows both choices and current
+CSS/JS. Home canonical/share metadata and live database health pass.
+Own temporary tabs closed and viewport/theme overrides reset; user's original
+debate tab remains untouched. No background test server was newly started.
+
+Before migration: verified previous source/config backup and consistent 26-table
+private DB backup at `.backup-before-e6c9e587a27ca216/`. Archive SHA256:
+`773d37f164c9132414f69f2fd33dfe3ed18af92d3159c55d2411515395bf19e4`.
+All 91 production hashes and production preflight passed. The last PageSpeed
+100/100/100/100 report predates this release; no new score is claimed. Meta 429
+remains explicitly deferred to Claude; no support contact/security weakening.
+
+---
 # MCP support-text contrast corrected — November 3
 
 Current runtime source d025278, release 93cc50cdbc2dfa84, 89 verified live files.
