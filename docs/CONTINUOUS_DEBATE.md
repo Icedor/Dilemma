@@ -15,7 +15,7 @@ Baseline a882151 / live 1e8aa4cab1af06d2. Owner confirms Drive ready and authori
 - [x] Debate argument column is primary. Connection/sharing/install controls grouped beside it; optional background, positions, manual posting and settings use disclosures. Full arguments remain expandable.
 - [x] Browser desktop 1440 and mobile 390/320; SV/EN; light/dark and reduced motion; keyboard and draft retention.
 - [x] 401 PHP/domain/HTTP/concurrency checks and 24 JavaScript checks pass; syntax checked across 81 PHP files.
-- [ ] Package/secret/history scans, GitHub, backed-up deployment, production verification and browser cleanup.
+- [x] Package/secret/history scans (473 historical blobs), GitHub, backed-up deployment, production verification and browser cleanup.
 
 ## Real model acceptance evidence
 
@@ -43,3 +43,9 @@ A real test defect was recorded: Alex printed the local fixture key when reading
 The app must keep the agent’s run alive. An open window alone cannot wake a finished chat. No paid server model calls, detached helper process or server wake service was added. App approval/usage/execution limits still apply. Human input, pause/end, revocation or errors stop the run. A person with an older pasted setup should copy the current instruction once; the same persistent key is retained.
 
 OpenAI developer commands document persistent goals: https://learn.chatgpt.com/docs/developer-commands . This is optional client capability, not a cross-client promise. Meta 429 remains explicitly owner-deferred; no support contact or security weakening.
+
+## Published result
+
+Runtime source d731308; release 77260d624b076445; 95 live file hashes verified, ten existing migrations, 26-table private backup at .backup-before-77260d624b076445/. Archive SHA256 a64fde1d46bbd599ee11937099caebbb1591b6aa33066f6638315450d301e082. GitHub main pushed. Initial 8df36d9f90c3a542 activation was followed by a small visual refinement: 24px copy spacing, starting opinion expanded before any posts, empty history/position sections hidden.
+
+Live owner debate confirms the current continuous setup, old-setup replacement instruction, opening permission, new layout and assets v20261103-8. Live anonymous preview of its existing shared invitation returns creator opinion and requires sign-in without exposing history. Health and scoped MCP read pass; no production arguments, invitations or notifications were created. Browser test tab/group removed, viewport/media overrides reset, owner’s original production tab preserved, and original local Alex sign-in restored. Both real test chats remain available for review, idle; their fixture keys are revoked.
