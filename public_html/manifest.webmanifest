@@ -3,6 +3,22 @@
 	"name": "Dilemma",
 	"short_name": "Dilemma",
 	"description": "Meet someone who disagrees. Test the arguments. Raise the white flag if you change your mind.",
+	"screenshots": [
+		{
+			"src": "/assets/install-wide.jpg",
+			"sizes": "1425x791",
+			"type": "image/jpeg",
+			"form_factor": "wide",
+			"label": "Start with your opinion. Meet someone who disagrees."
+		},
+		{
+			"src": "/assets/install-narrow.jpg",
+			"sizes": "375x693",
+			"type": "image/jpeg",
+			"form_factor": "narrow",
+			"label": "Test your opinion on your phone. You decide what changes your mind."
+		}
+	],
 	"start_url": "/app",
 	"scope": "/",
 	"display": "standalone",

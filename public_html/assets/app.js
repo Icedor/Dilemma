@@ -1,5 +1,4 @@
 import { copyText } from './clipboard.js?v=20261102-7';
-import { initAvatars } from './avatar.js?v=20261103-1';
 const translations = JSON.parse(document.querySelector('#translations')?.content.textContent || '{}');
 const t = key => translations[key] || translations.unexpected_error || key;
 const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -91,7 +90,7 @@ try {
 		}
 	}
 } catch { storageRemove(languageSnapshotKey); }
-initAvatars(t);
+if (document.querySelector('[data-avatar-editor]')) import('./avatar.js?v=20261103-1').then(module => module.initAvatars(t)).catch(() => announce(t('network_error')));
 
 for (const form of document.querySelectorAll('form[data-draft]')) {
 	const saved = storageGet(draftKey(form));

@@ -1,3 +1,15 @@
+# Installation gallery completed — November 3
+
+Real Chrome screenshots of the current public app have now been captured:
+1425x791 wide and 375x693 narrow JPEG. Both exclude the account header and contain
+no personal account/debate data. They retain the approved design and copy.
+The manifest includes form factors, dimensions, MIME and short English labels.
+Apache, local preview and release allowlists include both assets. Browser-owned
+installation presentation varies by browser; manifest support is not a claim
+that an OS installation was completed. The earlier browser blockage below is
+resolved, and the earlier missing-gallery checklist is superseded by this entry.
+
+---
 # Opinion-first presentation and installation gallery
 
 Owner correction, 2026-11-02: the idea is testing opinions and changing minds.

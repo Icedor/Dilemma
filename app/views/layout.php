@@ -17,6 +17,7 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<?php if ($path === '/'): ?><link rel="preload" as="image" href="/assets/gradient-yellow-v2.webp?v=20261102-6" fetchpriority="high"><?php endif; ?>
 	<meta name="color-scheme" content="light dark">
 	<meta name="theme-color" content="#ffda3d">
 	<meta name="application-name" content="Dilemma">
@@ -42,12 +43,12 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:image" content="<?= $e(Config::url('/assets/share-change-your-mind.jpg')) ?>">
 	<meta name="twitter:image:alt" content="Dilemma. What would change your mind?">
-	<link rel="manifest" href="/manifest.webmanifest?v=20261103-1">
-	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-1">
+	<link rel="manifest" href="/manifest.webmanifest?v=20261103-2">
+	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-2">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-	<script src="/assets/language.js?v=20261103-1"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261103-1">
-	<script type="module" src="/assets/app.js?v=20261103-1"></script>
+	<script src="/assets/language.js?v=20261103-2"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261103-2">
+	<script type="module" src="/assets/app.js?v=20261103-2"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
