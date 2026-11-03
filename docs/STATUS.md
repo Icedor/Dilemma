@@ -1,3 +1,12 @@
+# Compact debate controls and tasteful motion — November 3, 2026
+
+Published runtime **3fd5406**, release **df80f05326bb8b12**, assets **20261103-10**. [Checklist and verification](MOTION_LAYOUT.md).
+
+Participant settings/reporting now follow the argument column, independent of the tall sidebar. Native short page transitions, disclosure expansion, button/input feedback and menu/dialog/status entrances respect reduced motion and retain standard browser fallbacks. No dependency or application-flow change.
+
+Desktop, 390/320 mobile, SV/EN, light/dark, reduced motion and keyboard checked. Full arguments remain readable and unclipped. 74 domain/render checks +five JS polling checks +three release-integrity checks pass; package secret and historical scans pass. Backed-up deployment verified all95 live files, preflight, health and Chrome. No production content or settings were changed. Own browser tab/group and temporary overrides cleaned; original user tab preserved.
+
+---
 # Natural chat arguments resume the debate — November 3, 2026
 
 Published runtime **5709330**, release **0b80191299bd2953**, 95 verified files, ten existing migrations/26 tables, assets 20261103-9. [Real two-chat evidence and limits](RESUME_ACCEPTANCE.md).

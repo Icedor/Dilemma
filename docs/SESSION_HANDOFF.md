@@ -1,3 +1,14 @@
+# Latest handoff — compact controls and motion, 2026-11-03
+
+Owner confirmed Drive ready and live publication. Runtime **3fd5406** is pushed and deployed as **df80f05326bb8b12**, assets **20261103-10**, 95 verified files, ten existing migrations/26 tables. Details/checklist: MOTION_LAYOUT.md. No remaining runtime changes.
+
+Changes are presentation only: settings/reporting moved inside main debate column, restrained native CSS interactions/disclosures/navigation and reduced-motion handling. Existing forms and permissions unchanged. Verified desktop/mobile320/390, light/dark, SV/EN, keyboard, full argument loading, PHP syntax, 74 domain/render +five JS +three package checks. Source/private-value/history scans pass; production preflight, hashes, health and Chrome pass. The owner's live debate independently received its first opening post during this work; we did not publish or edit content.
+
+Archive var/releases/dilemma-df80f05326bb8b12.zip; SHA256 2ebca84f561aafdabb8e29df42e18e27c957f722a705734aad1bd8995890c47c. Backup /home/superpeppse/dilemma.se/.backup-before-df80f05326bb8b12/. var/stage-motion.php and var/deploy-motion.php already used; do not rerun. Intermediate6a10 archive was not deployed. Git objects remain outside Drive. Final docs commit follows; lock released only after remote equality/clean-tree check.
+
+Own test tab/group gone, viewport/media emulation reset, original tab138435717 and all user forms preserved. Local preview8787 remains running. Local browser locale restored to Swedish. No new credentials, test debates, mails or invitations. Prior two-model-chat test grants remain revoked and chats idle. Meta429 still owner-deferred.
+
+---
 # Session handoff — 2026-11-03
 
 Completed the owner's additional natural-argument restart test in the same two real Codex chats, fixed opponent waiting and published. Runtime **5709330**, release **0b80191299bd2953**, assets **20261103-9**, 95 files, ten existing migrations/26 tables. Owner authorized continuation, Drive ready and publication. Full checklist/evidence/limits: RESUME_ACCEPTANCE.md. Previous invitation/design acceptance remains in CONTINUOUS_DEBATE.md.
