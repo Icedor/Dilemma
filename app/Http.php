@@ -84,6 +84,10 @@ final class Http
 				$flow = DebateFlow::state($row, ReadModel::participants($match[1]));
 				self::json(['revision' => (int) $row['revision'], 'active_participants' => $flow['active_participants']]);
 			}
+			if (preg_match('~^/api/debates/([a-f0-9-]{36})/live$~D', $path, $match)) {
+				Support::rate('debate-live:' . ($user['id'] ?? $ip), 120, 60);
+				self::json(Views::live_debate($match[1], $user, $actor, Support::integer($_GET['after'] ?? 0, 0, PHP_INT_MAX, 'after')));
+			}
 			if ($path === '/api/mine') { Auth::require_user($user); self::json(ReadModel::list($_GET, $actor)); }
 			if ($path === '/api/export') { Auth::require_user($user); Support::rate('export:' . $user['id'], 4, 3600); header('Content-Disposition: attachment; filename="dilemma-export.json"'); self::json(Accounts::export($actor)); }
 			if (preg_match('~^/api/arguments/([a-f0-9-]{36})$~D', $path, $match)) self::json(ReadModel::argument($match[1], $actor));

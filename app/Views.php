@@ -31,6 +31,32 @@ final class Views
 		return self::layout($title, $content, $user, $path, $indexable, $description);
 	}
 
+	public static function live_debate(string $id, ?array $user, ?array $actor, int $after): array
+	{
+		$debate = ReadModel::live_debate($id, $actor, $after);
+		$member = $debate['viewer_member'];
+		$participants = array_column($debate['participants'], null, 'user_id');
+		$cards = [];
+		foreach ($debate['messages'] as $message) {
+			$author = $participants[$message['author_id']];
+			$cards[] = ['id' => $message['id'], 'ordinal' => (int) $message['ordinal'], 'html' => self::render('argument-card', compact('message', 'author', 'member', 'user', 'debate'))];
+		}
+		$flow = $debate['workflow'];
+		$next = $flow['next_action'];
+		$last = $cards ? $cards[count($cards) - 1]['ordinal'] : $after;
+		return [
+			'revision' => (int) $debate['revision'], 'message_count' => (int) $debate['message_count'],
+			'arguments' => $cards, 'next_ordinal' => $last, 'has_more' => $last < (int) $debate['message_count'],
+			'title' => I18n::t(!$member && $next === 'wait_for_decision' ? 'flow_public_decision' : 'flow_' . $next),
+			'hint' => in_array($next, ['publish_opening', 'publish_argument'], true) ? I18n::t('flow_publish_help') : ($next === 'ask_human' ? I18n::t('flow_ask_help') : ''),
+			'can_publish' => $flow['can_publish'], 'can_decide' => (bool) ($member && $member['left_at'] === null && !$debate['hidden'] && in_array($debate['status'], ['active', 'paused', 'awaiting_human'], true)),
+			'assessment' => $debate['latest_assessment'] ? ['id' => $debate['latest_assessment']['id'], 'excerpt' => $debate['latest_assessment']['excerpt'], 'url' => '/debate/' . $id . '?page=' . (int) ceil($debate['latest_assessment']['ordinal'] / 20) . '#argument-' . $debate['latest_assessment']['id']] : null,
+			'status' => $debate['status'], 'status_label' => I18n::t($debate['status'] === 'open' ? 'looking_for_opponent' : $debate['status']),
+			'public_label' => I18n::t($debate['is_public'] ? 'public' : 'private'),
+			'participants' => array_map(static fn ($person) => ['alias' => $person['alias'], 'connected' => I18n::t($person['ai_connected'] ? 'flow_connected' : 'flow_not_connected')], $flow['active_participants']),
+		];
+	}
+
 	public static function render(string $template, array $data): string
 	{
 		extract($data, EXTR_SKIP);
@@ -75,9 +101,9 @@ final class Views
 		return '<label class="check"><input type="checkbox" name="' . Support::escape($name) . '"' . ($checked ? ' checked' : '') . ($required ? ' required' : '') . '><span>' . Support::escape(I18n::t($label)) . '</span></label>';
 	}
 
-	public static function submit(string $label, string $class = ''): string
+	public static function submit(string $label, string $class = '', bool $disabled = false): string
 	{
-		return '<p class="form-feedback" role="status" aria-live="polite"></p><button class="button ' . Support::escape($class) . '" type="submit">' . Support::escape(I18n::t($label)) . '</button>';
+		return '<p class="form-feedback" role="status" aria-live="polite"></p><button class="button ' . Support::escape($class) . '" type="submit"' . ($disabled ? ' disabled' : '') . '>' . Support::escape(I18n::t($label)) . '</button>';
 	}
 
 	public static function scale(string $left = '', string $right = ''): string

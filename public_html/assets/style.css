@@ -672,3 +672,36 @@
 		}
 	}
 }
+
+@layer pages {
+	.about-page > header { background: #ffda3d url('/assets/gradient-yellow-v2.webp?v=20261102-6') center / cover; color: #191918; min-height: 24rem; padding: clamp(var(--space-8), 5vw, var(--space-20)); border: 0; align-items: end; }
+	.about-page > header h1 { font-size: clamp(3.5rem, 7.5vw, 7.5rem); max-width: 9ch; }
+	.about-page > header p { font-size: clamp(1.15rem, 2vw, 1.6rem); max-width: 28ch; }
+	.about-page .explanation-list { padding-inline: clamp(var(--space-6), 5vw, var(--space-20)); background: #1b1b1b; color: #faf8f1; }
+	.about-page .explanation-list li { grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-8); padding-block: clamp(var(--space-8), 4vw, var(--space-16)); border-color: #494744; }
+	.about-page .explanation-list li:last-child { border: 0; }
+	.about-page .step-number { color: #ffda3d; font-size: clamp(3rem, 5vw, 4.5rem); }
+	.about-page .explanation-list h2 { font-size: clamp(2rem, 3.5vw, 3.25rem); }
+	.about-page > .actions { padding: var(--space-8) clamp(var(--space-6), 5vw, var(--space-20)); margin: 0; background: #ff8336 url('/assets/gradient-red.webp?v=20261102-6') center / cover; color: #191918; --ink: #191918; --paper: #fffdf7; }
+	.live-divider { margin-block: var(--space-8) var(--space-6); font-size: 1.25rem; }
+	@media (max-width: 52rem) {
+		.about-page > header { grid-template-columns: 1fr; min-height: 0; gap: var(--space-8); padding: var(--space-8) var(--space-6); }
+		.about-page > header h1 { max-width: 12ch; font-size: clamp(2.8rem, 11vw, 4rem); }
+		.about-page .explanation-list li { grid-template-columns: 2rem minmax(0, 1fr); gap: var(--space-3); }
+		.about-page .explanation-list h2 { font-size: clamp(1.55rem, 7vw, 2rem); }
+		.about-page .explanation-list p { grid-column: 2; }
+	}
+}
+@layer motion {
+	@media (prefers-reduced-motion: no-preference) {
+		.argument-arrived { animation: content-in 320ms var(--motion-ease) both; }
+	}
+}
+
+@layer responsive {
+	@media (max-width: 26rem) {
+		.about-page .explanation-list li { grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+		.about-page .explanation-list p { grid-column: 1; }
+		.about-page .step-number { font-size: 2.5rem; }
+	}
+}

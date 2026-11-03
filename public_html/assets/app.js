@@ -187,7 +187,7 @@ document.addEventListener('submit', async event => {
 		feedback.focus();
 	} finally {
 		form.dataset.busy = 'false';
-		buttons.forEach(button => { button.disabled = false; });
+		buttons.forEach(button => { button.disabled = form.closest('.compose')?.dataset.canPublish === 'false'; });
 	}
 });
 
@@ -399,27 +399,113 @@ for (const details of document.querySelectorAll('[data-history]')) {
 	details.querySelector('[data-event-filter]').addEventListener('change', () => loadEvents(details, true));
 }
 
-// Announce changes without replacing the page or losing an unfinished form.
+// Only append new cards: existing text, selection, open panels and form nodes survive.
 const flowPanel = document.querySelector('[data-flow-revision]');
 const flowDebate = document.querySelector('[data-debate]')?.dataset.debate;
-if (flowPanel && flowDebate) {
+const liveArguments = document.querySelector('[data-live-after]');
+function readingAnchor() {
+	const focused = document.activeElement;
+	if (focused && focused !== document.body && focused.matches('input, textarea, select, button, summary, a')) {
+		const bounds = focused.getBoundingClientRect();
+		if (bounds.bottom > 0 && bounds.top < innerHeight) return focused;
+	}
+	const column = document.querySelector('.debate-main')?.getBoundingClientRect();
+	const x = column ? Math.max(8, Math.min(innerWidth - 8, column.left + Math.min(column.width / 2, 200))) : innerWidth / 2;
+	const hit = document.elementFromPoint(x, Math.min(120, innerHeight / 3));
+	return hit?.closest('p, summary, h1, h2, h3, label, li, .argument, .debate-management') || null;
+}
+function preserveReading(change) {
+	const anchor = readingAnchor();
+	const top = anchor?.getBoundingClientRect().top;
+	change();
+	if (anchor?.isConnected) {
+		const shift = anchor.getBoundingClientRect().top - top;
+		if (Math.abs(shift) > .5) window.scrollBy({ top: shift, behavior: 'instant' });
+	}
+}
+function applyLiveDebate(state) {
+	let added = 0;
+	const timeline = liveArguments.querySelector('.argument-timeline');
+	preserveReading(() => {
+		for (const card of state.arguments) {
+			if (document.getElementById('argument-' + card.id)) continue;
+			const template = document.createElement('template');
+			template.innerHTML = card.html;
+			const node = template.content.firstElementChild;
+			if (!node?.matches('details.argument') || node.dataset.argument !== card.id || node.id !== 'argument-' + card.id) throw new Error('Invalid argument card');
+			if (Number(liveArguments.dataset.historyPage) < Number(liveArguments.dataset.initialPages) && !timeline.querySelector('.live-divider')) timeline.append(element('h3', t('live_new_arguments'), 'live-divider'));
+			node.classList.add('argument-arrived'); timeline.append(node); added++;
+			const replies = document.querySelector('.compose [name=reply_to_id]');
+			if (replies) { const option = element('option', '#' + card.ordinal + ' · ' + node.querySelector('.argument-meta strong').textContent); option.value = card.id; replies.append(option); }
+		}
+		if (added) liveArguments.querySelector('.empty-message')?.remove();
+		liveArguments.dataset.liveAfter = String(state.next_ordinal);
+		flowPanel.dataset.flowRevision = String(state.revision);
+		liveArguments.querySelector('.section-heading > span').textContent = Math.ceil(state.message_count / 2) + ' ' + t('rounds');
+		const selection = window.getSelection();
+		const readingStatus = flowPanel.contains(document.activeElement) || (selection && !selection.isCollapsed && flowPanel.contains(selection.anchorNode));
+		if (!readingStatus) {
+			flowPanel.querySelector('h2').textContent = state.title;
+			flowPanel.querySelector('.section-heading > a').textContent = state.message_count + ' ' + t('arguments_count');
+			const hint = flowPanel.querySelector('[data-flow-hint]'); hint.textContent = state.hint; hint.hidden = !state.hint;
+			const assessment = flowPanel.querySelector('[data-live-assessment]');
+			assessment.hidden = !state.assessment;
+			if (state.assessment && assessment.dataset.assessmentId !== state.assessment.id) {
+				assessment.querySelector('p').textContent = state.assessment.excerpt;
+				assessment.querySelector('a').href = state.assessment.url;
+				assessment.dataset.assessmentId = state.assessment.id;
+			}
+			const people = flowPanel.querySelector('.connection-statuses');
+			if (JSON.stringify(state.participants) !== people.dataset.livePeople) {
+				people.replaceChildren(...state.participants.map(person => { const li = element('li'); li.append(element('strong', person.alias), element('span', person.connected)); return li; }));
+				people.dataset.livePeople = JSON.stringify(state.participants);
+			}
+		}
+		const badge = document.querySelector('.debate-heading-meta .status');
+		if (badge) { badge.textContent = state.status_label; badge.className = 'status status-' + state.status; }
+		const visibility = document.querySelector('.debate-heading-meta > span:last-child');
+		if (visibility) visibility.textContent = state.public_label;
+		const decision = document.querySelector('[data-live-decision]');
+		if (decision && !decision.contains(document.activeElement)) decision.hidden = !state.can_decide;
+		const compose = document.querySelector('.compose');
+		if (compose) {
+			compose.dataset.canPublish = String(state.can_publish);
+			const hint = compose.querySelector('[data-compose-wait]');
+			hint.hidden = state.can_publish;
+			hint.textContent = t(['ended', 'flagged', 'archived'].includes(state.status) ? 'live_draft_closed' : 'live_draft_wait');
+			const form = compose.querySelector('form');
+			if (form.dataset.busy !== 'true') {
+				form.querySelector('[type="submit"]').disabled = !state.can_publish;
+
+			}
+		}
+		// Preserve the receipt identity of an already-submitted request, including uncertain failures.
+		for (const input of document.querySelectorAll('form [name=revision]')) if (input.form.dataset.busy !== 'true' && !input.form.dataset.fingerprint) input.value = String(state.revision);
+		if (state.message_count > 0) for (const panel of document.querySelectorAll('[data-live-history]')) panel.hidden = false;
+	});
+	if (added) announce(added === 1 ? t('live_added_one') : t('live_added').replace('{count}', String(added)));
+	return added;
+}
+if (flowPanel && flowDebate && liveArguments) {
+	let polling = false, stopped = false;
+	const retry = flowPanel.querySelector('[data-retry-live]');
 	const poll = async () => {
+		if (polling || stopped) return;
 		if (document.hidden) { setTimeout(poll, 20000); return; }
+		polling = true;
 		try {
-			const state = await request(`/api/debates/${encodeURIComponent(flowDebate)}/status`);
-			if (String(state.revision) !== flowPanel.dataset.flowRevision) {
-				flowPanel.querySelector('.debate-update').hidden = false;
-				return;
-			}
-			for (const [index, person] of (state.active_participants || []).entries()) {
-				const status = flowPanel.querySelectorAll('.connection-statuses li span')[index];
-				if (status) status.textContent = t(person.ai_connected ? 'flow_connected' : 'flow_not_connected');
-			}
+			const state = await request('/api/debates/' + encodeURIComponent(flowDebate) + '/live?after=' + encodeURIComponent(liveArguments.dataset.liveAfter));
+			applyLiveDebate(state);
+			preserveReading(() => { flowPanel.querySelector('.debate-update').hidden = true; });
 			setTimeout(poll, 20000);
-		} catch { /* Stop after a failure; no automatic authentication retries. */ }
+		} catch {
+			// No automatic retry after revoked access, rate limits or a failed connection.
+			stopped = true;
+			preserveReading(() => { flowPanel.querySelector('.debate-update').hidden = false; });
+		} finally { polling = false; retry.disabled = false; }
 	};
 	setTimeout(poll, 20000);
-	flowPanel.querySelector('[data-refresh-debate]').addEventListener('click', () => location.reload());
+	retry.addEventListener('click', () => { if (polling) return; stopped = false; retry.disabled = true; poll(); });
 }
 
 const fragmentForm = document.querySelector('form[data-fragment]');

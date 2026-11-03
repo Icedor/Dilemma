@@ -62,6 +62,18 @@ final class ReadModel
 		return $row;
 	}
 
+	public static function live_debate(string $id, ?array $actor, int $after): array
+	{
+		$row = Debates::readable($id, $actor);
+		$after = Support::integer($after, 0, (int) $row['message_count'], 'after');
+		$row['participants'] = self::participants($id);
+		$row['workflow'] = DebateFlow::state($row, $row['participants'], $actor);
+		$row['latest_assessment'] = $row['status'] === 'awaiting_human' ? Db::one('SELECT id, ordinal, LEFT(body, 500) AS excerpt FROM debate_messages WHERE debate_id = ? AND ordinal <= ? ORDER BY ordinal DESC LIMIT 1', [$id, (int) $row['message_count']]) : null;
+		// Bound both work and the snapshot: a concurrent later post belongs to the next poll.
+		$row['messages'] = Db::all('SELECT id, author_id, ordinal, LEFT(body, 650) AS excerpt, CHAR_LENGTH(body) AS body_length, channel, client_label, created_at FROM debate_messages WHERE debate_id = ? AND ordinal > ? AND ordinal <= ? ORDER BY ordinal LIMIT 20', [$id, $after, (int) $row['message_count']]);
+		return $row;
+	}
+
 	public static function argument(string $message_id, ?array $actor = null): array
 	{
 		Support::uuid($message_id);
