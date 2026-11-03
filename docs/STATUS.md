@@ -1,3 +1,12 @@
+# Optional AI waiting and Icey credit — November 3, 2026
+
+Published runtime **663a884**, release **13569d022437111c**, assets **20261103-12**,98 files and11 migrations. [Checklist and evidence](OPTIONAL_WAITING.md).
+
+Manual mode is the default. One optional per-participant control selects15-minute compact checks for at most2 hours, with explicit stop and server expiry. Repeated enable/reload never extends a window. Only the human can select it; persistent debate access survives expiry. No AI service, background worker, auto-renewing goal or guaranteed token cost. Browser live updates remain20 seconds independently. Current guides replace unlimited waiting; existing chats need updated setup once.
+
+Exact Secret console implementation copied and matched against live reference. By Icey credit sits below footer logo.383 domain/HTTP/render checks, five JS suites and three package checks pass. Desktop/mobile320/390, SV/EN, keyboard, light/dark, reduced motion and real shortened-fixture UI expiry verified. No new real two-hour AI-chat run claimed. Full backup,98 live hashes, production preflight/health and authenticated Chrome checked. GitHub updated; local fixture/tabs/group cleaned. Meta429 unchanged and owner-deferred.
+
+---
 # Automatic live arguments and colorful About — November 3, 2026
 
 Published runtime **36f7c43**, release **281f062862a14fac**, assets **20261103-11**,96 verified files. [Checklist and browser evidence](LIVE_ARGUMENTS.md).
