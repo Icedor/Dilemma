@@ -1,3 +1,26 @@
+# Published and verified — November 3, 2026
+
+**Current release: 6efa482eedf1a1a6, source b8378e7, 89 live files.**
+See [the reconciled release checklist](NOVEMBER_03.md).
+
+Completed: persistent per-debate connection copying from the overview; scoped MCP
+prompts and first-chat guidance; stable invitation links, native share/copy and
+explicit email invitations with graphic and short copy; gradient avatars with
+three colors, drag/keyboard controls and truly round pickers; private chat URL
+field removed; owner admin grant verified; canonical/hreflang corrected.
+PWA installation screenshots are also complete and live.
+
+All 89 server hashes, eight migrations and production preflight pass. Source and
+all 26 database tables were backed up privately before installation. GitHub is
+updated. Final Google PageSpeed is **100/100/100/100 on mobile and desktop**:
+https://pagespeed.web.dev/analysis/https-dilemma-se/kug25tb9f5
+
+External limits: no actual connected AI-app debate or real device push/install
+was performed; local protocol and UI tests are documented. Meta 429 is deferred
+to Claude at the owner's explicit request. No support contact or security change.
+Earlier checkpoints below are historical, superseded by this entry.
+
+---
 # November 3 release prepared — publication in progress
 
 See [the current checklist](NOVEMBER_03.md). Release 56920eb5d9487656 contains
