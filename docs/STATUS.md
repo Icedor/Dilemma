@@ -1,3 +1,31 @@
+# Site-wide UI spacing published — November 3, 2026
+
+Runtime source **9cafb1e**, live **c1e82040fde74010**, 91 verified files; nine
+existing migrations unchanged. [Full checklist and QA](UI_SPACING.md).
+
+Shared spacing tokens now govern forms, actions, panels, page gutters, lists,
+profiles and admin. Invitation controls have 24px field/action separation,
+consistent width, no redundant create button after success and one divider per
+related disclosure. Normal controls are 52px, compact/icon targets at least 44px;
+round profile colors remain 48x48. Dashboard actions align and waiting status
+names the opponent. The 320px mobile scrollbar overflow is fixed.
+
+Verified local representative page types in SV/EN, light/dark, reduced motion,
+keyboard, 1440/390/320 widths. Live /new confirms CSS/JS 20261103-5, 24px form
+gaps, 8px label gaps, 52px controls and no horizontal overflow. 86 HTTP and
+24 JavaScript regression checks pass; syntax, package/private scans and 406
+historical blob checks pass. No new PageSpeed score is claimed for this release.
+
+Verified source/config and 26-table backup before installation:
+`.backup-before-c1e82040fde74010/`. Archive SHA256:
+`ca991dbc880aadba4d8bcb1b3f935a7e829d32370853c4075259d46102956e7c`.
+Production preflight and all 91 live hashes pass. GitHub updated. Local synthetic
+admin preview permission restored, viewport/theme reset, own temporary tabs
+closed; original user debate tab and production form progress preserved.
+No production invitation/post/mail/account permission was changed in this task.
+Prior completed features remain. Meta 429 remains owner-deferred to Claude.
+
+---
 # Direct access and opponent choices published — November 3, 2026
 
 Runtime source **419d0b5**, live release **e6c9e587a27ca216**, 91 verified files,
