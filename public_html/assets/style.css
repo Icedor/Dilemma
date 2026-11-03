@@ -616,3 +616,8 @@
 	.decision-panel:not([open]) { margin-block: 0 var(--space-6); padding-block: 0; }
 	.decision-panel:not([open]) > summary { padding-block: var(--space-4); }
 }
+
+@layer pages {
+	.debate-ai #connection-result { margin-top: var(--space-6); }
+	.viewpoints .stance-pair:has(> :only-child) { grid-template-columns: minmax(0, 1fr); }
+}
