@@ -1,3 +1,14 @@
+# Invitation and notification delivery — November 4
+
+Runtime **c7597ed**, release **9604184f5a2a06a0**, assets **20261104-4** are published and on GitHub. All 101 production hashes, migration 014, 26-table/private source backup, preflight and live health/invitation HTTP checks passed. Archive SHA256 f99560502801d917e16773362d8b7b81718a84ee692c5212831e7446320ff3ba. Backup is /home/superpeppse/dilemma.se/.backup-before-9604184f5a2a06a0/. Package integrity (three checks), private-value/key scan and 631 historical blobs passed.
+
+566 server/domain/HTTP/local-spool checks and eight JavaScript suites pass. Invitation email identifies the inviter and addressed recipient. Wrong-account preview provides recovery without disclosing private details. Owner explicitly chose email on for new participation; existing opt-outs remain unchanged. Push is a deliberate channel switch with a five-minute email fallback and duplicate suppression. Both account and debate choices are enforced. Transactional invitation/login email stays independent. [Full checklist](INVITATION_DELIVERY.md).
+
+One owner-requested production recipient correction was applied to their existing pending invitation, with the same token and expiry. Corrected owner preview verified. The single deduplicated resend was accepted by SMTP at 2026-11-04 13:33:01 UTC on its first attempt, without a reported error. Inbox placement is not independently verified. Private audit backup preserves the prior address. No invitation was accepted, no argument published and no participant preference changed.
+
+Computer control is still paused. Visual signup/invitation/email/PWA QA, actual device push and the real Claude application test remain pending owner resumption. Reuse the existing private connection-test topic for harmless receipt only. Meta429 remains owner-deferred. Do not rerun var/stage-invitation-delivery.php, var/deploy-invitation-delivery.php or var/correct-reported-invitation.php. They were already used.
+
+---
 # Email-first account entry published — November 4
 
 Runtime **89375a6**, release **a3a3bc25d4b10aef**, assets **20261104-3** are live and pushed. The reported silent failure for a new address on the sign-in page is fixed. Both entry links send a one-time email. New visitors choose a name and accept terms after verifying the address, and existing users sign in directly. Account creation is prominent in the header. The mobile form comes first, with shorter copy and a clear email/correction state.
