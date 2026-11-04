@@ -9,7 +9,7 @@ The owner requested a chosen icon library. Lucide was selected for its consisten
 - [x] Native control semantics, server-confirmed state, expiry and error behavior.
 - [x] SVG references resolve exactly once, decorative icons remain hidden from accessibility APIs, and action names remain visible.
 - [x] 19 waiting checks, 16 rendered controls checks and 284 HTTP checks passed, plus nine JavaScript suites and PHP/JS syntax checks.
-- [ ] Publish and verify release hashes and live source.
+- [x] Published runtime04ebb9f, releaseee0c8cc809b4feb4, assets20261104-5. All103 hashes,14 migrations,26-table/source/config backup, preflight and live page/icon sprite verified. SHA2567b569382e970ed8114688dae938a6334ffc545b9ea929f03d8c08827e8f9b975. Three package checks and665 historical blobs passed the release/private-value checks.
 - [ ] Visual desktop/mobile, keyboard, dark/light and reduced-motion QA awaits resumption of computer control.
 
 The owner has also reported a Codex 403 while trying to join the friend's debate and an access key printed in that chat. This is the next active investigation after publishing these controls. Identify the actual debate and credential used, inspect the relevant chat without reproducing its secret, correct per-debate connection selection, and revoke the specifically exposed access. Preserve the current tasks and all earlier pending client checks.
