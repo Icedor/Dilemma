@@ -36,6 +36,6 @@ check(count($updated['sources']) === 3 && $updated['amendments'][0]['clarificati
 $workflow = $call($next_client, 'dilemma_get_debate', ['debate_id' => $id])['workflow'];
 check(str_contains($workflow['instructions'], 'CITATIONS AND REUSABLE SOURCES') && str_contains($workflow['instructions'], 'dilemma_get_argument'), 'An existing chat receives the current citation instructions when reading the debate');
 foreach (['sv', 'en'] as $locale) {
-	check(str_contains(AiSetup::connector($id, $locale), 'CITATIONS AND REUSABLE SOURCES') && str_contains(AiSetup::text(Support::token(), $id, null, $locale), 'CITATIONS AND REUSABLE SOURCES'), 'Native and direct setup include citation guidance in ' . $locale);
+	check(str_contains(AiSetup::connector($id, $locale), 'prompts/get dilemma_debate') && str_contains(AiSetup::text(Support::token(), $id, null, $locale), 'result.instructions'), 'Native and direct bootstrap retrieve the full server guidance in ' . $locale);
 }
 echo 'SUCCESS: ' . $checks . " source handoff and security checks.\n";

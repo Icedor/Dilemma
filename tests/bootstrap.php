@@ -45,3 +45,23 @@ function actor_token(array $actor, bool $write, ?string $id = null): array {
 	$result = Connections::create($actor, ['label' => 'Protocol fixture', 'scopes' => $write ? 'debates:read arguments:write' : 'debates:read', 'debate_id' => $id]);
 	return ['token' => $result['access_token'], 'actor' => Connections::authenticate('Bearer ' . $result['access_token']), 'id' => $result['connection_id']];
 }
+
+// Exercise the short clipboard bootstrap followed by the server's startup protocol.
+function setup_requests(string $setup_text, string $debate_id): array {
+	$requests = [];
+	foreach (explode("\n", $setup_text) as $line) {
+		if (!str_starts_with($line, '{')) continue;
+		$request = json_decode($line, true, 32, JSON_THROW_ON_ERROR);
+		$request['params']['capabilities'] = (object) [];
+		$requests[] = $request;
+	}
+	$requests[] = ['jsonrpc'=>'2.0', 'id'=>2, 'method'=>'tools/list'];
+	$calls = [
+		['name'=>'dilemma_whoami', 'arguments'=>(object) []],
+		['name'=>'dilemma_test_connection', 'arguments'=>(object) []],
+		['name'=>'dilemma_test_write', 'arguments'=>['idempotency_key'=>Support::id()]],
+		['name'=>'dilemma_get_debate', 'arguments'=>['debate_id'=>$debate_id]],
+	];
+	foreach ($calls as $index => $params) $requests[] = ['jsonrpc'=>'2.0', 'id'=>$index + 3, 'method'=>'tools/call', 'params'=>$params];
+	return $requests;
+}

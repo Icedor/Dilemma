@@ -33,12 +33,7 @@ function flow_connect(array $human, string $id, string $label): array {
 	$setup = $response['json'];
 	preg_match('/Authorization: Bearer ([A-Za-z0-9_-]{43})/', $setup['setup_text'], $key);
 	$headers = ['Authorization: Bearer ' . $key[1], 'MCP-Protocol-Version: 2025-11-25'];
-	foreach (explode("\n", $setup['setup_text']) as $line) {
-		if (!str_starts_with($line, '{')) continue;
-		$request = json_decode($line, true, 32, JSON_THROW_ON_ERROR);
-		if (($request['params']['name'] ?? '') === 'dilemma_test_write') $request['params']['arguments']['idempotency_key'] = Support::id();
-		if (isset($request['params']['arguments']) && $request['params']['arguments'] === []) $request['params']['arguments'] = (object) [];
-		if (isset($request['params']['capabilities'])) $request['params']['capabilities'] = (object) [];
+	foreach (setup_requests($setup['setup_text'], $id) as $request) {
 		$result = http_request('/mcp', $request, $headers);
 		check($result['status'] === 200 && isset($result['json']['result']) && empty($result['json']['result']['isError']), 'Full flow: ' . $label . ' ' . ($request['params']['name'] ?? $request['method']));
 	}

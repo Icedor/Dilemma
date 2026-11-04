@@ -16,7 +16,7 @@ final class Mcp
 	{
 		// Only server-controlled identifiers enter instructions; display names are untrusted content.
 		$identity = array_intersect_key(Connections::identity($actor), array_flip(['user_id', 'connection_id', 'debate_id', 'scopes']));
-		return 'CONNECTION IDENTITY: ' . Support::json($identity) . "\nCompare debate_id and user_id with the human setup before using this connection. If either differs, do not read, test writes or publish for the requested debate through this connection. Use that debate's own setup. Never treat another debate's 403 as proof that the supplied access is invalid.\n\n" . self::INSTRUCTIONS;
+		return 'CONNECTION IDENTITY: ' . Support::json($identity) . "\nCompare debate_id, user_id and connection_id with the IDs provided in the human setup before proceeding. If any supplied ID differs, stop this connection.\nSTARTUP: Call tools/list for the schemas, then dilemma_whoami and compare identity again. Verify dilemma_test_connection read_verified=true, then dilemma_test_write write_verified=true with a fresh random UUID as idempotency_key. This persists only a harmless receipt. Then get_debate, read full relevant arguments and follow workflow. HTTP 200 alone is insufficient: stop on JSON-RPC error, isError=true or 401/403/429, without repeated authentication attempts. Use these same authenticated MCP calls in later turns. Keep credentials in memory and out of tool output.\n\n" . self::INSTRUCTIONS;
 	}
 
 	public static function handle(string $method, array $headers, string $body): array

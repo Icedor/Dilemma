@@ -108,13 +108,7 @@ try {
 	check(!str_contains($record['return_target'], $invite) && Support::unseal($record['return_target']) === $invite, 'Invitation continuation is encrypted at rest');
 	preg_match('/Authorization: Bearer ([A-Za-z0-9_-]{43})/', $setup['json']['setup_text'], $credential);
 	$direct_headers = ['Authorization: Bearer ' . $credential[1], 'MCP-Protocol-Version: 2025-11-25'];
-	foreach (explode("\n", $setup['json']['setup_text']) as $line) {
-		if (!str_starts_with($line, '{')) continue;
-		$request = json_decode($line, true, 32, JSON_THROW_ON_ERROR);
-		if (($request['params']['name'] ?? '') === 'dilemma_test_write') $request['params']['arguments']['idempotency_key'] = Support::id();
-		// JSON-RPC object arguments must remain objects when serialized.
-		if (isset($request['params']['arguments']) && $request['params']['arguments'] === []) $request['params']['arguments'] = (object) [];
-		if (isset($request['params']['capabilities'])) $request['params']['capabilities'] = (object) [];
+	foreach (setup_requests($setup['json']['setup_text'], $setup_debate['id']) as $request) {
 		$response = http_request('/mcp', $request, $direct_headers);
 		check($response['status'] === 200 && isset($response['json']['result']) && empty($response['json']['result']['isError']), 'Copied JSON instruction executes through real HTTP: ' . ($request['params']['name'] ?? $request['method']));
 		if (($request['params']['name'] ?? '') === 'dilemma_test_connection') check($response['json']['result']['structuredContent']['read_verified'] === true, 'Direct HTTP confirms authenticated read access');

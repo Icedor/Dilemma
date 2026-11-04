@@ -23,16 +23,15 @@ check(Db::one('SELECT write_test_at FROM mcp_connections WHERE id=?', [$old['con
 $headers = ['Content-Type'=>'application/json', 'MCP-Protocol-Version'=>Mcp::LEGACY, 'Authorization'=>'Bearer '.$token];
 $call = static fn (array $request): array => Mcp::handle('POST', $headers, Support::json($request));
 $methods = [];
-foreach (explode("\n", $right['setup_text']) as $line) {
-	if (!str_starts_with($line, '{')) continue;
-	$request = json_decode($line, true, 32, JSON_THROW_ON_ERROR);
+foreach (setup_requests($right['setup_text'], $second['id']) as $request) {
 	$name = $request['params']['name'] ?? $request['method']; $methods[] = $name;
-	if ($name === 'dilemma_test_write') $request['params']['arguments']['idempotency_key'] = Support::id();
-	if (isset($request['params']['arguments']) && !$request['params']['arguments']) $request['params']['arguments'] = (object) [];
-	if (isset($request['params']['capabilities'])) $request['params']['capabilities'] = (object) [];
 	$result = $call($request);
 	check($result['status'] === 200 && isset($result['body']['result']) && empty($result['body']['result']['isError']), 'Copied direct setup works: ' . $name);
-		if ($name === 'initialize') check(str_contains($result['body']['result']['instructions'], $second['id']) && str_contains($result['body']['result']['instructions'], $actor['user_id']) && !str_contains($result['body']['result']['instructions'], 'RoutingA'), 'Initialization advertises the actual scope without promoting a display name into instructions');
+	if ($name === 'initialize') {
+		$guide = $result['body']['result']['instructions'];
+		check(str_contains($guide, $second['id']) && str_contains($guide, $actor['user_id']) && !str_contains($guide, 'RoutingA'), 'Initialization advertises the actual scope without promoting a display name into instructions');
+		check(str_contains($guide, 'dilemma_test_connection') && str_contains($guide, 'dilemma_test_write') && str_contains($guide, 'CITATIONS AND REUSABLE SOURCES') && str_contains($guide, 'WAITING IS OPTIONAL'), 'Short bootstrap retrieves complete startup, sources and waiting rules');
+	}
 	if ($name === 'dilemma_whoami') check($result['body']['result']['structuredContent']->connection_id === $right['connection_id'] && $result['body']['result']['structuredContent']->debate_id === $second['id'], 'Pasted credential selects the requested connection while an old connection exists');
 	if ($name === 'dilemma_test_connection' || $name === 'dilemma_test_write') check($result['body']['result']['structuredContent']->debate_id === $second['id'], 'Test receipt identifies its debate: ' . $name);
 }
@@ -48,6 +47,10 @@ foreach (ToolRegistry::tools($actor) as $tool) check(str_contains($tool['descrip
 foreach (['sv','en'] as $locale) {
 	$native = AiSetup::connector($second['id'], $locale, $actor['user_id']);
 	check(str_contains($native, $actor['user_id']) && !str_contains($native, 'Bearer '), 'Native setup checks participant identity without a secret: ' . $locale);
+	foreach ([[], ['enabled'=>true, 'until'=>'2099-01-01T12:00:00Z']] as $waiting) {
+		$compact = AiSetup::text($token, $second['id'], null, $locale, $waiting, ['user_id'=>$actor['user_id'], 'connection_id'=>$right['connection_id']]);
+		check(mb_strlen($compact) < 2000 && str_starts_with($compact, 'PRIVATE DILEMMA ACCESS') && str_contains($compact, 'result.instructions'), 'Clipboard bootstrap stays compact with early redaction guidance: ' . $locale);
+	}
 }
 check(str_contains($right['setup_text'], 'Expected connection ID: '.$right['connection_id']) && str_contains($right['setup_text'], 'Expected user ID: '.$actor['user_id']), 'Direct setup pins both connection and participant');
 
