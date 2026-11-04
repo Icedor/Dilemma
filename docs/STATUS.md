@@ -1,3 +1,9 @@
+# Windows Claude test — follow-up November 4
+
+Owner requested a separate test topic. Created a private, clearly marked paper-books/e-books test on production with public visibility and email off; zero arguments. The hamburger debate is untouched. Windows app is reachable through Computer Use, but its visible banner requires fresh sign-in even for ordinary chat; an app update is also offered. Owner was asked to sign in. Native OAuth grant and app read/write-receipt test remain pending that login. No runtime changes or redeployment needed for this checkpoint. See [test details](CLAUDE_CONNECTION.md) and private operations notes for the test URL.
+
+---
+
 # Claude connection release — November 4, 2026
 
 Runtime **4a6df1b**, release **3b709088a1439374**, assets **20261104-1** are published on GitHub and production. All99 production file hashes match; twelve migrations and26 tables verified. Preflight and health200 passed. SHA256 e567b8634f3ac02d9539079920b443f129d39f1479cd9c40a9e554d96eef6129. Source/config/database backup: /home/superpeppse/dilemma.se/.backup-before-3b709088a1439374/.

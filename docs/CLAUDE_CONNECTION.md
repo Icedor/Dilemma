@@ -5,7 +5,7 @@
 - [x] Registration/authentication compatibility and per-debate consent.
 - [x] App-specific instructions and protected manual fallback.
 - [x] Domain/HTTP and real-client checks to the available consent boundary.
-- [ ] Final live Claude grant/read/write receipt: awaiting owner approval.
+- [ ] Final live Claude grant/read/write receipt: new private topic authorized; awaiting app sign-in.
 - [x] Backup, release, GitHub, production verification and handoff.
 
 Evidence: November4 11:30:07 Swedish time POST/oauth/register returned201, despite Claude reporting a registration failure. Request bodies were not logged, so exact Claude parser reason is unverified. Existing code returned auth=none, no secret, missing issued_at; it defaulted to none contrary to RFC7591 default client_secret_basic. OAuth consent omitted debate selection and could grant account-wide access. New consent will require one owned debate.
@@ -19,3 +19,11 @@ Current implementation: public/secret-post/secret-basic clients; hashed client s
 References: [Claude authentication](https://claude.com/docs/connectors/building/authentication), [custom connector setup](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp), [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html).
 
 Published runtime4a6df1b, release3b709088a1439374,99 verified files, twelve migrations. Production preflight and health200 pass. Secret/history scans pass. All temporary viewport/media overrides reset. Consent screenshot: C:/Users/hello/.codex/visualizations/2026/11/02/01a19c23-f646-7402-9879-c50d7458328b/dilemma-claude-consent-live.png.
+
+## Windows app follow-up
+
+Owner requested a new private test topic and a real Claude Windows-app check. Created a clearly marked paper-books versus e-books test through the live website, with public publication and email notifications off; zero arguments. Existing hamburger debate was untouched. The exact test URL is in private operations notes.
+
+Computer Use reaches the installed Claude Windows app. Ordinary chat mode is available, but both Code and ordinary chat display a recent-sign-in requirement; the app also reports an available relaunch update. No login automation, token exchange, argument or test receipt has been performed in this app. Owner was asked to complete sign-in, per the Windows Computer Use rule. Continue from the existing unconnected Dilemma connector, choose only the new test topic at consent, then verify whoami, read and harmless persisted write receipt in the actual app.
+
+The app accessibility tree lagged behind the visible page; use a fresh screenshot for native-app decisions after sign-in. Existing unconnected Claude connector can be reused for the new topic. No production connector grant has yet been created in this test.
