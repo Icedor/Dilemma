@@ -715,3 +715,14 @@
 	.ai-wait-control p { margin: 0; font-size: .875rem; line-height: 1.5; }
 	.ai-wait-control p:empty { display: none; }
 }
+
+@layer components {
+	.connect-start > [data-app-route] { margin-block-start: var(--space-4); }
+	.connect-start [data-app-route="server"] > .button { margin-block-start: var(--space-3); }
+	.connect-steps { padding-inline-start: 1.25rem; display: grid; gap: var(--space-4); font-size: .9375rem; line-height: 1.55; }
+	.server-copy { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-block: var(--space-4); }
+	.server-copy code, .oauth-callback { overflow-wrap: anywhere; }
+	.oauth-consent { max-width: 48rem; }
+	.oauth-consent h1 { font-size: clamp(2.5rem, 7vw, 5rem); }
+	.oauth-consent form { padding: var(--space-6); border: 1px solid var(--rule); margin-block: var(--space-6); }
+}

@@ -22,7 +22,7 @@ final class AiWaiting
 			$member = Debates::member($id, $actor['user_id']);
 			if ($input['enabled'] && ($row['hidden'] || $member['left_at'] !== null || !in_array($row['status'], ['draft', 'invited', 'open', 'active', 'awaiting_human'], true))) throw new Failure(409, 'invalid_transition');
 			$setup = Connections::current($actor, $id);
-			if (!$setup || $setup['revoked']) throw new Failure(409, 'connection_required');
+			if (!$setup || ($setup['revoked'] && !Db::one('SELECT id FROM mcp_connections WHERE user_id=? AND debate_id=? AND revoked_at IS NULL LIMIT 1', [$actor['user_id'], $id]))) throw new Failure(409, 'connection_required');
 			// Repeated clicks/retries never extend an existing window.
 			$until = !$input['enabled'] ? null : (self::policy($member)['enabled'] ? $member['ai_wait_until'] : gmdate('Y-m-d H:i:s', time() + 7200));
 			Db::run('UPDATE debate_participants SET ai_wait_until = ? WHERE debate_id = ? AND user_id = ?', [$until, $id, $actor['user_id']]);

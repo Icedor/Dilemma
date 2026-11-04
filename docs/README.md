@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Claude connection and app-specific onboarding](CLAUDE_CONNECTION.md)
+
 - [Optional bounded AI waiting and Icey credit](OPTIONAL_WAITING.md)
 
 - [Real two-chat resumption after fresh human arguments](RESUME_ACCEPTANCE.md)

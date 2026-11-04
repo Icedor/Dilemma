@@ -105,9 +105,9 @@ try {
 	$unauthorized = Mcp::handle('POST', ['Content-Type' => 'application/json'], Support::json(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/list']));
 	check($unauthorized['status'] === 401 && isset($unauthorized['headers']['WWW-Authenticate']), 'Unauthenticated MCP advertises protected-resource metadata');
 
-	$client = OAuth::register(['client_name' => 'Dilemma test client', 'redirect_uris' => ['https://client.example.test/callback']], 'oauth-' . $run);
+	$client = OAuth::register(['token_endpoint_auth_method' => 'none', 'client_name' => 'Dilemma test client', 'redirect_uris' => ['https://client.example.test/callback']], 'oauth-' . $run);
 	$verifier = Support::token();
-	$authorize = ['client_id' => $client['client_id'], 'redirect_uri' => $client['redirect_uris'][0], 'response_type' => 'code', 'code_challenge_method' => 'S256', 'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '='), 'resource' => Config::url('/mcp'), 'scope' => 'debates:read arguments:write', 'state' => 'fixture-state', 'approve' => true];
+	$authorize = ['client_id' => $client['client_id'], 'redirect_uri' => $client['redirect_uris'][0], 'response_type' => 'code', 'code_challenge_method' => 'S256', 'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '='), 'resource' => Config::url('/mcp'), 'scope' => 'debates:read arguments:write', 'state' => 'fixture-state', 'approve' => true, 'debate_id' => $id];
 	$authorization = OAuth::authorize($a['actor'], $authorize);
 	parse_str(parse_url($authorization['redirect'], PHP_URL_QUERY), $callback);
 	check($callback['state'] === 'fixture-state', 'OAuth preserves client state on an exact registered callback');

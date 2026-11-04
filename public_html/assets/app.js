@@ -128,7 +128,7 @@ document.addEventListener('submit', async event => {
 	if (form.dataset.busy === 'true' || !form.reportValidity()) return;
 	if (form.dataset.confirm && !window.confirm(t(form.dataset.confirm))) return;
 	const input = collect(form);
-	if (form.dataset.result === 'login') input.return_to = storageGet('dilemma:oauth-return') || (storageGet('dilemma:invitation') ? '/invite#' + storageGet('dilemma:invitation') : '');
+	if (form.dataset.result === 'login') input.return_to = input.return_to || storageGet('dilemma:oauth-return') || (storageGet('dilemma:invitation') ? '/invite#' + storageGet('dilemma:invitation') : '');
 	if (form.dataset.confirm) input.confirm = true;
 	const fingerprint = JSON.stringify({ ...input, idempotency_key: undefined });
 	if (form.dataset.fingerprint && form.dataset.fingerprint !== fingerprint) {
@@ -158,7 +158,7 @@ document.addEventListener('submit', async event => {
 				location.assign(data.redirect);
 				break;
 			}
-			case 'created': location.assign(`/debate/${encodeURIComponent(data.debate_id)}#connect-ai`); break;
+			case 'created': { const oauthReturn = storageGet('dilemma:oauth-return'); storageRemove('dilemma:oauth-return'); location.assign(oauthReturn?.startsWith('/oauth/authorize?') ? oauthReturn + '&debate_id=' + encodeURIComponent(data.debate_id) : `/debate/${encodeURIComponent(data.debate_id)}#connect-ai`); break; }
 			case 'accepted': storageRemove('dilemma:invitation'); location.assign(data.debate_id ? `/debate/${encodeURIComponent(data.debate_id)}#connect-ai` : '/app'); break;
 			case 'deleted': clearPrivateStorage(); location.assign('/'); break;
 			case 'flag': storageSet('dilemma:flag-replay', location.pathname); location.reload(); break;
@@ -215,16 +215,34 @@ function renderWaiting(waiting = {}) {
 const waitingButton = document.querySelector('#ai-wait-toggle');
 if (waitingButton) renderWaiting({ enabled: waitingButton.getAttribute('aria-pressed') === 'true', until: waitingButton.dataset.until });
 
+function chooseAiApp() {
+	const choice = document.querySelector('#ai-app-choice');
+	if (!choice) return;
+	const native = choice.value === 'native' || choice.value === 'other';
+	for (const panel of document.querySelectorAll('[data-app-route]')) panel.hidden = !((panel.dataset.appRoute === choice.value && choice.value !== '') || (['server', 'fallback'].includes(panel.dataset.appRoute) && native));
+	const copy = document.querySelector('[data-ai-copy]');
+	copy.disabled = !choice.value;
+	copy.hidden = native || !choice.value;
+	copy.dataset.copyTarget = native ? 'ai-native-setup' : 'ai-setup';
+	const details = document.querySelector('.setup-text-disclosure');
+	if (details) details.hidden = native || !choice.value;
+}
+document.querySelector('#ai-app-choice')?.addEventListener('change', chooseAiApp);
+chooseAiApp();
+
 function renderSetup(data) {
 	const section = document.querySelector('[data-debate-ai]');
-	const target = document.querySelector('[data-private-setup]');
+	const target = document.querySelector('#ai-setup');
 	if (!section || !target) return;
 	target.value = data.setup_text || '';
+	if (data.native_setup) document.querySelector('#ai-native-setup').value = data.native_setup;
+	document.querySelector('#ai-header').value = (target.value.match(/Authorization: (Bearer [A-Za-z0-9_-]{43})/) || [])[1] || '';
+	chooseAiApp();
 	renderWaiting(data.waiting);
 	document.querySelector('#connection-result').hidden = data.revoked || !target.value;
 	document.querySelector('#connection-copy-status').textContent = data.revoked ? t('setup_removed') : '';
 	const revoke = document.querySelector('#revoke-new-connection');
-	revoke.dataset.connectionId = data.connection_id; revoke.disabled = false;
+	revoke.dataset.connectionId = data.connection_id; revoke.disabled = false; revoke.hidden = Boolean(data.revoked);
 	document.querySelector('#renew-debate-connection').hidden = !data.revoked;
 	document.querySelector('#retry-debate-connection').hidden = true;
 	section.dataset.setupReady = 'true';
@@ -275,20 +293,6 @@ document.addEventListener('click', async event => {
 			if (navigator.share) await navigator.share({ title: 'Dilemma', url: share.dataset.share });
 			else announce(t(await copyText(share.dataset.share) ? 'copied' : 'setup_copy_failed'));
 		} catch (error) { if (error.name !== 'AbortError') announce(t('network_error')); }
-	}
-	const setupButton = event.target.closest('[data-overview-setup]');
-	if (setupButton && !setupButton.disabled) {
-		const card = setupButton.closest('[data-my-debate]'); const feedback = card.querySelector('.form-feedback');
-		setupButton.disabled = true; feedback.textContent = t('working');
-		try {
-			const data = await request('/api/connections/setup', { debate_id: card.dataset.myDebate });
-			if (data.revoked) { feedback.textContent = t('setup_removed'); }
-			else {
-				const text = card.querySelector('[data-private-setup]'); text.value = data.setup_text; text.closest('label').hidden = false;
-				feedback.textContent = t(await copyText(text.value, text) ? 'setup_copied' : 'setup_copy_failed');
-			}
-		} catch (error) { feedback.textContent = error.message; }
-		finally { setupButton.disabled = false; }
 	}
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {

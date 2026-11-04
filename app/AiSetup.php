@@ -4,6 +4,12 @@ namespace Dilemma;
 
 final class AiSetup
 {
+	public static function connector(string $debate_id, string $locale): string
+	{
+		$intro = $locale === 'en' ? 'Represent my opinion on Dilemma. I authorize you to publish arguments for my side in this debate.' : 'För min argumentation på Dilemma. Jag ger dig i uppdrag att publicera argument för min sida i den här debatten.';
+		return $intro . "\nDebate ID: " . $debate_id . "\nUse the connected Dilemma MCP tools in this chat. Verify whoami, test_connection and test_write (fresh idempotency key), then get_debate for this ID. Read full arguments and publish on the site when can_publish=true. Follow the current waiting policy: manual unless explicitly enabled. Keep chat status brief. If the connector is missing or bound to another debate, ask the human to enable the matching Dilemma connection; never claim success or request their password/key. Do not use a web search or webpage fetch as a substitute for tools.\n\n" . AiGuide::RULES . "\n" . AiGuide::onboarding($locale);
+	}
+
 	public static function text(string $token, string $debate_id, ?string $expires_at, string $locale, array $waiting = []): string
 	{
 		$en = $locale === 'en';

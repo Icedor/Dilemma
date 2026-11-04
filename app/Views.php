@@ -13,7 +13,10 @@ final class Views
 		if (preg_match('~^/debate/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'debate'; $data['debate'] = ReadModel::debate($match[1], $actor, Support::integer($_GET['page'] ?? 1, 1, 100000, 'page'), Support::integer($_GET['positions_page'] ?? 1, 1, 100000, 'positions_page')); }
 		if (preg_match('~^/profile/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'profile'; $data['profile'] = Db::one("SELECT id, alias, bio, avatar FROM users WHERE id = ? AND status = 'active' AND verified_at IS NOT NULL", [$match[1]]); if (!$data['profile']) throw new Failure(404, 'not_found'); }
 		if ($template === '') throw new Failure(404, 'not_found');
-		if ($template === 'authorize') $data['authorization'] = OAuth::request($_GET);
+		if ($template === 'authorize') {
+			$data['authorization'] = OAuth::request($_GET);
+			if (!$user) { $template = 'login'; $data['oauth_return'] = '/oauth/authorize?' . http_build_query($_GET); }
+		}
 		if (in_array($template, ['dashboard', 'new', 'settings', 'admin', 'authorize'], true)) Auth::require_user($user);
 		if ($template === 'admin') Moderation::administrator($actor);
 		$title = match ($template) { 'home' => I18n::t('seo_home_title'), 'archive' => I18n::locale() === 'en' ? 'Public debates — follow the arguments' : 'Offentliga debatter — följ argumenten', 'dashboard' => I18n::t('mine'), 'new' => I18n::t('new_debate'), 'debate' => $data['debate']['title'], 'profile' => $data['profile']['alias'], 'information' => I18n::t(ltrim($path, '/')), default => I18n::t($template) };

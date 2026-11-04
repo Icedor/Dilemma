@@ -31,7 +31,7 @@ final class Connections
 	{
 		$revoked = $row['revoked_at'] !== null;
 		$waiting = AiWaiting::policy(Debates::member($row['debate_id'], $row['user_id']));
-		return ['connection_id' => $row['connection_id'], 'waiting' => $waiting, 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale(), $waiting)];
+		return ['connection_id' => $row['connection_id'], 'waiting' => $waiting, 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'native_setup' => AiSetup::connector($row['debate_id'], I18n::locale()), 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale(), $waiting)];
 	}
 
 	public static function setup(array $actor, array $input): array

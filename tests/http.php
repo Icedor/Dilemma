@@ -24,6 +24,8 @@ function http_request(string $path, ?array $input = null, array $headers = [], s
 // Reset only loopback fixture buckets in the guarded, isolated test database.
 foreach (['login:ip:127.0.0.1', 'verify:127.0.0.1', 'invitation-preview:127.0.0.1'] as $fixture_bucket) Db::run('DELETE FROM rate_limits WHERE bucket = ?', [Support::hash($fixture_bucket . ':' . (int) floor(time() / 900))]);
 
+Db::run('DELETE FROM rate_limits WHERE bucket = ?', [Support::hash('oauth-register:127.0.0.1:' . (int) floor(time() / 3600))]);
+
 $directory = sys_get_temp_dir() . '/dilemma-http-' . Support::id();
 mkdir($directory, 0700);
 mkdir($directory . '/empty', 0700);
@@ -74,7 +76,7 @@ try {
 	$debate_page = http_request('/debate/' . $setup_debate['id'], null, [], $cookie);
 	check($debate_page['status'] === 200 && str_contains($debate_page['body'], 'data-private-setup') && str_contains($debate_page['body'], 'Authorization: Bearer ') && $debate_page['headers']['cache-control'][0] === 'no-store', 'Own debate shows the ready-to-copy setup without caching');
 	$overview = http_request('/app', null, [], $cookie);
-	check($overview['status'] === 200 && str_contains($overview['body'], 'data-my-debate="' . $setup_debate['id'] . '"') && str_contains($overview['body'], 'data-overview-setup') && !str_contains($overview['body'], 'Authorization: Bearer '), 'Overview has debate-specific controls without eagerly disclosing credentials');
+	check($overview['status'] === 200 && str_contains($overview['body'], 'data-my-debate="' . $setup_debate['id'] . '"') && str_contains($overview['body'], '#connect-ai') && !str_contains($overview['body'], 'Authorization: Bearer '), 'Overview has debate-specific controls without eagerly disclosing credentials');
 	check(!str_contains(http_request('/settings', null, [], $cookie)['body'], 'name="chat_link"'), 'Profile no longer asks for an AI conversation URL');
 	check(!str_contains(http_request('/debate/' . $setup_debate['id'])['body'], 'Authorization: Bearer '), 'Public debate page never exposes participant credentials');
 	check(http_request('/api/push/subscribe', ['endpoint' => 'https://fcm.googleapis.com/fcm/send/invalid', 'consent' => true], [], $cookie)['status'] === 403, 'Push subscription requires CSRF protection');
@@ -84,11 +86,11 @@ try {
 	check(http_request('/api/connections', ['label' => 'Invalid input', 'scopes' => ['bad']], $session_headers, $cookie)['status'] === 400, 'Malformed scope is a client error');
 	check(http_request('/api/debates?q%5B%5D=bad')['status'] === 422, 'Malformed query is rejected without server failure');
 	check(http_request('/oauth/register', ['client_name' => 'Invalid client', 'redirect_uris' => ['https://client.example.test/callback'], 'grant_types' => 'bad'])['status'] === 400, 'Malformed OAuth metadata is rejected');
-	$client = OAuth::register(['client_name' => 'HTTP test', 'redirect_uris' => ['https://client.example.test/callback']], 'http-' . $run);
+	$client = OAuth::register(['token_endpoint_auth_method' => 'none', 'client_name' => 'HTTP test', 'redirect_uris' => ['https://client.example.test/callback']], 'http-' . $run);
 	$params = ['client_id' => $client['client_id'], 'redirect_uri' => $client['redirect_uris'][0], 'response_type' => 'code', 'code_challenge_method' => 'S256', 'code_challenge' => Support::token(), 'resource' => Config::url('/mcp'), 'scope' => 'debates:read', 'state' => 'http-fixture'];
 	$return = '/oauth/authorize?' . http_build_query($params);
 	$authorize = http_request($return);
-	check($authorize['status'] === 401 && str_contains($authorize['body'], 'data-auth-return='), 'OAuth login offers a preserved authorization return');
+	check($authorize['status'] === 200 && str_contains($authorize['body'], 'name="return_to"'), 'OAuth login offers a preserved authorization return');
 	$email = 'qa-http-' . $run . '@example.test';
 	check(http_request('/api/login', ['email' => $email, 'alias' => 'HTTP login', 'accept_terms' => true, 'return_to' => $return])['status'] === 200, 'Magic-link request accepts a validated OAuth destination');
 	$account = Db::one('SELECT id FROM users WHERE email = ?', [$email]);
@@ -133,6 +135,7 @@ try {
 	check($wait_response['status'] === 200 && $wait_response['json']['waiting']['enabled'], 'Authenticated HTTP opt-in returns bounded setup');
 	$wait_off = http_request('/api/connections/waiting', array_replace($wait_input, ['enabled' => false]), $session_headers, $cookie);
 	check($wait_off['status'] === 200 && !$wait_off['json']['waiting']['enabled'], 'HTTP stop returns manual setup');
+	require __DIR__ . '/oauth-http.php';
 	\Dilemma\Connections::revoke($a['actor'], $setup['json']['connection_id']);
 	check(http_request('/mcp', ['jsonrpc' => '2.0', 'id' => 99, 'method' => 'tools/list'], $direct_headers)['status'] === 401, 'Revocation immediately blocks direct HTTP access');
 	check(http_request('/api/logout', [], $session_headers, $cookie)['status'] === 200 && http_request('/settings', null, [], $cookie)['status'] === 401, 'Logout revokes the stored session');

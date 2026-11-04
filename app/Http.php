@@ -36,9 +36,9 @@ final class Http
 			if ($method === 'POST' && in_array($path, ['/oauth/register', '/oauth/token', '/oauth/revoke'], true)) {
 				$input = $path === '/oauth/register' || str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') ? self::input() : $_POST;
 				if ($path === '/oauth/register') self::json(OAuth::register($input, $ip), 201);
-				if ($path === '/oauth/token') self::json(OAuth::token($input, $ip));
+				if ($path === '/oauth/token') self::json(OAuth::token($input, $ip, $_SERVER['HTTP_AUTHORIZATION'] ?? ''));
 				Support::rate('oauth-revoke:' . $ip, 60, 60);
-				OAuth::revoke($input); self::json((object) []);
+				OAuth::revoke($input, $_SERVER['HTTP_AUTHORIZATION'] ?? ''); self::json((object) []);
 			}
 			if ($method === 'GET' && $path === '/health') { Db::one('SELECT 1'); self::json(['status' => 'ok', 'version' => '0.1.0']); }
 			$user = Auth::session(is_string($_COOKIE['dilemma_session'] ?? null) ? $_COOKIE['dilemma_session'] : null);

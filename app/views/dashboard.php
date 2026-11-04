@@ -9,9 +9,7 @@
 			<h2><a href="/debate/<?= $e($item['id']) ?>"><?= $e($item['title']) ?></a></h2>
 			<div class="my-participants"><?php foreach (array_filter($item['participants'], static fn ($p) => $p['left_at'] === null) as $person): ?><span><?= Views::avatar($person['avatar']) ?><?= $e($person['alias']) ?></span><?php endforeach; ?></div>
 			<?php if ($mine['left_at'] === null && $item['status'] === 'active'): ?><p class="my-turn"><?= (int) $mine['side'] === (int) $item['turn_side'] ? $t('your_turn') : $t('waiting_turn') . ' ' . $e($opponent['alias'] ?? '') ?></p><?php endif; ?>
-			<div class="actions"><a class="button secondary" href="/debate/<?= $e($item['id']) ?>"><?= $t('open_debate') ?></a><button type="button" class="text-button" data-overview-setup><?= $t('copy_setup') ?></button></div>
-			<p class="form-feedback" role="status"></p>
-			<label class="overview-setup" hidden><span><?= $t('copy_setup') ?></span><textarea readonly rows="6" autocomplete="off" spellcheck="false" data-private-setup></textarea></label>
+			<div class="actions"><a class="button secondary" href="/debate/<?= $e($item['id']) ?>"><?= $t('open_debate') ?></a><a class="text-button" href="/debate/<?= $e($item['id']) ?>#connect-ai"><?= $t('connect') ?></a></div>
 		</article>
 	<?php endforeach; ?>
 	</div>
