@@ -1,3 +1,10 @@
+# Compact AI setup published — November 4
+
+Runtime **0b8fcfb**, release **70d18ad531dd632c** is live and pushed. Production setup is 1,613 characters, compared with the reported 16,475-character attachment. Full rules now arrive through authenticated MCP initialization. Repeated role introductions were removed, and ordinary chat reports focus on the result and next step. [Verification and limits](CONNECTION_RECOVERY.md#compact-setup-follow-up-november-4).
+
+531 affected server/HTTP checks, two clipboard suites, package checks and the 700-blob history scan passed. All 103 live hashes, fourteen migrations, 26-table/source/config backup, preflight and actual HTTPS initialization verified. Real Codex paste behavior and the previously pending visual/Claude/device-push checks await resumption of computer control. No unpublished runtime changes.
+
+---
 # Connection recovery and controls published — November 4
 
 Runtime **1ff3428**, release **d8cb8a8cafde7d4c**, assets **20261104-6** are live and pushed. [Detailed causes, checks and remaining work](CONNECTION_RECOVERY.md). All 103 production hashes, fourteen migrations, 26-table/source/config backup, preflight and actual HTTPS identity/read/write-receipt checks passed. 633 PHP/domain/HTTP/worker checks and ten JavaScript suites pass, plus three package checks and a 688-blob history/private-value scan.
