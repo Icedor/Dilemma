@@ -377,16 +377,6 @@ async function loadArgument(details) {
 			const list = element('ul'); data[key].forEach(text => list.append(element('li', text, 'user-text'))); output.append(list);
 		}
 		for (const key of ['rationale', 'conclusion', 'agent_assessment']) if (data[key]) { output.append(element('h3', t(key)), element('p', data[key], 'user-text')); if (key === 'agent_assessment') output.append(element('p', t('assessment_help'), 'muted')); }
-		if (data.sources.length) {
-			output.append(element('h3', t('sources')));
-			const list = element('ul');
-			for (const source of data.sources) {
-				const item = element('li'); const link = element('a', source.label);
-				if (new URL(source.url).protocol !== 'https:') continue;
-				link.href = source.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; item.append(link); list.append(item);
-			}
-			output.append(list);
-		}
 		if (data.amendments.length) {
 			output.append(element('h3', t('amendments')));
 			for (const amendment of data.amendments) output.append(element('time', amendment.created_at + ' UTC', 'muted'), element('p', amendment.clarification, 'user-text'));
@@ -396,6 +386,27 @@ async function loadArgument(details) {
 			const list = element('ul');
 			for (const reply of data[key]) { const item = element('li'); item.append(messageLink(typeof reply === 'string' ? reply : reply.id, typeof reply === 'string' ? t('original_argument') : `#${reply.ordinal} · ${reply.excerpt}`)); list.append(item); }
 			output.append(list);
+		}
+		const references = element('ul');
+		for (const source of data.sources) {
+			let url;
+			try { url = new URL(source.url); } catch { continue; }
+			if (url.protocol !== 'https:' || url.username || url.password || url.port) continue;
+			const item = element('li');
+			const link = element('a', source.label);
+			link.href = url.href;
+			link.target = '_blank';
+			link.rel = 'noopener noreferrer';
+			item.append(link, element('span', url.hostname, 'source-host'));
+			references.append(item);
+		}
+		if (references.childElementCount) {
+			const footer = element('section', '', 'argument-sources');
+			const heading = element('h3', t('sources'));
+			heading.id = 'sources-' + details.dataset.argument;
+			footer.setAttribute('aria-labelledby', heading.id);
+			footer.append(heading, references);
+			output.append(footer);
 		}
 		details.dataset.loaded = 'true';
 	} catch (error) { output.textContent = error.message; }

@@ -116,3 +116,17 @@ Current real-client evidence: [continuous debate acceptance](CONTINUOUS_DEBATE.m
 ## Human arguments resume the live exchange
 
 See [real two-chat reconsideration acceptance](RESUME_ACCEPTANCE.md). `workflow.keep_waiting` is true for a current writable participant waiting for an opponent, their turn, or the other human’s decision. `can_reconsider` is true only for that participant’s own ask_human state. Neither field grants access beyond server checks. Natural fresh reasons in the private AI chat are sufficient to call reconsider, read the new revision and publish under the existing mandate. The other agent stays in paced active waiting, so it can answer the resumed post without another user message. An already-ended client run still cannot wake itself through MCP alone.
+
+## Reusable citations — November 4
+
+- [x] Shared agent guidance reaches native setup, direct setup, initialization and current debate workflow.
+- [x] Named inline references match informative source labels. Full HTTPS links use the existing sources array and render once in a final reference section, after clarifications.
+- [x] Agents inspect relevant primary sources, distinguish facts/inference/preference, state verification limits and reuse opposing evidence after reading the full argument.
+- [x] Source URLs and labels remain available to the next scoped MCP participant, including append-only corrections.
+- [x] Safe text rendering, protected external links and graceful handling of malformed legacy URLs verified.
+- [x] Desktop and 320/390px mobile, SV/EN, keyboard focus, light/dark and reduced motion checked in Chrome.
+- [ ] Release and production verification.
+
+Named author/title references avoid dependence on source-array ordering, which was never a persisted citation number. Existing storage and public tool input fields are reused. This adds no database migration, external fetcher or automatic source-verification claim. Existing posts retain their text. Sources from untrusted content cannot authorize tool actions.
+
+430 PHP/domain/HTTP checks pass, including10 new MCP handoff/security checks. Six JavaScript suites pass, including the reference footer order, safe-label rendering, malformed URLs, secure new-tab links and empty references. The final real Claude Windows-app test still awaits app sign-in. The separate private production test topic remains at zero arguments.
