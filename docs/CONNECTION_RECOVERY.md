@@ -20,9 +20,16 @@ Error pages previously inherited the homepage class because layout defaulted to 
 - [x] Real loopback HTTP sign-in return for both private participants, unknown-ID privacy, wrong-account recovery and open-redirect rejection.
 - [x] Private clipboard refresh, denied/revoked/busy paths and manual clipboard fallback.
 - [x] Waiting, sources, notifications, account creation, OAuth refresh/revocation and full participant-flow regressions.
-- [ ] Package, private-value/history scan, GitHub and production hash verification.
+- [x] Package, private-value/history scan, GitHub and production hash verification.
 - [ ] Real Claude/Codex UI retest and visual desktop/mobile checks remain pending while the owner pauses computer control.
 
 Baseline verification: 633 PHP/domain/HTTP/worker checks and ten JavaScript suites passed. No real recipient was emailed and no real argument was published by these tests. Production verification is recorded below after deployment.
 
 [Official Codex MCP configuration](https://learn.chatgpt.com/docs/extend/mcp?surface=app) documents separate named server configurations; adding pasted text does not rebind an existing server. The direct setup avoids requiring a configuration edit or restart when HTTP tools are available.
+## Published release
+
+Runtime **1ff3428**, release **d8cb8a8cafde7d4c**, assets **20261104-6**. SHA256 **ec4327b13f3aecd073a945d0df309679ba4d881b83fee499f6ba3fb9e267122f**. All 103 production hashes verified, fourteen migrations current, private backup of all 26 tables plus source/configuration, and preflight passed. Backup: `/home/superpeppse/dilemma.se/.backup-before-d8cb8a8cafde7d4c/`. Three package checks and 688 historical blobs passed private-value/key checks before GitHub push.
+
+Production HTTPS verification at 2026-11-04 14:10:40 UTC confirmed the replacement identity, actual debate read and harmless persisted write receipt. Both actual participants retain domain read access. The logged-out link returns 303 to sign-in; the resulting page returns 200 with the preserved debate and new asset version. A missing page returns 404 with the inner-page/error layout. No debate argument or notification was created. Real client/UI testing remains pending the owner's resumption of computer control.
+
+Do not rerun `var/repair-reported-mcp.php`, `var/stage-connection-recovery.php` or `var/deploy-connection-recovery.php`. Repair and deployment have completed. Private production audits are `var/mcp-key-repair-20261104.json` and `var/connection-recovery-verification-20261104.json`. The replacement is available through the debate's ordinary Copy setup action; a prior pasted attachment retains the revoked key and must be replaced once.

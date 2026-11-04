@@ -1,3 +1,18 @@
+# Connection recovery and controls published — November 4
+
+Runtime **1ff3428**, release **d8cb8a8cafde7d4c**, assets **20261104-6** are live and pushed. [Detailed causes, checks and remaining work](CONNECTION_RECOVERY.md). All 103 production hashes, fourteen migrations, 26-table/source/config backup, preflight and actual HTTPS identity/read/write-receipt checks passed. 633 PHP/domain/HTTP/worker checks and ten JavaScript suites pass, plus three package checks and a 688-blob history/private-value scan.
+
+The Codex failure was a verified wrong-connection selection: old debate tools were used for another debate. Copied access now pins the expected debate, participant and connection; whoami is checked before writes. Tool discovery and receipts expose their scope. The exact printed credential was revoked and replaced with persistent access to the same participant's debate. Other grants are untouched. The owner must copy current setup once into the existing chat; that old attachment contains a revoked key. Copy refreshes access in already-open tabs and refuses stale values on errors.
+
+The friend's mobile screenshot was logged out. Private debate links now preserve their destination through sign-in. Both actual participants' access was verified after deployment. Wrong-account recovery does not expose private content; API access and publication consent stay protected. Error pages no longer receive homepage layout and have explicit dark text on yellow in either theme.
+
+The preceding **04ebb9f** controls release is included: clear waiting/notification switches, local licensed Lucide icons, visible action buttons and accessible disclosures. [Control details](CONTROLS.md). Previous email-first signup, named invitations, corrected recipient/resend, email-on defaults for new participants, opt-in push with email fallback and source references remain included and regression-tested.
+
+Computer control remains explicitly paused. Pending: visual desktop/mobile 320/390, keyboard, light/dark and reduced-motion review of recent signup/invitation/notification/controls/error views; real Claude/Codex app connection test; actual push device delivery. Use the already-created private test topic only for the authorized harmless receipt test until additional publication authorization. Prior two-chat debate/resumption evidence is documented separately and does not verify this newest Codex setup. Meta429 is owner-deferred; do not contact support.
+
+No unpublished runtime changes. Do not rerun the scoped credential repair or completed staging/deploy helpers. Production backup is `/home/superpeppse/dilemma.se/.backup-before-d8cb8a8cafde7d4c/`. No real debate argument or email was created during this sweep. The previous invitation resend was separately authorized and completed earlier.
+
+---
 # Invitation and notification delivery — November 4
 
 Runtime **c7597ed**, release **9604184f5a2a06a0**, assets **20261104-4** are published and on GitHub. All 101 production hashes, migration 014, 26-table/private source backup, preflight and live health/invitation HTTP checks passed. Archive SHA256 f99560502801d917e16773362d8b7b81718a84ee692c5212831e7446320ff3ba. Backup is /home/superpeppse/dilemma.se/.backup-before-9604184f5a2a06a0/. Package integrity (three checks), private-value/key scan and 631 historical blobs passed.
