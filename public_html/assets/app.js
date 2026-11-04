@@ -290,16 +290,18 @@ function renderSetup(data) {
 
 async function loadDebateSetup(renew = false) {
 	const section = document.querySelector('[data-debate-ai]');
-	if (!section || section.dataset.setupBusy === 'true') return;
+	if (!section || section.dataset.setupBusy === 'true') return false;
 	section.dataset.setupBusy = 'true';
 	const restore = document.querySelector('#renew-debate-connection');
 	restore.disabled = true;
 	try {
 		const data = await request('/api/connections/setup', { debate_id: section.dataset.debateAi, renew });
 		renderSetup(data);
+		return !data.revoked;
 	} catch (error) {
 		document.querySelector('#connection-copy-status').textContent = error.message;
 		document.querySelector('#retry-debate-connection').hidden = false;
+		return false;
 	} finally { section.dataset.setupBusy = 'false'; restore.disabled = false; }
 }
 
@@ -347,6 +349,8 @@ document.addEventListener('click', async event => {
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {
 		const target = copy.dataset.copyTarget ? document.getElementById(copy.dataset.copyTarget) : null;
+		// Refresh private access before copying; an already-open tab may hold a revoked key or old instructions.
+		if (target?.matches('[data-private-setup]') && document.querySelector('[data-debate-ai]') && !await loadDebateSetup()) return;
 		const value = copy.dataset.copy ?? (target && 'value' in target ? target.value : target?.textContent);
 		if (typeof value === 'string' && value !== '') {
 			const copied = await copyText(value, target);

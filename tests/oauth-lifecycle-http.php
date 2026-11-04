@@ -17,7 +17,7 @@ $mine = $mcp_call('dilemma_list_debates');
 check(array_column($mine['json']['result']['structuredContent']['items'] ?? [], 'id') === [$setup_debate['id']], 'OAuth cannot enumerate another debate owned by the same human');
 $other = $mcp_call('dilemma_get_debate', ['debate_id' => $open['debate_id']]);
 $denied = json_decode($other['json']['result']['content'][0]['text'] ?? '', true);
-check(($other['json']['result']['isError'] ?? false) && ($denied['error'] ?? '') === 'access_denied', 'OAuth cannot read a different debate even when the same human owns it');
+check(($other['json']['result']['isError'] ?? false) && ($denied['status'] ?? 0) === 403 && ($denied['error'] ?? '') === 'connection_debate_mismatch', 'OAuth cannot read a different debate even when the same human owns it');
 $read_test = $mcp_call('dilemma_test_connection');
 check(($read_test['json']['result']['structuredContent']['read_verified'] ?? false) === true, 'OAuth read verification succeeds through the public MCP route');
 $connection_id = $read_test['json']['result']['structuredContent']['connection_id'];

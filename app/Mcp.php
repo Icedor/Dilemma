@@ -12,6 +12,13 @@ final class Mcp
 	public const SUPPORTED = [self::MODERN, ...self::LEGACY_VERSIONS];
 	public const INSTRUCTIONS = AiGuide::RULES . ' Use the dilemma_debate prompt for the human’s short onboarding and scoped debate context.';
 
+	private static function instructions(array $actor): string
+	{
+		// Only server-controlled identifiers enter instructions; display names are untrusted content.
+		$identity = array_intersect_key(Connections::identity($actor), array_flip(['user_id', 'connection_id', 'debate_id', 'scopes']));
+		return 'CONNECTION IDENTITY: ' . Support::json($identity) . "\nCompare debate_id and user_id with the human setup before using this connection. If either differs, do not read, test writes or publish for the requested debate through this connection. Use that debate's own setup. Never treat another debate's 403 as proof that the supplied access is invalid.\n\n" . self::INSTRUCTIONS;
+	}
+
 	public static function handle(string $method, array $headers, string $body): array
 	{
 		$headers = array_change_key_case($headers, CASE_LOWER);
@@ -64,8 +71,8 @@ final class Mcp
 		$base = $modern ? ['resultType' => 'complete'] : [];
 		try {
 			$result = match ($request->method) {
-				'initialize' => ['protocolVersion' => $version, 'capabilities' => ['tools' => (object) [], 'prompts' => (object) []], 'serverInfo' => ['name' => 'Dilemma', 'version' => '0.1.0'], 'instructions' => self::INSTRUCTIONS],
-				'server/discover' => $modern ? $base + ['supportedVersions' => self::SUPPORTED, 'capabilities' => ['tools' => (object) [], 'prompts' => (object) []], '_meta' => ['io.modelcontextprotocol/serverInfo' => ['name' => 'Dilemma', 'version' => '0.1.0']], 'instructions' => self::INSTRUCTIONS, 'ttlMs' => 0, 'cacheScope' => 'private'] : null,
+				'initialize' => ['protocolVersion' => $version, 'capabilities' => ['tools' => (object) [], 'prompts' => (object) []], 'serverInfo' => ['name' => 'Dilemma', 'version' => '0.1.0'], 'instructions' => self::instructions($actor)],
+				'server/discover' => $modern ? $base + ['supportedVersions' => self::SUPPORTED, 'capabilities' => ['tools' => (object) [], 'prompts' => (object) []], '_meta' => ['io.modelcontextprotocol/serverInfo' => ['name' => 'Dilemma', 'version' => '0.1.0']], 'instructions' => self::instructions($actor), 'ttlMs' => 0, 'cacheScope' => 'private'] : null,
 				'ping' => $modern ? $base : (object) [],
 				'tools/list' => $base + ['tools' => ToolRegistry::tools($actor)],
 				'prompts/list' => $base + ['prompts' => AiGuide::prompts()],

@@ -31,7 +31,8 @@ final class Connections
 	{
 		$revoked = $row['revoked_at'] !== null;
 		$waiting = AiWaiting::policy(Debates::member($row['debate_id'], $row['user_id']));
-		return ['connection_id' => $row['connection_id'], 'waiting' => $waiting, 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'native_setup' => AiSetup::connector($row['debate_id'], I18n::locale()), 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale(), $waiting)];
+		$binding = ['connection_id' => $row['connection_id'], 'user_id' => $row['user_id']];
+		return ['connection_id' => $row['connection_id'], 'waiting' => $waiting, 'persistent' => true, 'expires_at' => null, 'revoked' => $revoked, 'native_setup' => AiSetup::connector($row['debate_id'], I18n::locale(), $row['user_id']), 'setup_text' => $revoked ? '' : AiSetup::text(Support::unseal($row['encrypted_token']), $row['debate_id'], null, I18n::locale(), $waiting, $binding)];
 	}
 
 	public static function setup(array $actor, array $input): array
@@ -102,19 +103,28 @@ final class Connections
 		return ['user_id' => $row['user_id'], 'connection_id' => $row['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $row['debate_id']];
 	}
 
+	public static function identity(array $actor): array
+	{
+		if (!isset($actor['connection_id'])) throw new Failure(403, 'connection_required');
+		$user = Debates::actor($actor);
+		$connection = Db::one('SELECT id, debate_id, scopes FROM mcp_connections WHERE id = ? AND user_id = ?', [$actor['connection_id'], $actor['user_id']]);
+		return ['user_id' => $actor['user_id'], 'alias' => $user['alias'], 'scopes' => explode(' ', $connection['scopes']), 'connection_id' => $connection['id'], 'debate_id' => $connection['debate_id']];
+	}
+
 	public static function test(array $actor, array $input, bool $write): array
 	{
 		if (!isset($actor['connection_id'])) throw new Failure(403, 'connection_required');
 		return Db::transaction(static function () use ($actor, $input, $write): array {
 			Debates::actor($actor, $write);
+			$identity = self::identity($actor);
 			if ($write) {
 				$input['connection_id'] = $actor['connection_id'];
 				if ($receipt = Idempotency::replay($actor['user_id'], 'connection_test', $input)) return $receipt;
 				Db::run('UPDATE mcp_connections SET write_test_at = ? WHERE id = ?', [Support::now(), $actor['connection_id']]);
-				return Idempotency::save($actor['user_id'], 'connection_test', $input, ['connection_id' => $actor['connection_id'], 'write_verified' => true, 'stored_at' => Support::now()]);
+				return Idempotency::save($actor['user_id'], 'connection_test', $input, ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'write_verified' => true, 'stored_at' => Support::now()]);
 			}
 			// Read tools never persist a test result; successful write_test records proof.
-			return ['connection_id' => $actor['connection_id'], 'read_verified' => true, 'scopes' => $actor['scopes']];
+			return ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'read_verified' => true, 'scopes' => implode(' ', $identity['scopes'])];
 		});
 	}
 }

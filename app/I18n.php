@@ -25,6 +25,10 @@ final class I18n
 		$index = self::$locale === 'en' ? 1 : 0;
 		return array_map(static fn (array $pair): string => $pair[$index], [
 			'oauth_login_intro' => ['Logga in för att ansluta din AI till en debatt.', 'Sign in to connect your AI to a debate.'],
+			'debate_login_title' => ['Logga in till debatten', 'Sign in to the debate'],
+			'debate_login_help' => ['Använd din e-post för Dilemma. Länken tar dig tillbaka hit.', 'Use your Dilemma email. The sign-in link brings you back here.'],
+			'debate_other_account' => ['Deltar du i debatten? Du kan vara inloggad med ett annat konto.', 'Taking part in this debate? You may be signed in with a different account.'],
+			'debate_switch_account' => ['Byt konto', 'Switch accounts'],
 			'oauth_choose' => ['Välj debatt', 'Choose a debate'],
 			'oauth_select' => ['Välj din debatt…', 'Choose your debate…'],
 			'oauth_one_debate' => ['Du ger appen åtkomst till bara den debatt du väljer.', 'You give the app access only to the debate you choose.'],

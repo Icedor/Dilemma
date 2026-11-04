@@ -60,7 +60,7 @@ $fa = flow_human('Sam'); $fb = flow_human('Robin');
 $made = flow_post($fa, '/api/debates', ['title' => 'Parks should stay open at night', 'stance' => 'People working late need access to public space.', 'processing_consent' => true, 'public_consent' => true, 'opponent_mode' => 'invite', 'locale' => 'en']);
 check($made['status'] === 201, 'Full flow: create opinion through HTTP');
 $fid = $made['json']['debate_id']; $fpath = '/api/debates/' . $fid;
-check(http_request('/debate/' . $fid)['status'] === 404 && http_request($fpath . '/status')['status'] === 404, 'Full flow: waiting friend and status are private');
+check(http_request('/debate/' . $fid)['status'] === 303 && http_request($fpath . '/status')['status'] === 404, 'Full flow: private page offers login while the data API stays private');
 $ma = flow_connect($fa, $fid, 'Sam');
 $first = flow_publish($ma, $fid, 'Parks should remain accessible to people returning from late shifts. Quiet paths could preserve access without encouraging noisy gatherings.');
 $state = flow_ok(flow_tool($ma, 'get_debate', ['debate_id' => $fid]), 'opening remains readable while waiting');
@@ -114,4 +114,4 @@ check($ended['status'] === 200 && $ended['json']['status'] === 'flagged', 'Full 
 $events = http_request($fpath . '/events');
 check(in_array('seat_opened', array_column($events['json']['events'], 'kind'), true) && in_array('agent_reconsidering', array_column($events['json']['events'], 'kind'), true), 'Full flow: decisions and reconsideration are in event history');
 $withdraw_consent = flow_post($fa, $fpath . '/action', ['action' => 'consent', 'public_consent' => false, 'revision' => (int) Debates::row($fid)['revision']]);
-check($withdraw_consent['status'] === 200 && http_request('/debate/' . $fid)['status'] === 404, 'Full flow: former participant retains control over publication consent');
+check($withdraw_consent['status'] === 200 && http_request('/debate/' . $fid)['status'] === 303, 'Full flow: former participant retains control over publication consent');

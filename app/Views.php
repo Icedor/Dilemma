@@ -10,6 +10,7 @@ final class Views
 	{
 		$template = match ($path) { '/' => 'home', '/explore' => 'archive', '/app' => 'dashboard', '/new' => 'new', '/login' => 'login', '/verify' => 'verify', '/invite' => 'invite', '/settings' => 'settings', '/admin' => 'admin', '/oauth/authorize' => 'authorize', '/about', '/how', '/privacy', '/terms' => 'information', default => '' };
 		$data = [];
+		if ($template === 'login' && is_string($_GET['return_to'] ?? null) && preg_match('~^/debate/[a-f0-9-]{36}$~D', $_GET['return_to'])) $data['debate_return'] = $_GET['return_to'];
 		if (preg_match('~^/debate/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'debate'; $data['debate'] = ReadModel::debate($match[1], $actor, Support::integer($_GET['page'] ?? 1, 1, 100000, 'page'), Support::integer($_GET['positions_page'] ?? 1, 1, 100000, 'positions_page')); }
 		if (preg_match('~^/profile/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'profile'; $data['profile'] = Db::one("SELECT id, alias, bio, avatar FROM users WHERE id = ? AND status = 'active' AND verified_at IS NOT NULL", [$match[1]]); if (!$data['profile']) throw new Failure(404, 'not_found'); }
 		if ($template === '') throw new Failure(404, 'not_found');
@@ -78,8 +79,13 @@ final class Views
 	public static function error(int $status, string $key, ?array $user): string
 	{
 		$return = $_SERVER['REQUEST_URI'] ?? '';
+		$path = parse_url($return, PHP_URL_PATH) ?: '/error';
+		$debate_account = $status === 404 && $user && preg_match('~^/debate/[a-f0-9-]{36}$~D', $path);
 		$attribute = $status === 401 && str_starts_with($return, '/oauth/authorize?') ? ' data-auth-return="' . Support::escape($return) . '"' : '';
-		return self::layout((string) $status, '<section class="reading"><h1>' . $status . '</h1><p>' . Support::escape(I18n::t($key)) . '</p><a class="button"' . $attribute . ' href="' . ($status === 401 ? '/login' : '/') . '">' . Support::escape(I18n::t($status === 401 ? 'login' : 'explore')) . '</a></section>', $user);
+		$help = $debate_account ? '<p>' . Support::escape(I18n::t('debate_other_account')) . '</p>' : '';
+		$url = $debate_account ? '/login?' . http_build_query(['return_to' => $path, 'lang' => I18n::locale()]) : ($status === 401 ? '/login' : '/explore');
+		$label = $debate_account ? 'debate_switch_account' : ($status === 401 ? 'login' : 'explore');
+		return self::layout((string) $status, '<section class="reading error-state"><h1>' . $status . '</h1><p>' . Support::escape(I18n::t($key)) . '</p>' . $help . '<a class="button"' . $attribute . ' href="' . Support::escape($url) . '">' . Support::escape(I18n::t($label)) . self::icon('arrow-right') . '</a></section>', $user, $path);
 	}
 
 	public static function form(string $endpoint, string $result = 'reload', string $extra = ''): string

@@ -85,6 +85,7 @@
 	.page-heading p { margin-top: var(--space-4); max-width: 40rem; font-size: 1.15rem; }
 	.reading { max-width: 51rem; margin-inline: auto; padding: var(--section-space) var(--space); }
 	.reading.wide { max-width: 61rem; }
+	.error-state { --ink: #191918; --paper: #fffdf7; --muted: #403719; color: #191918; background: #ffda3d url('/assets/gradient-yellow-v2.webp?v=20261102-6') center/cover; margin-block: var(--space-8); }
 	.reading > h1 { margin-bottom: var(--space-6); }
 	.reading > p { margin-bottom: var(--space-8); }
 	.reading section { margin: var(--space-12) 0; }

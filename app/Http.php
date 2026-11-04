@@ -62,6 +62,11 @@ final class Http
 			echo Views::page($path, $user, $actor);
 		} catch (Failure $error) {
 			if (str_starts_with($path, '/api/') || (str_starts_with($path, '/oauth/') && $path !== '/oauth/authorize')) self::json(['error' => $error->error, 'message' => I18n::t($error->error), 'details' => (object) $error->details], $error->status);
+			// Unknown and private debate links share the same guest recovery. No existence oracle.
+			if ($method === 'GET' && !$user && $error->status === 404 && preg_match('~^/debate/[a-f0-9-]{36}$~D', $path)) {
+				header('Location: /login?' . http_build_query(['return_to' => $path, 'lang' => I18n::locale()]), true, 303);
+				exit;
+			}
 			http_response_code($error->status);
 			echo Views::error($error->status, $error->error, $user);
 		} catch (\Throwable $error) {

@@ -18,7 +18,7 @@ final class Debates
 			if (!$connection || $connection['revoked_at'] !== null) throw new Failure(401, 'connection_revoked');
 			$scopes = explode(' ', $connection['scopes']);
 			if (!in_array($write ? 'arguments:write' : 'debates:read', $scopes, true)) throw new Failure(403, 'insufficient_scope');
-			if ($connection['debate_id'] !== null && $debate_id !== null && $connection['debate_id'] !== $debate_id) throw new Failure(403, 'access_denied');
+			if ($connection['debate_id'] !== null && $debate_id !== null && $connection['debate_id'] !== $debate_id) throw new Failure(403, 'connection_debate_mismatch', ['connected_debate_id' => $connection['debate_id'], 'recovery' => 'This connection belongs to a different debate. Stop using it for this request. Use the requested debate\'s own setup after verifying its identity; do not retry this connection or broaden its permissions.']);
 		}
 		return $user;
 	}

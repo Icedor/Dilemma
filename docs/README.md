@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [MCP connection identity and private-link recovery](CONNECTION_RECOVERY.md)
+
 - [Clear switches, action icons and disclosure controls](CONTROLS.md)
 
 - [Invitation identity, recipient recovery and notification delivery](INVITATION_DELIVERY.md)
