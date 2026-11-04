@@ -15,7 +15,7 @@ foreach (['app', 'database/migrations', 'public_html'] as $directory) {
 		$paths[] = $relative;
 	}
 }
-foreach (['bin/migrate.php', 'bin/maintenance.php', 'bin/admin.php', 'bin/preflight.php', 'bin/verify-release.php', 'bin/init-push.php', '.env.example', 'README.md', 'docs/DEPLOYMENT.md'] as $path) $paths[] = $path;
+foreach (['bin/migrate.php', 'bin/maintenance.php', 'bin/admin.php', 'bin/preflight.php', 'bin/verify-release.php', 'bin/init-push.php', '.env.example', 'README.md', 'docs/DEPLOYMENT.md', 'docs/LUCIDE_LICENSE.txt'] as $path) $paths[] = $path;
 if (is_file($root . '/LICENSE')) $paths[] = 'LICENSE';
 sort($paths);
 $manifest = ['format' => 1, 'created_at' => gmdate('c'), 'files' => []];

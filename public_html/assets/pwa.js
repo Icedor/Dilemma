@@ -20,7 +20,7 @@ export async function setup({ request, t }) {
 	const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && isSecureContext;
 	const preference = () => t(config?.notifications_enabled === false ? 'notifications_paused' : config?.enabled ? (config.device ? 'push_active' : config.devices > 0 ? 'push_other_device' : 'push_email_fallback') : 'push_optional');
 	const paint = () => {
-		enables.forEach(button => { button.disabled = busy || !supported || !config || !registration; button.textContent = t(config?.enabled && config?.device ? 'push_active' : 'push_enable'); button.hidden = !!(config?.enabled && config?.device); });
+		enables.forEach(button => { button.disabled = busy || !supported || !config || !registration; (button.querySelector?.('[data-control-label]') || button).textContent = t(config?.enabled && config?.device ? 'push_active' : 'push_enable'); button.hidden = !!(config?.enabled && config?.device); });
 		disables.forEach(button => { button.hidden = !config?.enabled; button.disabled = busy; });
 	};
 	paint();

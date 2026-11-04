@@ -101,12 +101,27 @@ final class Views
 
 	public static function check(string $name, string $label, bool $checked = false, bool $required = false): string
 	{
+		if ($name === 'notify') {
+			return '<label class="switch-field"><input class="switch-input" type="checkbox" role="switch" name="notify"' . ($checked ? ' checked' : '') . ($required ? ' required' : '') . '><span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span><span class="switch-label">' . Support::escape(I18n::t($label)) . '</span><span class="switch-field-state" aria-hidden="true"><span class="switch-on">' . Support::escape(I18n::t('control_on')) . '</span><span class="switch-off">' . Support::escape(I18n::t('control_off')) . '</span></span></label>';
+		}
 		return '<label class="check"><input type="checkbox" name="' . Support::escape($name) . '"' . ($checked ? ' checked' : '') . ($required ? ' required' : '') . '><span>' . Support::escape(I18n::t($label)) . '</span></label>';
+	}
+
+	public static function icon(string $name): string
+	{
+		return '<svg class="ui-icon icon-' . Support::escape($name) . '" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="#icon-' . Support::escape($name) . '"></use></svg>';
 	}
 
 	public static function submit(string $label, string $class = '', bool $disabled = false): string
 	{
-		return '<p class="form-feedback" role="status" aria-live="polite"></p><button class="button ' . Support::escape($class) . '" type="submit"' . ($disabled ? ' disabled' : '') . '>' . Support::escape(I18n::t($label)) . '</button>';
+		$icon = match ($label) {
+			'save', 'save_position', 'save_consent', 'accept_invitation', 'oauth_allow' => 'check',
+			'share_link' => 'link',
+			'email_invitation', 'send_link', 'publish' => 'arrow-right',
+			'ai_connection_revoke' => 'unlink',
+			default => '',
+		};
+		return '<p class="form-feedback" role="status" aria-live="polite"></p><button class="button ' . Support::escape($class) . '" type="submit"' . ($disabled ? ' disabled' : '') . '>' . ($icon !== '' ? self::icon($icon) : '') . Support::escape(I18n::t($label)) . '</button>';
 	}
 
 	public static function scale(string $left = '', string $right = ''): string

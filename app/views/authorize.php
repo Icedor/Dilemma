@@ -14,8 +14,8 @@ $choices = Db::all("SELECT d.id, d.title FROM debates d JOIN debate_participants
 <?php foreach ($choices as $choice): ?><option value="<?= $e($choice['id']) ?>" <?= count($choices) === 1 || ($_GET['debate_id'] ?? '') === $choice['id'] ? 'selected' : '' ?>><?= $e($choice['title']) ?></option><?php endforeach; ?>
 </select></label>
 <p><?= $t(str_contains($authorization['scope'], Connections::WRITE) ? 'oauth_permissions' : 'read_scope') ?></p><p class="muted"><?= $t('human_boundary') ?></p>
-<div class="actions"><?= Views::submit('oauth_allow') ?><button type="button" class="text-button" data-oauth-deny><?= $t('deny') ?></button></div>
+<div class="actions"><?= Views::submit('oauth_allow') ?><button type="button" class="text-button" data-oauth-deny><?= \Dilemma\Views::icon('x') ?><span data-control-label><?= $t('deny') ?></span></button></div>
 </form>
 <?php else: ?><p><?= $t('oauth_empty') ?></p><a class="button" href="/new" data-auth-return="<?= $e('/oauth/authorize?' . http_build_query($_GET)) ?>"><?= $t('new_debate') ?></a><?php endif; ?>
-<details><summary><?= $t('oauth_details') ?></summary><p><?= $t('authorize_intro') ?></p><code class="oauth-callback"><?= $e($authorization['redirect_uri']) ?></code></details>
+<details><summary class="disclosure-control"><span><?= $t('oauth_details') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('authorize_intro') ?></p><code class="oauth-callback"><?= $e($authorization['redirect_uri']) ?></code></details>
 </section>

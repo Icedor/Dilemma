@@ -8,7 +8,7 @@
 <label class="opponent-choice"><input type="radio" name="opponent_mode" value="invite" checked><span><strong><?= $t('friend_mode') ?></strong><span><?= $t('friend_mode_help') ?></span></span></label>
 <label class="opponent-choice"><input type="radio" name="opponent_mode" value="open"><span><strong><?= $t('open_mode') ?></strong><span><?= $t('open_mode_help') ?></span></span></label>
 </fieldset>
-<details class="disclosure"><summary><?= $t('optional_details') ?></summary>
+<details class="disclosure"><summary class="disclosure-control"><span><?= $t('optional_details') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary>
 <?= Views::field('topic', 'topic', '', 'text', false, 60) ?><?= Views::area('introduction', 'introduction') ?>
 <div class="form-columns"><?= Views::field('left_label', 'left_label', '', 'text', false, 140) ?><?= Views::field('right_label', 'right_label', '', 'text', false, 140) ?></div>
 <?= Views::scale() ?></details>

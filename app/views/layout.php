@@ -47,10 +47,11 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-2">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script src="/assets/language.js?v=20261103-2"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261104-4">
-	<script type="module" src="/assets/app.js?v=20261104-4"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261104-5">
+	<script type="module" src="/assets/app.js?v=20261104-5"></script>
 </head>
 <body class="<?= $path === '/' ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
+	<?= \Dilemma\Views::render('icons', []) ?>
 	<a href="#main" class="skip-link"><?= $t('skip') ?></a>
 	<div class="site-shell">
 	<header class="site-header">
@@ -61,7 +62,7 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 		</nav>
 		<div class="header-actions">
 			<nav class="language-switch" aria-label="<?= $t('language') ?>"><a href="?<?= $e(http_build_query($query + ['lang' => 'sv'])) ?>" lang="sv" <?= $language === 'sv' ? 'aria-current="true"' : '' ?>>SV</a><span aria-hidden="true">/</span><a href="?<?= $e(http_build_query($query + ['lang' => 'en'])) ?>" lang="en" <?= $language === 'en' ? 'aria-current="true"' : '' ?>>EN</a></nav>
-			<?php if ($user): ?><details class="account-menu"><summary><?= $e($user['alias']) ?></summary><nav><a href="/app"><?= $t('mine') ?></a><a href="/settings"><?= $t('settings') ?></a><?php if ($user['is_admin']): ?><a href="/admin"><?= $t('admin') ?></a><?php endif; ?><button type="button" data-logout><?= $t('logout') ?></button></nav></details><?php else: ?><a class="button small" href="/login?register=1"><?= $t('signup_short') ?></a><?php endif; ?>
+			<?php if ($user): ?><details class="account-menu"><summary class="disclosure-control"><span><?= $e($user['alias']) ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><nav><a href="/app"><?= $t('mine') ?></a><a href="/settings"><?= \Dilemma\Views::icon('settings-2') ?><?= $t('settings') ?></a><?php if ($user['is_admin']): ?><a href="/admin"><?= $t('admin') ?></a><?php endif; ?><button type="button" data-logout><?= \Dilemma\Views::icon('log-out') ?><span data-control-label><?= $t('logout') ?></span></button></nav></details><?php else: ?><a class="button small" href="/login?register=1"><?= \Dilemma\Views::icon('plus') ?><span data-control-label><?= $t('signup_short') ?></span></a><?php endif; ?>
 		</div>
 	</header>
 	<noscript><p class="notice"><?= $t('no_script') ?></p></noscript>

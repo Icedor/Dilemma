@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Clear switches, action icons and disclosure controls](CONTROLS.md)
+
 - [Invitation identity, recipient recovery and notification delivery](INVITATION_DELIVERY.md)
 
 - [Email-first account entry and background verification](EMAIL_FIRST_SIGNUP.md)

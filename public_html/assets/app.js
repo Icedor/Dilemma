@@ -194,6 +194,7 @@ document.addEventListener('submit', async event => {
 				const actions = document.createElement('div'); actions.className = 'actions';
 				const copy = document.createElement('button'); copy.type = 'button'; copy.className = 'button secondary'; copy.textContent = t('copy_link'); copy.dataset.copy = data.invitation_url;
 				const share = document.createElement('button'); share.type = 'button'; share.className = 'button'; share.textContent = t('share'); share.dataset.share = data.invitation_url;
+				copy.prepend(actionIcon('copy')); share.prepend(actionIcon('share-2'));
 				actions.append(share, copy); result.append(label, actions); result.hidden = false; feedback.textContent = '';
 				if (form.classList.contains('share-link-form')) form.hidden = true;
 				share.focus(); break;
@@ -218,6 +219,23 @@ function clearPrivateStorage() {
 	try { for (const key of Object.keys(sessionStorage)) if (key.startsWith('dilemma:')) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
 }
 
+function actionIcon(name) {
+	const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	icon.setAttribute('class', 'ui-icon');
+	icon.setAttribute('viewBox', '0 0 24 24');
+	icon.setAttribute('fill', 'none');
+	icon.setAttribute('stroke', 'currentColor');
+	icon.setAttribute('stroke-width', '2');
+	icon.setAttribute('stroke-linecap', 'round');
+	icon.setAttribute('stroke-linejoin', 'round');
+	icon.setAttribute('aria-hidden', 'true');
+	icon.setAttribute('focusable', 'false');
+	const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+	use.setAttribute('href', '#icon-' + name);
+	icon.append(use);
+	return icon;
+}
+
 let waitingExpiry;
 function renderWaiting(waiting = {}) {
 	const button = document.querySelector('#ai-wait-toggle');
@@ -225,9 +243,9 @@ function renderWaiting(waiting = {}) {
 	clearTimeout(waitingExpiry);
 	const until = Date.parse(waiting.until || '');
 	const enabled = Boolean(waiting.enabled && until > Date.now());
-	button.setAttribute('aria-pressed', String(enabled));
+	button.setAttribute('aria-checked', String(enabled));
 	button.dataset.until = enabled ? waiting.until : '';
-	button.textContent = t(enabled ? 'ai_wait_stop' : 'ai_wait_start');
+	button.querySelector('.switch-state').textContent = t(enabled ? 'control_on' : 'control_off');
 	document.querySelector('#ai-wait-status').textContent = enabled ? t('ai_wait_until') + ' ' + new Intl.DateTimeFormat(document.documentElement.lang, { hour: '2-digit', minute: '2-digit' }).format(until) + '.' : '';
 	if (enabled) waitingExpiry = setTimeout(() => {
 		renderWaiting();
@@ -235,7 +253,7 @@ function renderWaiting(waiting = {}) {
 	}, Math.min(until - Date.now() + 50, 7200050));
 }
 const waitingButton = document.querySelector('#ai-wait-toggle');
-if (waitingButton) renderWaiting({ enabled: waitingButton.getAttribute('aria-pressed') === 'true', until: waitingButton.dataset.until });
+if (waitingButton) renderWaiting({ enabled: waitingButton.getAttribute('aria-checked') === 'true', until: waitingButton.dataset.until });
 
 function chooseAiApp() {
 	const choice = document.querySelector('#ai-app-choice');
@@ -309,14 +327,15 @@ document.addEventListener('click', async event => {
 	}
 	const waitToggle = event.target.closest('#ai-wait-toggle');
 	if (waitToggle && !waitToggle.disabled) {
-		const enabled = waitToggle.getAttribute('aria-pressed') !== 'true';
+		const enabled = waitToggle.getAttribute('aria-checked') !== 'true';
 		waitToggle.disabled = true;
+		waitToggle.setAttribute('aria-busy', 'true');
 		try {
 			const data = await request('/api/connections/waiting', { debate_id: document.querySelector('[data-debate-ai]').dataset.debateAi, enabled });
 			renderSetup(data);
 			document.querySelector('#connection-copy-status').textContent = t(enabled ? 'ai_wait_ready' : 'ai_wait_off');
 		} catch (error) { document.querySelector('#connection-copy-status').textContent = error.message; }
-		finally { waitToggle.disabled = false; }
+		finally { waitToggle.disabled = false; waitToggle.removeAttribute('aria-busy'); }
 	}
 	const share = event.target.closest('[data-share]');
 	if (share) {
@@ -669,7 +688,7 @@ revealAnchor();
 const savedScroll = storageGet(`dilemma:scroll:${location.pathname}`);
 if (savedScroll !== null) { storageRemove(`dilemma:scroll:${location.pathname}`); requestAnimationFrame(() => scrollTo(0, Number(savedScroll) || 0)); }
 
-if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261104-4').then(module => module.setup({ request, t })).catch(() => {});
+if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261104-5').then(module => module.setup({ request, t })).catch(() => {});
 
 // Exact cross-browser console credit from Secret.icey.se.
 console.log('%c' + String.raw`██╗ ██████╗███████╗██╗   ██╗

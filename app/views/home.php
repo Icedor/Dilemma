@@ -1,10 +1,10 @@
 <?php use Dilemma\ReadModel; use Dilemma\Views; ?>
 <section class="hero" aria-labelledby="home-title">
-	<div class="hero-intro"><p><?= $t('home_pitch') ?></p><div class="actions"><a class="button" href="<?= $user ? '/new' : '/login?register=1' ?>"><?= $t('get_started') ?></a><a class="text-link" href="/how"><?= $t('how') ?></a></div></div>
+	<div class="hero-intro"><p><?= $t('home_pitch') ?></p><div class="actions"><a class="button" href="<?= $user ? '/new' : '/login?register=1' ?>"><?= \Dilemma\Views::icon('plus') ?><span data-control-label><?= $t('get_started') ?></span></a><a class="text-link" href="/how"><span><?= $t('how') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div></div>
 	<h1 class="hero-wordmark" id="home-title">dilemma</h1>
 </section>
-<section class="project-story" aria-labelledby="story-title"><h2 id="story-title"><?= $t('home_story_title') ?></h2><div class="story-copy"><p><?= $t('home_story') ?></p><p><?= $t('home_purpose') ?></p><a class="text-link" href="/about"><?= $t('about') ?></a></div></section>
+<section class="project-story" aria-labelledby="story-title"><h2 id="story-title"><?= $t('home_story_title') ?></h2><div class="story-copy"><p><?= $t('home_story') ?></p><p><?= $t('home_purpose') ?></p><a class="text-link" href="/about"><span><?= $t('about') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div></section>
 <section class="process" aria-labelledby="process-title"><header class="process-header"><h2 id="process-title"><?= $t('how') ?></h2></header><ol class="process-list">
 <?php foreach ([1, 2, 3] as $step): ?><li><span class="step-number" aria-hidden="true"><?= $step ?></span><h3><?= $t('step_' . $step . '_title') ?></h3><p><?= $t('step_' . $step) ?></p></li><?php endforeach; ?>
 </ol></section>
-<section class="section home-archive" aria-labelledby="archive-title"><div class="section-heading"><h2 id="archive-title"><?= $t('archive') ?></h2><a class="text-link" href="/explore"><?= $t('explore') ?></a></div><?= Views::debate_list(ReadModel::list([])) ?></section>
+<section class="section home-archive" aria-labelledby="archive-title"><div class="section-heading"><h2 id="archive-title"><?= $t('archive') ?></h2><a class="text-link" href="/explore"><span><?= $t('explore') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div><?= Views::debate_list(ReadModel::list([])) ?></section>

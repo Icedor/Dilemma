@@ -20,10 +20,10 @@
 			<?php else: ?>
 			<?= Views::form('/api/accept', 'accepted', 'id="invitation-form" hidden') ?>
 				<?= Views::hidden('token', '') ?><?= Views::area('stance', 'your_counter_position', '', true) ?>
-				<details class="disclosure"><summary><?= $t('optional_details') ?></summary><?= Views::scale() ?></details>
+				<details class="disclosure"><summary class="disclosure-control"><span><?= $t('optional_details') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><?= Views::scale() ?></details>
 				<?= Views::consent() ?><?= Views::check('notify', 'notify_debate', true) ?><p class="muted"><?= $t('notify_debate_help') ?></p><?= Views::check('accept_terms', 'accept_terms', false, true) ?>
 				<p class="muted"><a href="/terms" target="_blank" rel="noopener"><?= $t('terms') ?></a> · <a href="/privacy" target="_blank" rel="noopener"><?= $t('privacy') ?></a></p>
-				<div class="actions"><?= Views::submit('accept_invitation') ?><button type="button" class="text-button" data-decline><?= $t('decline') ?></button></div>
+				<div class="actions"><?= Views::submit('accept_invitation') ?><button type="button" class="text-button" data-decline><?= \Dilemma\Views::icon('x') ?><span data-control-label><?= $t('decline') ?></span></button></div>
 			</form>
 			<?php endif; ?>
 			<ol class="invitation-steps"><li><?= $t('invite_step_opinion') ?></li><li><?= $t('invite_step_connect') ?></li><li><?= $t('invite_step_decide') ?></li></ol>
