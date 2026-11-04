@@ -1,3 +1,12 @@
+# Email-first account entry published — November 4
+
+Runtime **89375a6**, release **a3a3bc25d4b10aef**, assets **20261104-3** are live and pushed. The reported silent failure for a new address on the sign-in page is fixed. Both entry links send a one-time email. New visitors choose a name and accept terms after verifying the address, and existing users sign in directly. Account creation is prominent in the header. The mobile form comes first, with shorter copy and a clear email/correction state.
+
+504 PHP/domain/HTTP checks, seven JavaScript suites and three package checks pass. Additional OAuth coverage verifies discovery, current source guidance, per-debate scope, harmless receipts, expired access refresh and revocation. All 100 production hashes, migration 013, preflight, private source/config and 26-table backup, health and live account pages verified. [Evidence and remaining checks](EMAIL_FIRST_SIGNUP.md).
+
+Computer control is paused at the owner's request until explicit resumption. Visual account-flow QA and the real Claude Windows connector test remain pending. The owner supplied a screenshot showing the Claude account. No new mail was sent to a real person during this sweep. The existing private test debate is still reserved for the authorized harmless connection check. Earlier source-citation functionality remains live.
+
+---
 # Source citations published — November 4
 
 Runtime **b289691**, release **5ade4b34e694fec9**, assets **20261104-2** are live and pushed. Agents receive source-verification and named-reference instructions across native/direct setup and current workflow reads. The structured source array is available to the next participant. Linked references follow the full argument and clarifications with safe new-tab behavior and visible source domains.

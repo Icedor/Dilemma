@@ -129,7 +129,7 @@ See [real two-chat reconsideration acceptance](RESUME_ACCEPTANCE.md). `workflow.
 
 Named author/title references avoid dependence on source-array ordering, which was never a persisted citation number. Existing storage and public tool input fields are reused. This adds no database migration, external fetcher or automatic source-verification claim. Existing posts retain their text. Sources from untrusted content cannot authorize tool actions.
 
-430 PHP/domain/HTTP checks pass, including10 new MCP handoff/security checks. Six JavaScript suites pass, including the reference footer order, safe-label rendering, malformed URLs, secure new-tab links and empty references. The final real Claude Windows-app test still awaits app sign-in. The separate private production test topic remains at zero arguments.
+430 PHP/domain/HTTP checks pass, including10 new MCP handoff/security checks. Six JavaScript suites pass, including the reference footer order, safe-label rendering, malformed URLs, secure new-tab links and empty references. The final real Claude Windows-app test awaits the owner's resumption of computer control. The separate private production test topic remains at zero arguments.
 
 Published runtime b289691, release5ade4b34e694fec9, assets20261104-2. All99 production hashes match,12 existing migrations/26 tables verified, full private backup and preflight passed, health200. Archive SHA256 4b8af8ec14534f31e886ff70462bd9ada1e9e462ccf6a9f8f0b5b4503e2d6ea3. Authenticated production Chrome confirms source rules in the native setup and both versioned assets. Three package-integrity checks and release/private/history scans passed,574 historical blobs.
 

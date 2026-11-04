@@ -11,8 +11,12 @@ Migration 013 allows a verification record without a user, with an encrypted pen
 - [x] OAuth initialization, tools, prompts, per-debate isolation, harmless write receipt, actual token expiry/refresh and revocation for all three client authentication methods.
 - [x] Account UI transitions, text rendering, focus, reload/language recovery and unavailable-storage fallback through JavaScript checks.
 - [x] 504 PHP/domain/HTTP checks and seven JavaScript suites.
-- [ ] Release and production verification.
+- [x] Release and production verification.
 - [ ] Visual desktop/mobile check after the owner resumes computer control.
 - [ ] Real Claude Windows connector test after the owner resumes computer control.
 
 The owner paused computer control for a meeting. No browser or native-app interaction took place during this sweep. The earlier sign-in blocker is superseded by the owner's screenshot showing the Claude account. The last control attempt had inconsistent window discovery and was stopped with Escape. Resume from a fresh app/window observation and the existing private test topic. Do not infer real Claude success from server tests.
+
+Published runtime **89375a6**, release **a3a3bc25d4b10aef**, assets **20261104-3**. All 100 production hashes verified after a private source/config and 26-table backup. Migration 013 and production preflight passed. Health and the Swedish entry/English completion pages returned HTTP 200. The release passed three integrity checks and the private-value scan. Git history scan covered 604 blobs. Archive SHA256 is e84e47814731737f39b5a47bd6332c19b587c6d83351380f65b483258e4bb998. No new production mailbox delivery or visual browser result is claimed.
+
+When computer control resumes, check the account flow at desktop, 390px and 320px, Swedish/English, keyboard, light/dark and reduced motion. Confirm visible field focus, address correction and the post-email name/terms step. Then reuse the existing Claude connector with only the authorized private test topic. Verify identity, read access, a harmless persisted write receipt and the current source guide. Keep the connection test free of argument publication as previously agreed.
