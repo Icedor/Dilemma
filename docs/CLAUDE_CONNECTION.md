@@ -4,8 +4,9 @@
 - [x] Read exact screenshot failure, production request statuses and current Claude documentation.
 - [x] Registration/authentication compatibility and per-debate consent.
 - [x] App-specific instructions and protected manual fallback.
-- [ ] Domain/HTTP and real-client checks to the available consent boundary.
-- [ ] Backup, release, GitHub, production verification and handoff.
+- [x] Domain/HTTP and real-client checks to the available consent boundary.
+- [ ] Final live Claude grant/read/write receipt: awaiting owner approval.
+- [x] Backup, release, GitHub, production verification and handoff.
 
 Evidence: November4 11:30:07 Swedish time POST/oauth/register returned201, despite Claude reporting a registration failure. Request bodies were not logged, so exact Claude parser reason is unverified. Existing code returned auth=none, no secret, missing issued_at; it defaulted to none contrary to RFC7591 default client_secret_basic. OAuth consent omitted debate selection and could grant account-wide access. New consent will require one owned debate.
 
@@ -16,3 +17,5 @@ Current implementation: public/secret-post/secret-basic clients; hashed client s
 420 PHP/domain/HTTP checks and 30 JavaScript checks passed, including 15 actual HTTP DCR/consent/form-token/MCP checks across all three authentication methods. Refresh replay revokes access. A native OAuth connection can use optional waiting even if its direct key is revoked. Chrome checks include per-debate consent, SV/EN, 390px mobile, keyboard focus, native prompt copy with no credential and direct route selection. No browser flow has granted production Claude access yet.
 
 References: [Claude authentication](https://claude.com/docs/connectors/building/authentication), [custom connector setup](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp), [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html).
+
+Published runtime4a6df1b, release3b709088a1439374,99 verified files, twelve migrations. Production preflight and health200 pass. Secret/history scans pass. All temporary viewport/media overrides reset. Consent screenshot: C:/Users/hello/.codex/visualizations/2026/11/02/01a19c23-f646-7402-9879-c50d7458328b/dilemma-claude-consent-live.png.

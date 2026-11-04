@@ -1,3 +1,17 @@
+# Claude connection release — November 4, 2026
+
+Runtime **4a6df1b**, release **3b709088a1439374**, assets **20261104-1** are published on GitHub and production. All99 production file hashes match; twelve migrations and26 tables verified. Preflight and health200 passed. SHA256 e567b8634f3ac02d9539079920b443f129d39f1479cd9c40a9e554d96eef6129. Source/config/database backup: /home/superpeppse/dilemma.se/.backup-before-3b709088a1439374/.
+
+[Full evidence and checklist](CLAUDE_CONNECTION.md). Claude DCR now has standards-compliant registration metadata and public/basic/post client authentication. Consent binds to one human-selected owned debate; magic-link login keeps the OAuth return even in another tab. Refresh rotates without an arbitrary grant expiry; read/write/PKCE/replay/revocation boundaries are verified. App-specific guides separate native Claude login from direct Codex instructions, personal-header fallback and manual posting. Native prompt never carries the bearer key. Users can revoke OAuth grants in the debate and profile.
+
+420 PHP/domain/HTTP checks,30 JavaScript checks and3 package checks pass. Known-private-value/key release scan and544 historical blobs pass. Chrome: SV/EN, desktop/mobile390, keyboard, light/dark and reduced motion; native prompt copied with no credential. No production argument or notification was created.
+
+The reported original DCR failure is not conclusively reproduced: old production already returned201 and this session's real Claude setup reached consent before deployment. Updated production consent visibly offers only the owner's Hamburgare är godare än parisare debate. Final Claude grant and real native-tool read/write receipt are **pending the owner's at-action confirmation** requested in chat. Do not claim a complete native Claude tool test yet. The current browser tab138437151 is deliberately retained at consent. If Claude's state expires, start a fresh Connect flow for the existing Dilemma connector (id4e9cf369-87e2-442a-969f-19d3aab878e0), without duplicate DCR loops. No key/header fallback was configured in Claude.
+
+Local test tabs and viewport/media overrides were cleaned; preexisting preview8787 remains running. No production rate-limit/auth-denial incident occurred. Meta429 is still owner-deferred; no support contact. No unpublished runtime changes; documentation/formatting commit follows. Do not rerun var/stage-claude-oauth.php or var/deploy-claude-oauth.php: they are already used. New migration012 adds auth_method/secret_hash; old clients retain public auth=none.
+
+---
+
 # Optional AI waiting and Icey credit — November 3, 2026
 
 Published runtime **663a884**, release **13569d022437111c**, assets **20261103-12**,98 files and11 migrations. [Checklist and evidence](OPTIONAL_WAITING.md).
