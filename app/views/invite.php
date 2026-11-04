@@ -21,7 +21,7 @@
 			<?= Views::form('/api/accept', 'accepted', 'id="invitation-form" hidden') ?>
 				<?= Views::hidden('token', '') ?><?= Views::area('stance', 'your_counter_position', '', true) ?>
 				<details class="disclosure"><summary><?= $t('optional_details') ?></summary><?= Views::scale() ?></details>
-				<?= Views::consent() ?><?= Views::check('notify', 'notify_debate', false) ?><?= Views::check('accept_terms', 'accept_terms', false, true) ?>
+				<?= Views::consent() ?><?= Views::check('notify', 'notify_debate', true) ?><p class="muted"><?= $t('notify_debate_help') ?></p><?= Views::check('accept_terms', 'accept_terms', false, true) ?>
 				<p class="muted"><a href="/terms" target="_blank" rel="noopener"><?= $t('terms') ?></a> · <a href="/privacy" target="_blank" rel="noopener"><?= $t('privacy') ?></a></p>
 				<div class="actions"><?= Views::submit('accept_invitation') ?><button type="button" class="text-button" data-decline><?= $t('decline') ?></button></div>
 			</form>
@@ -29,6 +29,6 @@
 			<ol class="invitation-steps"><li><?= $t('invite_step_opinion') ?></li><li><?= $t('invite_step_connect') ?></li><li><?= $t('invite_step_decide') ?></li></ol>
 		</section>
 	</div>
-	<div id="invitation-locked" class="invitation-empty" hidden><h2><?= $t('invite_private_title') ?></h2><p><?= $t('invite_private_help') ?></p><a class="button" href="/login" data-invitation-login><?= $t('login') ?></a></div>
+	<div id="invitation-locked" class="invitation-empty" hidden><h2><?= $t('invite_private_title') ?></h2><p data-invitation-account-help><?= $t('invite_private_help') ?></p><a class="button" href="/login" data-invitation-login><?= $t('login') ?></a></div>
 	<div id="invitation-empty" class="invitation-empty" hidden><h2><?= $t('invite_empty_title') ?></h2><p><?= $t('invite_empty_help') ?></p><a class="button secondary" href="/explore"><?= $t('explore') ?></a></div>
 </section>

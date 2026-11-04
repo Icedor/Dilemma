@@ -18,6 +18,7 @@ export async function setup({ request, t }) {
 		} else status(t('install_help'));
 	});
 	const supported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && isSecureContext;
+	const preference = () => t(config?.notifications_enabled === false ? 'notifications_paused' : config?.enabled ? (config.device ? 'push_active' : config.devices > 0 ? 'push_other_device' : 'push_email_fallback') : 'push_optional');
 	const paint = () => {
 		enables.forEach(button => { button.disabled = busy || !supported || !config || !registration; button.textContent = t(config?.enabled && config?.device ? 'push_active' : 'push_enable'); button.hidden = !!(config?.enabled && config?.device); });
 		disables.forEach(button => { button.hidden = !config?.enabled; button.disabled = busy; });
@@ -30,7 +31,7 @@ export async function setup({ request, t }) {
 		}
 		config = await request('/api/push');
 		if (supported && config.device && !(await registration.pushManager.getSubscription())) config.device = false;
-		status(t(!supported ? 'push_unsupported' : config.enabled && config.device ? 'push_active' : 'push_optional'));
+		status(preference() + (!supported ? ' ' + t('push_unsupported') : ''));
 	} catch { status(t('push_unavailable')); }
 	paint();
 	for (const button of enables) button.addEventListener('click', async () => {
@@ -47,7 +48,7 @@ export async function setup({ request, t }) {
 			}
 			try { config = { ...config, ...await request('/api/push/subscribe', { endpoint: subscription.endpoint, consent: true }) }; }
 			catch (error) { await subscription.unsubscribe(); throw error; }
-			status(t('push_active'));
+			status(preference());
 		} catch (error) { status(error.message || t('push_unavailable')); }
 		finally { busy = false; paint(); }
 	});
@@ -58,7 +59,7 @@ export async function setup({ request, t }) {
 			config = { ...config, ...await request('/api/push/disable', {}) };
 			const subscription = await registration?.pushManager?.getSubscription();
 			if (subscription) await subscription.unsubscribe();
-			status(t('push_off'));
+			status(config.notifications_enabled === false ? preference() : t('push_off'));
 		} catch (error) { status(error.message); }
 		finally { busy = false; paint(); }
 	});

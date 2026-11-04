@@ -20,7 +20,7 @@ $before = (int) Db::one('SELECT COUNT(*) AS n FROM notification_outbox WHERE use
 Mail::notify($debate['id'], $b_user['id'], 'argument', 987654321);
 Mail::notify($debate['id'], $b_user['id'], 'argument', 987654321);
 check((int) Db::one('SELECT COUNT(*) AS n FROM push_outbox WHERE subscription_id = ?', [$row['id']])['n'] === 1, 'Push event is queued once');
-check((int) Db::one('SELECT COUNT(*) AS n FROM notification_outbox WHERE user_id = ?', [$a_user['id']])['n'] === $before, 'Push replaces debate email without a fallback copy');
+check((int) Db::one('SELECT COUNT(*) AS n FROM notification_outbox WHERE user_id = ?', [$a_user['id']])['n'] === $before + 1, 'Push queues one delayed email fallback, not duplicate messages');
 $keys = Push::keys();
 $header = Push::authorization('https://fcm.googleapis.com', $keys, 1700000000);
 preg_match('/vapid t=([^,]+), k=/', $header, $match);

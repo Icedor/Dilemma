@@ -15,7 +15,8 @@ final class Push
 
 	public static function status(array $user): array
 	{
-		return ['public_key' => self::keys()['public'], 'enabled' => (bool) $user['push_enabled'], 'device' => (bool) Db::one('SELECT id FROM push_subscriptions WHERE user_id = ? AND session_hash = ?', [$user['id'], $user['session_hash']])];
+		$devices = (int) Db::one('SELECT COUNT(*) AS n FROM push_subscriptions p JOIN auth_sessions s ON s.token_hash = p.session_hash WHERE p.user_id = ? AND s.expires_at > UTC_TIMESTAMP()', [$user['id']])['n'];
+		return ['devices' => $devices, 'public_key' => self::keys()['public'], 'enabled' => (bool) $user['push_enabled'], 'notifications_enabled' => (bool) $user['notify'], 'device' => (bool) Db::one('SELECT id FROM push_subscriptions WHERE user_id = ? AND session_hash = ?', [$user['id'], $user['session_hash']])];
 	}
 
 	public static function endpoint(string $endpoint): array
@@ -58,11 +59,15 @@ final class Push
 		});
 	}
 
-	public static function enqueue(string $user_id, int $sequence): void
+	public static function enqueue(string $user_id, int $sequence, string $debate_id): array
 	{
+		$receipts = [];
+		if (is_file(Config::storage('push-paused')) || Db::one("SELECT id FROM push_outbox WHERE status = 'blocked' LIMIT 1")) return $receipts;
 		foreach (Db::all('SELECT p.id FROM push_subscriptions p JOIN auth_sessions s ON s.token_hash = p.session_hash WHERE p.user_id = ? AND s.expires_at > UTC_TIMESTAMP()', [$user_id]) as $subscription) {
-			Db::run('INSERT IGNORE INTO push_outbox (id, subscription_id, dedupe_key, available_at, created_at) VALUES (?, ?, ?, ?, ?)', [Support::id(), $subscription['id'], Support::hash($sequence . ':' . $subscription['id']), Support::now(), Support::now()]);
+			Db::run('INSERT IGNORE INTO push_outbox (id, subscription_id, dedupe_key, available_at, created_at, debate_id) VALUES (?, ?, ?, ?, ?, ?)', [Support::id(), $subscription['id'], Support::hash($sequence . ':' . $subscription['id']), Support::now(), Support::now(), $debate_id]);
+			$receipts[] = Support::hash($sequence . ':' . $subscription['id']);
 		}
+		return $receipts;
 	}
 
 	public static function authorization(string $origin, array $keys, ?int $now = null): string
@@ -100,7 +105,7 @@ final class Push
 		if (is_file(Config::storage('push-paused')) || Db::one("SELECT id FROM push_outbox WHERE status = 'blocked' LIMIT 1")) return $counts + ['paused' => true];
 		for ($i = 0; $i < $limit; $i++) {
 			$row = Db::transaction(static function (): ?array {
-				$row = Db::one("SELECT o.*, p.encrypted_endpoint, p.user_id FROM push_outbox o JOIN push_subscriptions p ON p.id = o.subscription_id JOIN users u ON u.id = p.user_id JOIN auth_sessions s ON s.token_hash = p.session_hash WHERE u.status = 'active' AND u.push_enabled = 1 AND s.expires_at > UTC_TIMESTAMP() AND o.created_at > UTC_TIMESTAMP() - INTERVAL 1 DAY AND ((o.status = 'pending' AND o.available_at <= UTC_TIMESTAMP()) OR (o.status = 'sending' AND o.lease_until < UTC_TIMESTAMP())) AND o.attempts < 3 ORDER BY o.available_at LIMIT 1 FOR UPDATE SKIP LOCKED");
+				$row = Db::one("SELECT o.*, p.encrypted_endpoint, p.user_id FROM push_outbox o JOIN push_subscriptions p ON p.id = o.subscription_id JOIN users u ON u.id = p.user_id JOIN auth_sessions s ON s.token_hash = p.session_hash WHERE u.status = 'active' AND u.notify = 1 AND u.push_enabled = 1 AND (o.debate_id IS NULL OR EXISTS (SELECT 1 FROM debate_participants dp WHERE dp.debate_id = o.debate_id AND dp.user_id = u.id AND dp.notify = 1 AND dp.left_at IS NULL)) AND s.expires_at > UTC_TIMESTAMP() AND o.created_at > UTC_TIMESTAMP() - INTERVAL 1 DAY AND ((o.status = 'pending' AND o.available_at <= UTC_TIMESTAMP()) OR (o.status = 'sending' AND o.lease_until < UTC_TIMESTAMP())) AND o.attempts < 3 ORDER BY o.available_at LIMIT 1 FOR UPDATE SKIP LOCKED");
 				if ($row) Db::run("UPDATE push_outbox SET status = 'sending', attempts = attempts + 1, lease_until = ? WHERE id = ?", [gmdate('Y-m-d H:i:s', time() + 120), $row['id']]);
 				return $row;
 			});

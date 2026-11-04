@@ -613,7 +613,14 @@ async function invitation() {
 	try {
 		const data = await request('/api/invitation', { token });
 		status.hidden = true;
-		if (!data.debate) { document.querySelector('#invitation-locked').hidden = false; return; }
+		if (!data.debate) {
+			const locked = document.querySelector('#invitation-locked');
+			if (data.different_account) {
+				locked.querySelector('[data-invitation-account-help]').textContent = t('invite_other_account');
+				locked.querySelector('[data-invitation-login]').textContent = t('invite_switch_account');
+			}
+			locked.hidden = false; return;
+		}
 		document.querySelector('#invitation-title').textContent = data.debate.title;
 		const premise = document.querySelector('.invitation-premise');
 		const thesis = document.querySelector('[data-invite-thesis]');
@@ -662,7 +669,7 @@ revealAnchor();
 const savedScroll = storageGet(`dilemma:scroll:${location.pathname}`);
 if (savedScroll !== null) { storageRemove(`dilemma:scroll:${location.pathname}`); requestAnimationFrame(() => scrollTo(0, Number(savedScroll) || 0)); }
 
-if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261102-3').then(module => module.setup({ request, t })).catch(() => {});
+if (document.querySelector('.pwa-controls')) import('./pwa.js?v=20261104-4').then(module => module.setup({ request, t })).catch(() => {});
 
 // Exact cross-browser console credit from Secret.icey.se.
 console.log('%c' + String.raw`██╗ ██████╗███████╗██╗   ██╗

@@ -12,7 +12,8 @@
 <?= Views::check('public_consent', 'public_consent', false, true) ?>
 <?= Views::check('accept_terms', 'accept_terms', false, true) ?>
 <p class="legal-links"><a href="/terms" target="_blank" rel="noopener"><?= $t('terms') ?></a> · <a href="/privacy" target="_blank" rel="noopener"><?= $t('privacy') ?></a></p>
-<details class="disclosure"><summary><?= $t('optional_details') ?></summary><?= Views::scale($debate['left_label'], $debate['right_label']) ?><?= Views::check('position_consent', 'position_consent') ?><?= Views::check('notify', 'notify_debate') ?></details>
+<details class="disclosure"><summary><?= $t('optional_details') ?></summary><?= Views::scale($debate['left_label'], $debate['right_label']) ?><?= Views::check('position_consent', 'position_consent') ?></details>
+<?= Views::check('notify', 'notify_debate', true) ?><p class="muted"><?= $t('notify_debate_help') ?></p>
 <?= Views::submit('claim_opponent') ?></form>
 <?php endif; ?></section>
 </div>

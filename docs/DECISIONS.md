@@ -62,3 +62,7 @@ selectable instruction and copy button directly there. Encrypt a recoverable tok
 under APP_KEY, preserve hashed authentication, clear ciphertext on revoke/deletion.
 Use explicit renewal only after revocation. Migration 007 adds the unique mapping
 and nullable expiry; source/config and database backup required before deployment.
+
+# 2026-11-04: Notification default and invitation identity
+
+Owner explicitly selects email on by default for new debate participation, superseding earlier opt-in-only defaults. Each new-participant form shows the checked choice. Existing opt-outs remain unchanged. Push replaces email only after a deliberate selection, with a clearly disclosed email fallback if push cannot be sent. Both channels obey account/per-debate choices. Invitations and login links always use email. Invitation subject/body must identify the inviting account. See INVITATION_DELIVERY.md.

@@ -24,7 +24,7 @@ $email_inv=Debates::invite($a['actor'],$id2,['idempotency_key'=>Support::token()
 // Read the targeted invitation's protected token from its private storage.
 $target=Db::one('SELECT encrypted_token FROM debate_invitations WHERE debate_id=? AND email=?',[$id2,$b['email']]);$target_token=Support::unseal($target['encrypted_token']);
 check(Debates::invitation(null,$target_token)===['sign_in_required'=>true], 'Targeted invitation hides all question data until matching sign-in');
-rejects(fn()=>Debates::invitation($c['actor'],$target_token),404,'Wrong email cannot view targeted invitation');
+check(Debates::invitation($c['actor'],$target_token) === ['sign_in_required'=>true,'different_account'=>true], 'Wrong email gets recovery without private invitation details');
 check(Debates::invitation($b['actor'],$target_token)['debate']['id']===$id2,'Matching email sees targeted premise');
 Db::run('UPDATE debates SET hidden=1 WHERE id=?',[$id2]);
 rejects(fn()=>Debates::invitation(null,$target_token),409,'Hidden debate preview blocked for guests');

@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Invitation identity, recipient recovery and notification delivery](INVITATION_DELIVERY.md)
+
 - [Email-first account entry and background verification](EMAIL_FIRST_SIGNUP.md)
 
 - [Claude connection and app-specific onboarding](CLAUDE_CONNECTION.md)

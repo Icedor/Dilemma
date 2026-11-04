@@ -13,5 +13,5 @@
 <div class="form-columns"><?= Views::field('left_label', 'left_label', '', 'text', false, 140) ?><?= Views::field('right_label', 'right_label', '', 'text', false, 140) ?></div>
 <?= Views::scale() ?></details>
 <?= Views::consent() ?>
-<?= Views::check('notify', 'notify_debate', false) ?><p class="muted"><?= $t('notify_debate_help') ?></p>
+<?= Views::check('notify', 'notify_debate', true) ?><p class="muted"><?= $t('notify_debate_help') ?></p>
 <?= Views::submit('create_draft') ?></form></div></section>

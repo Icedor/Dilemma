@@ -6,19 +6,33 @@ namespace Dilemma;
 
 final class Mail
 {
-	public static function enqueue(string $dedupe, string $kind, string $email, string $locale, array $data, ?string $user_id = null): void
+	public static function enqueue(string $dedupe, string $kind, string $email, string $locale, array $data, ?string $user_id = null, int $delay = 0): void
 	{
 		$payload = Support::seal(Support::json(['email' => Support::email($email), 'locale' => $locale, 'data' => $data]));
-		Db::run('INSERT INTO notification_outbox (id, dedupe_key, user_id, kind, encrypted_payload, available_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE dedupe_key = VALUES(dedupe_key)', [Support::id(), Support::hash($dedupe), $user_id, $kind, $payload, Support::now(), Support::now()]);
+		Db::run('INSERT INTO notification_outbox (id, dedupe_key, user_id, kind, encrypted_payload, available_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE dedupe_key = VALUES(dedupe_key)', [Support::id(), Support::hash($dedupe), $user_id, $kind, $payload, gmdate('Y-m-d H:i:s', time() + max(0, $delay)), Support::now()]);
 	}
 
 	public static function notify(string $debate_id, string $actor_id, string $kind, int $sequence): void
 	{
 		$debate = Db::one('SELECT title FROM debates WHERE id = ?', [$debate_id]);
-		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND p.left_at IS NULL AND u.status = 'active' AND (u.push_enabled = 1 OR (u.notify = 1 AND p.notify = 1))", [$debate_id, $actor_id]) as $user) {
-			if ($user['push_enabled']) { Push::enqueue($user['id'], $sequence); continue; }
-			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title']], $user['id']);
+		foreach (Db::all("SELECT u.* FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? AND p.user_id <> ? AND p.left_at IS NULL AND u.status = 'active' AND u.notify = 1 AND p.notify = 1", [$debate_id, $actor_id]) as $user) {
+			$push_receipts = $user['push_enabled'] ? Push::enqueue($user['id'], $sequence, $debate_id) : [];
+			// Email is held briefly for push transport; a confirmed send cancels it.
+			self::enqueue('event:' . $sequence . ':' . $user['id'], $kind, $user['email'], $user['locale'], ['url' => Config::url('/debate/' . $debate_id), 'title' => $debate['title'], 'debate_id' => $debate_id, 'push_receipts' => $push_receipts], $user['id'], $push_receipts ? 300 : 0);
 		}
+	}
+
+	public static function deliverable(array $row, array $payload): bool
+	{
+		// Transactional messages never depend on debate notification preferences.
+		if (in_array($row['kind'], ['login', 'invitation'], true)) return true;
+		if ($row['user_id'] && !Db::one("SELECT id FROM users WHERE id = ? AND status = 'active' AND notify = 1", [$row['user_id']])) return false;
+		$data = $payload['data'];
+		if (isset($data['debate_id']) && !Db::one('SELECT user_id FROM debate_participants WHERE debate_id = ? AND user_id = ? AND notify = 1 AND left_at IS NULL', [$data['debate_id'], $row['user_id']])) return false;
+		foreach ($data['push_receipts'] ?? [] as $receipt) {
+			if (Db::one("SELECT id FROM push_outbox WHERE dedupe_key = ? AND status = 'sent'", [$receipt])) return false;
+		}
+		return true;
 	}
 
 	public static function work(int $limit = 20): array
@@ -33,11 +47,11 @@ final class Mail
 			});
 			if (!$row) break;
 			try {
-				if (!in_array($row['kind'], ['login', 'invitation'], true) && $row['user_id'] && Db::one('SELECT id FROM users WHERE id = ? AND push_enabled = 1', [$row['user_id']])) {
+				$payload = json_decode(Support::unseal($row['encrypted_payload']), true, 32, JSON_THROW_ON_ERROR);
+				if (!self::deliverable($row, $payload)) {
 					Db::run("UPDATE notification_outbox SET status = 'cancelled', encrypted_payload = '', lease_until = NULL WHERE id = ?", [$row['id']]);
 					continue;
 				}
-				$payload = json_decode(Support::unseal($row['encrypted_payload']), true, 32, JSON_THROW_ON_ERROR);
 				$message = self::render($row['id'], $row['kind'], $payload);
 				if (Config::get('MAIL_TRANSPORT') === 'spool' && !Config::production()) {
 					$directory = Config::storage('mail');
@@ -47,6 +61,9 @@ final class Mail
 					(new Smtp())->send($payload['email'], $message);
 				}
 				Db::run("UPDATE notification_outbox SET status = 'sent', sent_at = ?, lease_until = NULL, encrypted_payload = '', last_error = NULL WHERE id = ?", [Support::now(), $row['id']]);
+				foreach ($payload['data']['push_receipts'] ?? [] as $receipt) {
+					Db::run("UPDATE push_outbox SET status = 'cancelled' WHERE dedupe_key = ? AND status IN ('pending', 'failed')", [$receipt]);
+				}
 				$counts['sent']++;
 			} catch (\Throwable) {
 				$attempts = (int) $row['attempts'] + 1;
@@ -71,6 +88,8 @@ final class Mail
 		];
 		$subject = $subjects[$kind] ?? ($en ? 'Your debate has an update' : 'Din debatt har uppdaterats');
 		$data = $payload['data'];
+		$sender = preg_replace('/\s+/u', ' ', trim((string) ($data['sender_name'] ?? '')));
+		if ($kind === 'invitation' && $sender !== '') $subject = $sender . ($en ? ' invited you to Dilemma' : ' bjuder in dig till Dilemma');
 		$copy = [
 			'login' => [$en ? 'Welcome.' : 'Välkommen in.', $en ? 'Continue to Dilemma' : 'Fortsätt till Dilemma'],
 			'invitation' => [$en ? 'You’re invited.' : 'Du är inbjuden.', $en ? 'View invitation' : 'Se inbjudan'],
@@ -81,17 +100,20 @@ final class Mail
 			'ended' => [$en ? 'The debate has ended.' : 'Debatten är avslutad.', $en ? 'View debate' : 'Se debatten'],
 		];
 		[$heading, $action] = $copy[$kind] ?? [$en ? 'An update in your debate.' : 'Nytt i din debatt.', $en ? 'Open debate' : 'Öppna debatten'];
+		if ($kind === 'invitation' && $sender !== '') $heading = $sender . ($en ? ' invites you.' : ' bjuder in dig.');
 		$title = $kind === 'login' ? '' : (string) ($data['title'] ?? '');
 		$expiry = $en ? 'Valid for 15 minutes. One use only.' : 'Gäller i 15 minuter. Kan användas en gång.';
 		$ignore = $en ? 'Didn’t request this? You can ignore this email.' : 'Har du inte begärt länken? Bortse från det här mejlet.';
 		$settings = !in_array($kind, ['login', 'invitation'], true);
 		$settings_label = $en ? 'Notification settings' : 'Ändra dina notiser';
 		$chat = '';
-		$invitation_copy = $en ? 'Think differently? Explore the arguments together. Your own AI assistants help you debate; you decide what changes your mind.' : 'Tycker du annorlunda? Pröva argumenten tillsammans. Era egna AI-assistenter hjälper er debattera; ni avgör vad som övertygar.';
+		$invitation_copy = $en ? 'See it differently? Let your AI assistants explore the arguments. You decide what convinces you.' : 'Tycker du annorlunda? Låt era AI-assistenter pröva argumenten. Ni avgör vad som övertygar.';
+		$invitation_access = $en ? 'This invitation is for ' . $payload['email'] . '. Sign in with that address.' : 'Inbjudan gäller ' . $payload['email'] . '. Logga in med den adressen.';
+		if ($kind === 'invitation' && !str_contains($data['url'], '/invite#')) $invitation_access = $en ? 'An open question. The first person to join takes the other side.' : 'En öppen fråga. Först att tacka ja blir motpart.';
 		$chat_label = $en ? 'Your AI conversation' : 'Din AI-konversation';
 		$preview = $kind === 'login' ? $expiry : ($title !== '' ? $title : $subject);
 		$text = $subject . "\n\n" . ($title !== '' ? $title . "\n\n" : '') . $action . ":\n" . $data['url'];
-		if ($kind === 'invitation') $text = $subject . "\n\n" . $title . "\n\n" . $invitation_copy . "\n\n" . $action . ":\n" . $data['url'];
+		if ($kind === 'invitation') $text = $subject . "\n\n" . ($en ? 'Question for discussion' : 'Frågan att diskutera') . ":\n“" . $title . "”\n\n" . $invitation_copy . "\n\n" . $invitation_access . "\n\n" . $action . ":\n" . $data['url'];
 		if ($kind === 'login') $text .= "\n\n" . $expiry . "\n" . $ignore;
 		if ($chat !== '') $text .= "\n\n" . $chat_label . ': ' . $chat;
 		if ($settings) $text .= "\n\n" . $settings_label . ': ' . Config::url('/settings');

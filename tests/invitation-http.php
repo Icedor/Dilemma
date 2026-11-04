@@ -14,3 +14,21 @@ foreach (['sv','en'] as $invite_language) {
 	check($page['status']===200 && str_contains($page['body'],'invitation-hero') && str_contains($page['body'],'id="invitation-empty"'), 'HTTP: invitation has an intentional empty state in '.$invite_language);
 	check(!str_contains($page['body'],'A clear creator opinion') && !str_contains($page['body'],$invite_token), 'HTTP: invitation page source never embeds someone else’s private premise or token');
 }
+
+$target_user=user_fixture('InvitationTarget');
+$target_link=Debates::invite($invite_author['actor'],$invite_draft['debate_id'],['idempotency_key'=>Support::token(),'email'=>$target_user['email']]);
+$target_token=parse_url($target_link['invitation_url'],PHP_URL_FRAGMENT);
+$wrong=http_request('/api/invitation',['token'=>$target_token],[],'dilemma_session='.$invite_author['session']['token']);
+check($wrong['status']===200&&$wrong['json']===['sign_in_required'=>true,'different_account'=>true],'HTTP: wrong account gets a clear recovery state without recipient or premise');
+check(http_request('/api/invitation',['token'=>$target_token])['json']===['sign_in_required'=>true],'HTTP: addressed invitation stays private for guests');
+check(http_request('/api/invitation',['token'=>$target_token],[],'dilemma_session='.$target_user['session']['token'])['json']['debate']['id']===$invite_draft['debate_id'],'HTTP: matching account can view the addressed invitation');
+foreach(['sv','en'] as $locale){
+	$cookie='dilemma_session='.$target_user['session']['token'];
+	foreach(['/new','/invite'] as $path){
+		$page=http_request($path.'?lang='.$locale,null,[],$cookie);
+		$dom=new DOMDocument();@$dom->loadHTML($page['body']);$xpath=new DOMXPath($dom);
+		check($xpath->query('//input[@name="notify" and @checked]')->length===1,'HTTP: visible default notification choice on '.$path.' in '.$locale);
+	}
+	$page=http_request('/invite?lang='.$locale,null,[],$cookie);
+	check(str_contains($page['body'],'data-invitation-account-help'),'HTTP: wrong-account recovery is rendered in '.$locale);
+}
