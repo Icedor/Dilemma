@@ -104,7 +104,8 @@ final class Http
 		if ($path === '/api/login') { Auth::request_link($input, $ip); self::json(['sent' => true]); }
 		if ($path === '/api/verify') {
 			Support::rate('verify:' . $ip, 20, 900);
-			$session = Auth::verify(Support::text($input, 'token', 43, 43));
+			$session = Auth::verify(Support::text($input, 'token', 43, 43), $input);
+			if (!empty($session['registration_required'])) self::json($session);
 			Auth::cookie($session['token']); self::json(['redirect' => $session['redirect']]);
 		}
 		Auth::require_user($user);

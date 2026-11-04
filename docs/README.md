@@ -1,5 +1,7 @@
 # Dilemma documentation
 
+- [Email-first account entry and background verification](EMAIL_FIRST_SIGNUP.md)
+
 - [Claude connection and app-specific onboarding](CLAUDE_CONNECTION.md)
 
 - [Optional bounded AI waiting and Icey credit](OPTIONAL_WAITING.md)

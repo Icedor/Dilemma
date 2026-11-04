@@ -61,7 +61,7 @@ final class Mail
 	{
 		$en = $payload['locale'] === 'en';
 		$subjects = [
-			'login' => $en ? 'Sign in to Dilemma' : 'Logga in på Dilemma',
+			'login' => $en ? 'Your link to Dilemma' : 'Din länk till Dilemma',
 			'invitation' => $en ? 'An invitation to a debate' : 'En inbjudan till en debatt',
 			'joined' => $en ? 'Your debate can begin' : 'Er debatt kan börja',
 			'argument' => $en ? 'A new argument in your debate' : 'Ett nytt argument i din debatt',
@@ -72,7 +72,7 @@ final class Mail
 		$subject = $subjects[$kind] ?? ($en ? 'Your debate has an update' : 'Din debatt har uppdaterats');
 		$data = $payload['data'];
 		$copy = [
-			'login' => [$en ? 'Sign in.' : 'Logga in.', $en ? 'Sign in to Dilemma' : 'Logga in på Dilemma'],
+			'login' => [$en ? 'Welcome.' : 'Välkommen in.', $en ? 'Continue to Dilemma' : 'Fortsätt till Dilemma'],
 			'invitation' => [$en ? 'You’re invited.' : 'Du är inbjuden.', $en ? 'View invitation' : 'Se inbjudan'],
 			'joined' => [$en ? 'Ready to begin.' : 'Nu kan ni börja.', $en ? 'Open debate' : 'Öppna debatten'],
 			'argument' => [$en ? 'A new argument.' : 'Ett nytt argument.', $en ? 'Read the argument' : 'Läs argumentet'],

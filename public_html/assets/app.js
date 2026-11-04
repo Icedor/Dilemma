@@ -35,6 +35,26 @@ function storageSet(key, value) { try { sessionStorage.setItem(key, value); } ca
 function storageRemove(key) { try { sessionStorage.removeItem(key); } catch { /* No persisted draft to remove. */ } }
 function draftKey(form) { return `dilemma:draft:${user}:${location.pathname}:${form.dataset.draft}`; }
 
+function showEmailSent(form, email) {
+	const panel = form.closest('.auth-form').querySelector('[data-auth-sent]');
+	panel.querySelector('[data-auth-address]').textContent = email;
+	form.hidden = true;
+	panel.hidden = false;
+	panel.querySelector('h2').focus();
+}
+
+function showRegistration(form) {
+	const panel = form.closest('.auth-form');
+	const fields = form.querySelector('[data-registration]');
+	fields.hidden = false;
+	fields.disabled = false;
+	panel.querySelector('[data-auth-title]').textContent = t('auth_finish_title');
+	panel.querySelector('[data-auth-intro]').textContent = t('auth_finish_help');
+	form.querySelector('[type="submit"]').textContent = t('auth_finish');
+	form.querySelector('.form-feedback').textContent = '';
+	form.elements.namedItem('alias').focus();
+}
+
 function collect(form) {
 	const data = Object.fromEntries(new FormData(form));
 	for (const checkbox of form.querySelectorAll('input[type="checkbox"][name]')) data[checkbox.name] = checkbox.checked;
@@ -152,8 +172,10 @@ document.addEventListener('submit', async event => {
 		if (form.dataset.draft) storageRemove(draftKey(form));
 		feedback.textContent = t('saved');
 		switch (form.dataset.result) {
-			case 'login': feedback.textContent = t('check_mail'); break;
+			case 'login': showEmailSent(form, input.email); break;
 			case 'verify': {
+				if (data.registration_required) { showRegistration(form); break; }
+				storageRemove('dilemma:verification');
 				storageRemove('dilemma:oauth-return');
 				location.assign(data.redirect);
 				break;
@@ -276,6 +298,15 @@ window.addEventListener('pageshow', event => { if (event.persisted) loadDebateSe
 if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDebateSetup();
 
 document.addEventListener('click', async event => {
+	const editEmail = event.target.closest('[data-auth-edit]');
+	if (editEmail) {
+		const panel = editEmail.closest('.auth-form');
+		panel.querySelector('[data-auth-sent]').hidden = true;
+		const form = panel.querySelector('form');
+		form.hidden = false;
+		form.querySelector('.form-feedback').textContent = '';
+		form.elements.namedItem('email').focus();
+	}
 	const waitToggle = event.target.closest('#ai-wait-toggle');
 	if (waitToggle && !waitToggle.disabled) {
 		const enabled = waitToggle.getAttribute('aria-pressed') !== 'true';
@@ -556,8 +587,15 @@ if (flowPanel && flowDebate && liveArguments) {
 
 const fragmentForm = document.querySelector('form[data-fragment]');
 if (fragmentForm) {
-	const token = location.hash.slice(1);
-	if (/^[A-Za-z0-9_-]{43}$/.test(token)) fragmentForm.elements.namedItem('token').value = token;
+	const field = fragmentForm.elements.namedItem('token');
+	const incoming = location.hash.slice(1) || field.value;
+	let saved;
+	try { saved = JSON.parse(storageGet('dilemma:verification') || 'null'); } catch { storageRemove('dilemma:verification'); }
+	if (/^[A-Za-z0-9_-]{43}$/.test(incoming)) {
+		field.value = incoming;
+		if (saved?.token !== incoming) storageSet('dilemma:verification', JSON.stringify({ token: incoming, until: Date.now() + 900000 }));
+	} else if (saved?.until > Date.now() && /^[A-Za-z0-9_-]{43}$/.test(saved.token)) field.value = saved.token;
+	else storageRemove('dilemma:verification');
 	history.replaceState(null, '', location.pathname + location.search);
 }
 

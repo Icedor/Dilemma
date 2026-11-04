@@ -16,31 +16,37 @@ final class Auth
 		$return = self::return_target(Support::text($input, 'return_to', 0, 4096));
 		Db::transaction(static function () use ($email, $alias, $locale, $input, $return): void {
 			$user = Db::one('SELECT * FROM users WHERE email = ? FOR UPDATE', [$email]);
-			if (!$user) {
-				if ($alias === '' || ($input['accept_terms'] ?? false) !== true) {
-					// The same outward response protects account enumeration.
-					return;
-				}
+			if (!$user && $alias !== '' && ($input['accept_terms'] ?? false) === true) {
 				$id = Support::id();
 				Db::run('INSERT INTO users (id, email, alias, locale, created_at) VALUES (?, ?, ?, ?, ?)', [$id, $email, $alias, $locale, Support::now()]);
 				$user = Db::one('SELECT * FROM users WHERE id = ?', [$id]);
 			}
-			if ($user['status'] !== 'active') return;
+			if ($user && $user['status'] !== 'active') return;
 			$token = Support::token();
-			Db::run('INSERT INTO email_verifications (token_hash, user_id, expires_at, return_target) VALUES (?, ?, ?, ?)', [Support::hash($token), $user['id'], gmdate('Y-m-d H:i:s', time() + 900), $return !== '' ? Support::seal($return) : null]);
-			Mail::enqueue('auth:' . Support::hash($token), 'login', $user['email'], $user['locale'], ['url' => Config::url('/verify#' . $token)], $user['id']);
+			Db::run('INSERT INTO email_verifications (token_hash, user_id, expires_at, return_target, pending_email, locale) VALUES (?, ?, ?, ?, ?, ?)', [Support::hash($token), $user['id'] ?? null, gmdate('Y-m-d H:i:s', time() + 900), $return !== '' ? Support::seal($return) : null, $user ? null : Support::seal($email), $locale]);
+			Mail::enqueue('auth:' . Support::hash($token), 'login', $email, $user['locale'] ?? $locale, ['url' => Config::url('/verify#' . $token)], $user['id'] ?? null);
 		});
 	}
 
-	public static function verify(string $token): array
+	public static function verify(string $token, array $input = []): array
 	{
 		if (!preg_match('/^[A-Za-z0-9_-]{43}$/D', $token)) throw new Failure(400, 'expired_link');
-		return Db::transaction(static function () use ($token): array {
+		return Db::transaction(static function () use ($token, $input): array {
 			$link = Db::one('SELECT * FROM email_verifications WHERE token_hash = ? FOR UPDATE', [Support::hash($token)]);
 			if (!$link || $link['used_at'] !== null || $link['expires_at'] < Support::now()) throw new Failure(400, 'expired_link');
-			$user = Db::one('SELECT * FROM users WHERE id = ? FOR UPDATE', [$link['user_id']]);
+			if ($link['user_id'] === null) {
+				$email = Support::unseal($link['pending_email']);
+				$user = Db::one('SELECT * FROM users WHERE email = ? FOR UPDATE', [$email]);
+				if (!$user) {
+					if (($input['accept_terms'] ?? false) !== true) return ['registration_required' => true];
+					$alias = Support::text($input, 'alias', 1, 60);
+					$id = Support::id();
+					Db::run('INSERT INTO users (id, email, alias, locale, created_at) VALUES (?, ?, ?, ?, ?)', [$id, $email, $alias, $link['locale'], Support::now()]);
+					$user = Db::one('SELECT * FROM users WHERE id = ?', [$id]);
+				}
+			} else $user = Db::one('SELECT * FROM users WHERE id = ? FOR UPDATE', [$link['user_id']]);
 			if (!$user || $user['status'] !== 'active') throw new Failure(403, 'access_denied');
-			Db::run('UPDATE email_verifications SET used_at = ? WHERE token_hash = ?', [Support::now(), Support::hash($token)]);
+			Db::run('UPDATE email_verifications SET used_at = ?, user_id = ?, pending_email = NULL WHERE token_hash = ?', [Support::now(), $user['id'], Support::hash($token)]);
 			Db::run('UPDATE users SET verified_at = COALESCE(verified_at, ?) WHERE id = ?', [Support::now(), $user['id']]);
 			$session = Support::token();
 			$csrf = Support::token();

@@ -19,4 +19,5 @@ foreach (['none','client_secret_post','client_secret_basic'] as $method) {
  check($status===200 && isset($token['access_token'],$token['refresh_token']),'Form-encoded exchange works: '.$method);
  $tool=http_request('/mcp',['jsonrpc'=>'2.0','id'=>1,'method'=>'tools/call','params'=>['name'=>'dilemma_get_debate','arguments'=>['debate_id'=>$setup_debate['id']]]],['Authorization: Bearer '.$token['access_token'],'MCP-Protocol-Version: 2025-11-25']);
  check($tool['status']===200 && !$tool['json']['result']['isError'],'OAuth-issued token reads the chosen debate through MCP');
+	require __DIR__ . '/oauth-lifecycle-http.php';
 }
