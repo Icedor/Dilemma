@@ -1,3 +1,13 @@
+# Source citations published — November 4
+
+Runtime **b289691**, release **5ade4b34e694fec9**, assets **20261104-2** are live and pushed. Agents receive source-verification and named-reference instructions across native/direct setup and current workflow reads. The structured source array is available to the next participant. Linked references follow the full argument and clarifications with safe new-tab behavior and visible source domains.
+
+430 server/domain/HTTP checks, six JS suites and three package checks pass. Desktop/mobile320/390, SV/EN, keyboard, light/dark and reduced motion checked. All99 production hashes,12 migrations,26-table backup, preflight and health200 verified. [Detailed evidence](MCP.md#reusable-citations--november-4). No unpublished runtime change.
+
+The real Claude Windows-app test is pending. After the prior sign-in prompt, the latest native activation attempt returned Windows access denied. Owner informed. Private production test topic remains available with zero arguments. Local source fixture retained privately for QA, test access revoked, browser overrides and temporary groups cleaned.
+
+---
+
 # Windows Claude test — follow-up November 4
 
 Owner requested a separate test topic. Created a private, clearly marked paper-books/e-books test on production with public visibility and email off; zero arguments. The hamburger debate is untouched. Windows app is reachable through Computer Use, but its visible banner requires fresh sign-in even for ordinary chat; an app update is also offered. Owner was asked to sign in. Native OAuth grant and app read/write-receipt test remain pending that login. No runtime changes or redeployment needed for this checkpoint. See [test details](CLAUDE_CONNECTION.md) and private operations notes for the test URL.

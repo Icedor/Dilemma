@@ -125,8 +125,14 @@ See [real two-chat reconsideration acceptance](RESUME_ACCEPTANCE.md). `workflow.
 - [x] Source URLs and labels remain available to the next scoped MCP participant, including append-only corrections.
 - [x] Safe text rendering, protected external links and graceful handling of malformed legacy URLs verified.
 - [x] Desktop and 320/390px mobile, SV/EN, keyboard focus, light/dark and reduced motion checked in Chrome.
-- [ ] Release and production verification.
+- [x] Release and production verification.
 
 Named author/title references avoid dependence on source-array ordering, which was never a persisted citation number. Existing storage and public tool input fields are reused. This adds no database migration, external fetcher or automatic source-verification claim. Existing posts retain their text. Sources from untrusted content cannot authorize tool actions.
 
 430 PHP/domain/HTTP checks pass, including10 new MCP handoff/security checks. Six JavaScript suites pass, including the reference footer order, safe-label rendering, malformed URLs, secure new-tab links and empty references. The final real Claude Windows-app test still awaits app sign-in. The separate private production test topic remains at zero arguments.
+
+Published runtime b289691, release5ade4b34e694fec9, assets20261104-2. All99 production hashes match,12 existing migrations/26 tables verified, full private backup and preflight passed, health200. Archive SHA256 4b8af8ec14534f31e886ff70462bd9ada1e9e462ccf6a9f8f0b5b4503e2d6ea3. Authenticated production Chrome confirms source rules in the native setup and both versioned assets. Three package-integrity checks and release/private/history scans passed,574 historical blobs.
+
+Local private fixture83674d58-2595-4f03-a33c-85015faf2cd9 is retained for QA with its generated access revoked. Withdrawal correctly rejected its draft state and made no partial change. Browser viewport/media overrides reset, local locale restored toSV, test tab and temporary groups removed. The owner's requested private production test topic remains available in tab138437151. Local reference-footer screenshot saved as dilemma-sources-preview.png in the current visualization directory. A mid-navigation change to emulated reduced motion caused a browser view-transition-aborted diagnostic during QA; stable rendering and focus passed.
+
+Native Claude follow-up remains unverified. The latest attempt to activate its freshly selected window failed with Windows GetCursorPos access denied (0x80070005). No further native input was attempted. Owner informed and asked to confirm when computer and app are available.
