@@ -1,3 +1,14 @@
+# Short Claude onboarding published — November 6
+
+Runtime **8c65099**, release **0566e551321f8c76**, assets **20261106-1** are live and pushed. Two short steps replace the long native setup. Registration/help and personal-key fallback are folded away. Copy unlocks after completed OAuth exchange and fetches current instructions. A regular scoped `dilemma_get_instructions` tool replaces the native prompt-only call. Source, waiting, publishing and human-decision rules remain intact. [Full evidence and checklist](CLAUDE_CONNECTION.md).
+
+672 PHP/domain/HTTP checks, eleven JavaScript suites, package checks and 718 historical blobs passed. All 103 live hashes, fourteen migrations, private source/config and 26-table backup, preflight, scoped guide, HTTPS health200 and live Chrome state verified. Visual checks include SV/EN, desktop/mobile320/390, keyboard, light/dark and reduced motion. Real browser clipboard and concurrent checks pass. Local fixture access revoked and owned preview8790 stopped. Original Dilemma tab preserved; overrides reset; no new tabs/groups.
+
+The owner first resumed native Claude testing, then stopped it with “Vänta”. Do not claim an end-to-end native Claude test: production has a registered Claude client but no completed owner OAuth grant. Current live UI correctly shows pending login. No production argument, permission grant or notification was created. Resume the private test topic only when the owner wants that test continued. Prior pending device-push and broader account/invitation visual checks are unchanged; Meta429 remains owner-deferred, with no support contact.
+
+No unpublished runtime changes. Backup: `/home/superpeppse/dilemma.se/.backup-before-0566e551321f8c76/`. Do not rerun completed stage/deploy helpers. Final documentation commit follows runtime.
+
+---
 # Compact AI setup published — November 4
 
 Runtime **0b8fcfb**, release **70d18ad531dd632c** is live and pushed. Production setup is 1,613 characters, compared with the reported 16,475-character attachment. Full rules now arrive through authenticated MCP initialization. Repeated role introductions were removed, and ordinary chat reports focus on the result and next step. [Verification and limits](CONNECTION_RECOVERY.md#compact-setup-follow-up-november-4).
