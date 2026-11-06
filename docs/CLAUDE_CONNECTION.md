@@ -1,3 +1,23 @@
+# Claude install link and one connector per account — November 6 (Claude session)
+
+Goal: a new user copies one instruction from the debate into their AI chat. Claude cannot be installed by a prompt, so the page shows only the next action the platform requires.
+
+- [x] Verified Claude's documented install link ([directory vs custom](https://claude.com/docs/connectors/building/directory-vs-custom)): `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Dilemma&connectorUrl=https%3A%2F%2Fdilemma.se%2Fmcp`. It only prefills the form; the user confirms. Signed-out users sign in first (documented).
+- [x] Real signed-in desktop check in the owner's Chrome: the dialog opened with name and URL prefilled, an external-link warning and a two-step Continue. Because the owner already had an unconnected Dilemma connector, step 2 said a connector with this URL already exists. The page hint now covers that case: click Connect next to Dilemma.
+- [x] Platform limits from the [custom connector docs](https://claude.com/docs/connectors/custom/add-unlisted.md): the Free plan allows one custom connector; on Team/Enterprise only an Owner adds it. A per-debate connector URL would therefore break for these users. Decision: one Dilemma connector per Claude account.
+- [x] Each debate is still its own connection: the first OAuth consent creates the connection for the debate the human started from (preselected via a one-hour HttpOnly cookie scoped to `/oauth/`). Every further debate is enabled with one human click on its page (`Använd Claude i den här debatten`), which adds a separate, individually revocable connection to the same grant (`mcp_connections.grant_id`, migration 015). No new Claude step is needed.
+- [x] Every MCP call is resolved to exactly one debate connection from its `debate_id` (or the message's debate). Debates the human did not enable return `connection_debate_mismatch`. Multi-debate tests require `debate_id`. Listing shows only enabled debates. Legacy single-debate grants, direct keys and their errors behave exactly as before.
+- [x] Revoking one debate on the website keeps the other debates and the token refresh working. Disconnecting in Claude (token revocation) or refresh-token replay ends every debate in that grant.
+- [x] Debate page states: `connect` (install button, short hint, folded manual fallback with name/URL and plan note), `enable` (one button), `ready` (copy button plus Open Claude link). Claude is preselected. The personal-key/header fallback was removed from the Claude route; it remains for Codex/direct. The waiting switch appears only once the AI can act. After opening Claude the page checks quietly every 8 s for at most 10 minutes while visible.
+- [x] Copied text is five short lines: debate link, call `dilemma_get_instructions`, act only in this debate, publish on Dilemma, and what to say if the tools are missing. No credential.
+- [x] Real Claude app test on production (old release, before this deployment): owner's existing connector, Connect, Dilemma consent for the private test topic `194e0d31…`, then from a real Claude session through the claude.ai connector: whoami, test_connection (read_verified), test_write receipt at 2026-11-06 16:24:11 UTC and a published opening test argument `8204457d-3cfb-4080-896a-c73c351f5683` (16:24:32 UTC). First completed native Claude OAuth/read/write/publish chain.
+- [ ] Mobile: not verified on a phone. The install link is a claude.ai web link; the manual fallback covers apps that do not open the dialog.
+- [ ] After deployment: enable a second private test debate in the same grant and verify whoami lists both.
+
+Tests: new grant checks in `tests/claude-onboarding.php` (41) and `tests/claude-install-http.php` (11 HTTP checks inside `tests/http.php`), updated `tests/claude-ui.cjs`.
+
+---
+
 # Short Claude onboarding — November 6
 
 - [x] Preserve existing work, verify lock/Drive/Git baseline and inspect production without changing access.

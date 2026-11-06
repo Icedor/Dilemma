@@ -10,7 +10,7 @@ use Dilemma\{Auth, Config, Db, OAuth, Support};
 function http_request(string $path, ?array $input = null, array $headers = [], string $cookie = ''): array {
 	$curl = curl_init(Config::url($path));
 	$response_headers = [];
-	curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_FOLLOWLOCATION => false, CURLOPT_COOKIE => $cookie, CURLOPT_HTTPHEADER => array_merge(['Accept: application/json'], $input !== null ? ['Content-Type: application/json', 'Origin: ' . Config::url()] : [], $headers), CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$response_headers): int {
+	curl_setopt_array($curl, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 5, CURLOPT_FOLLOWLOCATION => false, CURLOPT_COOKIE => $cookie, CURLOPT_HTTPHEADER => array_merge(['Accept: application/json'], $input !== null ? array_merge(['Content-Type: application/json'], preg_grep('/^Origin:/i', $headers) ? [] : ['Origin: ' . Config::url()]) : [], $headers), CURLOPT_HEADERFUNCTION => static function ($handle, string $line) use (&$response_headers): int {
 		if (str_contains($line, ':')) { [$name, $value] = explode(':', $line, 2); $response_headers[strtolower($name)][] = trim($value); }
 		return strlen($line);
 	}]);
@@ -131,6 +131,7 @@ try {
 	$wait_off = http_request('/api/connections/waiting', array_replace($wait_input, ['enabled' => false]), $session_headers, $cookie);
 	check($wait_off['status'] === 200 && !$wait_off['json']['waiting']['enabled'], 'HTTP stop returns manual setup');
 	require __DIR__ . '/oauth-http.php';
+	require __DIR__ . '/claude-install-http.php';
 	require __DIR__ . '/email-first-http.php';
 	\Dilemma\Connections::revoke($a['actor'], $setup['json']['connection_id']);
 	check(http_request('/mcp', ['jsonrpc' => '2.0', 'id' => 99, 'method' => 'tools/list'], $direct_headers)['status'] === 401, 'Revocation immediately blocks direct HTTP access');

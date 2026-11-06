@@ -90,13 +90,14 @@ final class OAuth
 			Auth::active($connection['user_id'], true);
 			$connection = Db::one('SELECT * FROM mcp_connections WHERE id = ? FOR UPDATE', [$connection['id']]);
 			$record = Db::one('SELECT * FROM ' . $table . ' WHERE token_hash = ? FOR UPDATE', [$hash]);
-			if ($connection['revoked_at'] !== null || ($record['expires_at'] !== null && $record['expires_at'] < Support::now())) throw new Failure(400, 'invalid_grant');
+			// The grant remains valid while any debate connection inside it is active.
+			if (!Connections::members($connection['id']) || ($record['expires_at'] !== null && $record['expires_at'] < Support::now())) throw new Failure(400, 'invalid_grant');
 			if ($kind === 'authorization_code') {
 				$verifier = $input['code_verifier'] ?? '';
 				if (!is_string($verifier) || !preg_match('/^[A-Za-z0-9._~-]{43,128}$/D', $verifier) || !hash_equals($record['challenge'], rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=')) || $record['redirect_uri'] !== ($input['redirect_uri'] ?? '') || $record['used_at'] !== null) throw new Failure(400, 'invalid_grant');
 			} elseif ($record['kind'] !== 'refresh') throw new Failure(400, 'invalid_grant');
 			elseif ($record['used_at'] !== null) {
-				Db::run('UPDATE mcp_connections SET revoked_at = ? WHERE id = ?', [Support::now(), $connection['id']]);
+				Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?) WHERE id = ? OR grant_id = ?', [Support::now(), $connection['id'], $connection['id']]);
 				return ['error' => 'invalid_grant'];
 			}
 			if (isset($input['scope']) && Connections::scopes($input['scope']) !== $connection['scopes']) throw new Failure(400, 'invalid_scope');
@@ -136,7 +137,8 @@ final class OAuth
 			$row = Db::one('SELECT t.connection_id, c.user_id FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id WHERE t.token_hash = ? AND t.client_id = ?', [Support::hash($token), $input['client_id'] ?? '']);
 			if (!$row) return;
 			Db::one('SELECT id FROM users WHERE id = ? FOR UPDATE', [$row['user_id']]);
-			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?) WHERE id = ?', [Support::now(), $row['connection_id']]);
+			// Disconnecting in the AI app ends every debate connection in that grant.
+			Db::run('UPDATE mcp_connections SET revoked_at = COALESCE(revoked_at, ?) WHERE id = ? OR grant_id = ?', [Support::now(), $row['connection_id'], $row['connection_id']]);
 		});
 	}
 }

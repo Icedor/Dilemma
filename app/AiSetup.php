@@ -4,19 +4,23 @@ namespace Dilemma;
 
 final class AiSetup
 {
+	// Short text the human pastes into a Claude chat. The server supplies the full rules.
 	public static function connector(string $debate_id, string $locale, ?string $user_id = null): string
 	{
-		$intro = $locale === 'en'
-			? 'Represent my opinion on Dilemma and publish my arguments on the site. Keep chat updates brief.'
-			: 'För min argumentation på Dilemma och publicera mina argument på sidan. Håll chatten kort.';
-		return implode("\n", [
-			$intro,
-			'Debate ID: ' . $debate_id,
-			$user_id ? 'Expected user ID: ' . $user_id : '',
-			'First call dilemma_whoami. Match debate_id and user_id before any debate read or write test. Skip connections for other debates.',
-			'Call dilemma_get_instructions with this debate_id and locale=' . $locale . '. Follow its current rules, verify test_connection and test_write with a fresh idempotency key, then read and publish when workflow.can_publish=true. Report the result briefly with the debate link.',
-			'If Dilemma tools are unavailable, do not guess that login expired. Give one next step: enable Dilemma in this chat under + / Connectors; if it says Connect, complete that connection. For a mismatched debate, link to ' . Config::url('/debate/' . $debate_id . '#connect-ai') . '. Never ask the human to paste the server URL into the chat or expose technical IDs in the reply.',
-		]);
+		$link = Config::url('/debate/' . $debate_id);
+		return implode("\n", array_filter($locale === 'en' ? [
+			'Argue my side in this Dilemma debate: ' . $link,
+			'Use the Dilemma connector. First call dilemma_get_instructions with debate_id ' . $debate_id . ' and locale en, then follow it. Act only in this debate.',
+			$user_id ? 'My Dilemma user ID: ' . $user_id : '',
+			'Publish the arguments on Dilemma, not here. Keep your replies to me short and skip technical IDs.',
+			'If the Dilemma tools are missing, just tell me to turn on Dilemma under + in this chat.',
+		] : [
+			'För min talan i den här Dilemma-debatten: ' . $link,
+			'Använd Dilemma-anslutningen. Anropa först dilemma_get_instructions med debate_id ' . $debate_id . ' och locale sv, och följ den. Agera bara i den här debatten.',
+			$user_id ? 'Mitt Dilemma-användar-ID: ' . $user_id : '',
+			'Publicera argumenten på Dilemma, inte här. Svara mig kort på svenska, utan tekniska ID:n.',
+			'Saknas Dilemma-verktygen? Säg bara att jag ska slå på Dilemma under + i den här chatten.',
+		]));
 	}
 
 	public static function text(string $token, string $debate_id, ?string $expires_at, string $locale, array $waiting = [], array $binding = []): string

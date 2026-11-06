@@ -736,8 +736,16 @@
 	.claude-guide .connect-steps { margin-block: var(--space-4); gap: var(--space-3); }
 	.claude-guide .claude-new { margin: 0; }
 	.claude-status { padding-inline-start: var(--space-3); border-inline-start: .2rem solid currentColor; font-size: .9375rem; line-height: 1.5; }
+	.claude-status:empty { display: none; }
+	.ai-wait-control[data-pending="true"] { display: none; }
+	.claude-step { display: grid; justify-items: start; gap: var(--space-3); }
+	.claude-hint { margin: 0; font-size: .9375rem; line-height: 1.5; }
+	.claude-guide .claude-manual { margin: 0; font-size: .9375rem; }
+	.claude-guide .claude-manual > p { margin-block: var(--space-3); }
+	.native-chat-step { display: grid; justify-items: start; gap: var(--space-3); }
+	.native-chat-step > details { justify-self: stretch; }
 	.claude-status[data-ready="true"] { font-weight: 650; }
-	.native-chat-step { border-top: 1px solid #19191850; padding-block-start: var(--space-6); }
+	.native-chat-step { border-top: 1px solid #19191850; padding-block-start: var(--space-4); }
 	.native-chat-step h3 { font-size: 1.05rem; letter-spacing: -.02em; margin-block-end: var(--space-3); }
 	.native-chat-step > p { font-size: .9375rem; line-height: 1.5; }
 	.connect-start .button:disabled { opacity: 1; background: #19191820; color: #4c400b; border-color: #19191840; cursor: not-allowed; }

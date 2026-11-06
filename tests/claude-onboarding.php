@@ -32,6 +32,53 @@ check(!Connections::native_status($a['actor'],$id)['ready'],'Revocation removes 
 foreach(['sv','en']as$locale){
  Dilemma\I18n::locale($locale);
  $html=Views::render('debate-ai',['actor'=>$a['actor'],'user'=>Db::one('SELECT * FROM users WHERE id=?',[$a['actor']['user_id']]),'debate'=>ReadModel::debate($id,$a['actor'])]);
- check(str_contains($html,'id="claude-connect-steps" open') && str_contains($html,'id="claude-status"') && str_contains($html,'data-ready="false"'),'Unfinished connection renders its first step and actual state: '.$locale);
+ check(str_contains($html,'data-claude-state="connect"') && str_contains($html,'href="/connect/claude?debate='.$id.'"') && str_contains($html,'id="claude-status"') && str_contains($html,'data-ready="false"') && !str_contains($html,'customize/connectors"'),'Unfinished connection renders only the install step and actual state: '.$locale);
+ check(!str_contains($html,'data-native-key') && !str_contains($html,'id="ai-header"'),'Claude route has no key or header dead end: '.$locale);
 }
+Dilemma\I18n::locale('sv');
+check(Connections::install_url()==='https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Dilemma&connectorUrl='.rawurlencode(\Dilemma\Config::url('/mcp')),'Install link uses Claude\'s documented prefill parameters');
+
+// One Claude connector per account; every debate is its own revocable connection inside that grant.
+$third=debate_fixture($a['actor'],$c['actor'],false);
+rejects(fn()=>Connections::enable_claude($a['actor'],$other['id']),409,'A debate cannot be enabled before Claude is connected','claude_not_connected');
+$verifier=Support::token();
+$args['code_challenge']=rtrim(strtr(base64_encode(hash('sha256',$verifier,true)),'+/','-_'),'=');
+parse_str(parse_url(OAuth::authorize($a['actor'],$args)['redirect'],PHP_URL_QUERY),$code);
+$grant=OAuth::token(['client_id'=>$client['client_id'],'grant_type'=>'authorization_code','code'=>$code['code'],'code_verifier'=>$verifier,'redirect_uri'=>$args['redirect_uri']],$run);
+$root=Connections::authenticate('Bearer '.$grant['access_token']);
+check(Connections::native_status($a['actor'],$id)['state']==='ready' && Connections::native_status($a['actor'],$other['id'])['state']==='enable','Another debate offers a one-click enable instead of a new connector');
+rejects(fn()=>ToolRegistry::invoke($root,'dilemma_get_debate',(object)['debate_id'=>$other['id']]),403,'Before enabling, the grant cannot read the other debate','connection_debate_mismatch');
+$enabled=Connections::enable_claude($a['actor'],$other['id']);
+check($enabled['state']==='ready' && $enabled['ready'],'Enabling a debate makes it ready without touching Claude');
+Connections::enable_claude($a['actor'],$other['id']);
+check((int)Db::one('SELECT COUNT(*) n FROM mcp_connections WHERE grant_id=? AND debate_id=?',[$root['connection_id'],$other['id']])['n']===1,'Enabling twice keeps one connection per debate');
+rejects(fn()=>Connections::enable_claude($c['actor'],$id),404,'Only a participant can enable a debate');
+rejects(fn()=>Connections::enable_claude($root,$other['id']),403,'An AI connection cannot enable debates itself','human_only');
+$multi=Connections::authenticate('Bearer '.$grant['access_token']);
+check(count($multi['debates'])===2 && isset($multi['debates'][$id],$multi['debates'][$other['id']]),'The grant resolves to exactly the enabled debates');
+$who=ToolRegistry::invoke($multi,'dilemma_whoami',(object)[]);
+check(count($who['enabled_debates'])===2 && $who['user_id']===$a['actor']['user_id'],'whoami lists every enabled debate');
+check(ReadModel::debate($other['id'],Connections::scoped($multi,$other['id']))['id']===$other['id'] && ToolRegistry::invoke($multi,'dilemma_get_debate',(object)['debate_id'=>$id])['id']===$id,'Each call reads only through its own debate connection');
+rejects(fn()=>ToolRegistry::invoke($multi,'dilemma_get_debate',(object)['debate_id'=>$third['id']]),403,'A debate that was not enabled stays closed','connection_debate_mismatch');
+rejects(fn()=>ToolRegistry::invoke($multi,'dilemma_test_write',(object)['idempotency_key'=>Support::id()]),422,'A multi-debate write test must name its debate','debate_id_required');
+$receipt=ToolRegistry::invoke($multi,'dilemma_test_write',(object)['idempotency_key'=>Support::id(),'debate_id'=>$other['id']]);
+check($receipt['debate_id']===$other['id'] && Connections::native_status($a['actor'],$other['id'])['verified'] && !Connections::native_status($a['actor'],$id)['verified'],'Write receipts are recorded per debate');
+$listed=array_column(ToolRegistry::invoke($multi,'dilemma_list_debates',(object)[])['items'],'id');
+check(count($listed)===2 && !in_array($third['id'],$listed,true),'Listing shows only enabled debates');
+$tools=ToolRegistry::tools($multi);
+check(str_contains($tools[0]['description'],$other['id']) && str_contains($tools[0]['description'],$id),'Tool descriptions name the enabled debates');
+$post=ToolRegistry::invoke($multi,'dilemma_submit_argument',json_decode(Support::json(['debate_id'=>$other['id'],'revision'=>(int)Db::one('SELECT revision FROM debates WHERE id=?',[$other['id']])['revision'],'idempotency_key'=>Support::token(),'body'=>'Paper books are easier to annotate and share in a study group.'])));
+$stored=Db::one('SELECT debate_id, author_id, client_label FROM debate_messages WHERE id=?',[$post['message_id']]);
+check($stored['debate_id']===$other['id'] && $stored['author_id']===$a['actor']['user_id'] && $stored['client_label']==='Claude','Publishing through the grant lands on the right side of the named debate');
+check(ToolRegistry::invoke($multi,'dilemma_get_argument',(object)['message_id'=>$post['message_id']])['id']===$post['message_id'],'Message reads resolve to the message\'s own debate');
+Connections::revoke($a['actor'],$root['connection_id']);
+$after=Connections::authenticate('Bearer '.$grant['access_token']);
+check(array_keys($after['debates'])===[$other['id']] && Connections::native_status($a['actor'],$id)['state']==='enable' && Connections::native_status($a['actor'],$other['id'])['ready'],'Revoking one debate keeps the other debate connected');
+rejects(fn()=>ToolRegistry::invoke($after,'dilemma_get_debate',(object)['debate_id'=>$id]),403,'A revoked debate is closed for the grant','connection_debate_mismatch');
+$refreshed=OAuth::token(['client_id'=>$client['client_id'],'grant_type'=>'refresh_token','refresh_token'=>$grant['refresh_token']],$run);
+check(isset($refreshed['access_token']) && Connections::authenticate('Bearer '.$refreshed['access_token'])['debates']===[$other['id']=>$after['debates'][$other['id']]],'Refresh keeps working while another debate stays connected');
+check(Connections::enable_claude($a['actor'],$id)['ready'],'A revoked debate can be enabled again with one click');
+OAuth::revoke(['client_id'=>$client['client_id'],'token'=>$refreshed['refresh_token']]);
+rejects(fn()=>Connections::authenticate('Bearer '.$refreshed['access_token']),401,'Disconnecting in Claude ends every debate in the grant','invalid_token');
+check(Connections::native_status($a['actor'],$other['id'])['state']==='connect' && Connections::native_status($a['actor'],$id)['state']==='connect','After disconnecting, the page asks to add Claude again');
 echo 'SUCCESS: '.$checks." Claude onboarding checks.\n";

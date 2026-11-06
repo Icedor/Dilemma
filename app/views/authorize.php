@@ -1,5 +1,6 @@
 <?php
 use Dilemma\{Views, Connections, Db};
+$preferred = is_string($_GET['debate_id'] ?? null) ? $_GET['debate_id'] : (is_string($_COOKIE['dilemma_connect_debate'] ?? null) ? $_COOKIE['dilemma_connect_debate'] : '');
 $choices = Db::all("SELECT d.id, d.title FROM debates d JOIN debate_participants p ON p.debate_id=d.id WHERE p.user_id=? AND p.left_at IS NULL AND d.hidden=0 ORDER BY d.updated_at DESC LIMIT 200", [$user['id']]);
 ?>
 <section class="oauth-consent reading">
@@ -11,7 +12,7 @@ $choices = Db::all("SELECT d.id, d.title FROM debates d JOIN debate_participants
 <?= Views::hidden('approve', 'true') ?>
 <label class="field"><span><?= $t('oauth_choose') ?></span><select name="debate_id" required>
 <option value=""><?= $t('oauth_select') ?></option>
-<?php foreach ($choices as $choice): ?><option value="<?= $e($choice['id']) ?>" <?= count($choices) === 1 || ($_GET['debate_id'] ?? '') === $choice['id'] ? 'selected' : '' ?>><?= $e($choice['title']) ?></option><?php endforeach; ?>
+<?php foreach ($choices as $choice): ?><option value="<?= $e($choice['id']) ?>" <?= count($choices) === 1 || $preferred === $choice['id'] ? 'selected' : '' ?>><?= $e($choice['title']) ?></option><?php endforeach; ?>
 </select></label>
 <p><?= $t(str_contains($authorization['scope'], Connections::WRITE) ? 'oauth_permissions' : 'read_scope') ?></p><p class="muted"><?= $t('human_boundary') ?></p>
 <div class="actions"><?= Views::submit('oauth_allow') ?><button type="button" class="text-button" data-oauth-deny><?= \Dilemma\Views::icon('x') ?><span data-control-label><?= $t('deny') ?></span></button></div>

@@ -258,21 +258,39 @@ if (waitingButton) renderWaiting({ enabled: waitingButton.getAttribute('aria-che
 function chooseAiApp() {
 	const choice = document.querySelector('#ai-app-choice');
 	if (!choice) return;
-	const native = choice.value === 'native' || choice.value === 'other';
-	for (const panel of document.querySelectorAll('[data-app-route]')) panel.hidden = !((panel.dataset.appRoute === choice.value && choice.value !== '') || (['server', 'fallback'].includes(panel.dataset.appRoute) && native));
+	const claude = choice.value === 'native';
+	const ready = document.querySelector('#claude-status')?.dataset.ready === 'true';
+	// Show only the next step: Claude gets the copy step after its connection is ready.
+	for (const panel of document.querySelectorAll('[data-app-route]')) panel.hidden = !((panel.dataset.appRoute === choice.value && choice.value !== '') || (panel.dataset.appRoute === 'server' && ((claude && ready) || choice.value === 'other')));
 	const copy = document.querySelector('[data-ai-copy]');
 	copy.disabled = !choice.value;
-	copy.hidden = native || !choice.value;
-	copy.dataset.copyTarget = native ? 'ai-native-setup' : 'ai-setup';
+	copy.hidden = choice.value !== 'direct';
+	copy.dataset.copyTarget = 'ai-setup';
 	const details = document.querySelector('.setup-text-disclosure');
-	if (details) details.hidden = native || !choice.value;
-	const ready = choice.value !== 'native' || document.querySelector('#claude-status')?.dataset.ready === 'true' || document.querySelector('[data-debate-ai]')?.dataset.nativeKey === 'true';
-	document.querySelector('#native-copy').disabled = !ready;
-	document.querySelector('#native-text').hidden = !ready;
+	if (details) details.hidden = choice.value !== 'direct';
+	const claudeLink = document.querySelector('[data-claude-new]');
+	if (claudeLink) claudeLink.hidden = !claude;
+	// Waiting only matters once the AI can act in this debate.
+	const waiting = document.querySelector('.ai-wait-control');
+	if (waiting) waiting.dataset.pending = String(claude && !ready);
+}
+function showClaudeState(data) {
+	const guide = document.querySelector('[data-claude-state]');
+	const status = document.querySelector('#claude-status');
+	if (!guide || !status) return;
+	guide.dataset.claudeState = data.state;
+	for (const step of guide.querySelectorAll('[data-claude-step]')) step.hidden = step.dataset.claudeStep !== data.state;
+	status.dataset.ready = String(Boolean(data.ready));
+	if (data.ready) status.textContent = t(data.verified ? 'claude_verified' : 'claude_ready');
+	else if (data.state === 'connect' && claudeWaitingSince) status.textContent = t('claude_pending');
+	else status.textContent = '';
+	if (data.native_setup) document.querySelector('#ai-native-setup').value = data.native_setup;
+	chooseAiApp();
 }
 const aiChoice = document.querySelector('#ai-app-choice');
 const aiChoiceKey = `dilemma:ai-app:${user}:${location.pathname}`;
-if (aiChoice && ['native', 'direct', 'other'].includes(storageGet(aiChoiceKey))) aiChoice.value = storageGet(aiChoiceKey);
+// Claude is the common case, so it is preselected; the choice is remembered per debate.
+if (aiChoice) aiChoice.value = ['native', 'direct', 'other'].includes(storageGet(aiChoiceKey)) ? storageGet(aiChoiceKey) : 'native';
 aiChoice?.addEventListener('change', () => {
 	storageSet(aiChoiceKey, aiChoice.value);
 	chooseAiApp();
@@ -280,7 +298,7 @@ aiChoice?.addEventListener('change', () => {
 });
 chooseAiApp();
 
-let claudeCheckBusy = false, claudeCheckFailed = false, claudeCheckedAt = 0, claudeCheckPromise;
+let claudeCheckBusy = false, claudeCheckFailed = false, claudeCheckedAt = 0, claudeCheckPromise, claudeWaitingSince = 0, claudeWaitTimer;
 function checkClaudeConnection(manual = false) {
 	const section = document.querySelector('[data-debate-ai]');
 	const status = document.querySelector('#claude-status');
@@ -292,19 +310,17 @@ function checkClaudeConnection(manual = false) {
 	claudeCheckPromise = (async () => {
 	try {
 		const data = await request(`/api/connections/native?debate_id=${encodeURIComponent(section.dataset.debateAi)}`);
-		status.dataset.ready = String(data.ready);
-		button.hidden = data.ready;
-		status.textContent = t(data.verified ? 'claude_verified' : data.ready ? 'claude_ready' : 'claude_pending');
-		document.querySelector('#ai-native-setup').value = data.native_setup;
-		if (data.ready) document.querySelector('#claude-connect-steps').open = false;
+		button.hidden = true;
 		claudeCheckFailed = false;
-		chooseAiApp();
+		if (data.ready) stopClaudeWait();
+		showClaudeState(data);
 		return data.ready;
 	} catch {
 		status.dataset.ready = 'false';
 		button.hidden = false;
 		status.textContent = t('claude_check_failed');
 		claudeCheckFailed = true;
+		stopClaudeWait();
 		chooseAiApp();
 		return false;
 	} finally {
@@ -314,8 +330,19 @@ function checkClaudeConnection(manual = false) {
 	})();
 	return claudeCheckPromise;
 }
+// After the human opens Claude, check quietly while this tab is visible, for at most ten minutes.
+function stopClaudeWait() { clearInterval(claudeWaitTimer); claudeWaitTimer = undefined; claudeWaitingSince = 0; }
+function startClaudeWait() {
+	stopClaudeWait();
+	claudeWaitingSince = Date.now();
+	document.querySelector('#claude-status').textContent = t('claude_pending');
+	claudeWaitTimer = setInterval(() => {
+		if (Date.now() - claudeWaitingSince > 600000) { stopClaudeWait(); document.querySelector('[data-claude-check]').hidden = false; return; }
+		if (!document.hidden) checkClaudeConnection(true);
+	}, 8000);
+}
 window.addEventListener('focus', () => { if (aiChoice?.value === 'native') checkClaudeConnection(); });
-// A returning browser tab gets one read-only check; no background polling or AI calls.
+// A returning browser tab gets one read-only check; no AI calls.
 document.addEventListener('visibilitychange', () => { if (!document.hidden && aiChoice?.value === 'native') checkClaudeConnection(); });
 
 function renderSetup(data) {
@@ -323,8 +350,6 @@ function renderSetup(data) {
 	const target = document.querySelector('#ai-setup');
 	if (!section || !target) return;
 	target.value = data.setup_text || '';
-	if (data.native_setup) document.querySelector('#ai-native-setup').value = data.native_setup;
-	document.querySelector('#ai-header').value = (target.value.match(/Authorization: (Bearer [A-Za-z0-9_-]{43})/) || [])[1] || '';
 	chooseAiApp();
 	renderWaiting(data.waiting);
 	document.querySelector('#connection-result').hidden = data.revoked || !target.value;
@@ -368,10 +393,13 @@ if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDe
 
 document.addEventListener('click', async event => {
 	if (event.target.closest('[data-claude-check]')) await checkClaudeConnection(true);
-	if (event.target.closest('[data-native-key]')) {
-		document.querySelector('[data-debate-ai]').dataset.nativeKey = 'true';
-		document.querySelector('#claude-status').textContent = t('claude_key_selected');
-		chooseAiApp();
+	if (event.target.closest('[data-claude-open]')) startClaudeWait();
+	const enableClaude = event.target.closest('[data-claude-enable]');
+	if (enableClaude && !enableClaude.disabled) {
+		enableClaude.disabled = true; enableClaude.setAttribute('aria-busy', 'true');
+		try { showClaudeState(await request('/api/connections/claude', { debate_id: document.querySelector('[data-debate-ai]').dataset.debateAi })); }
+		catch (error) { document.querySelector('#claude-status').textContent = error.message; checkClaudeConnection(true); }
+		finally { enableClaude.disabled = false; enableClaude.removeAttribute('aria-busy'); }
 	}
 	const editEmail = event.target.closest('[data-auth-edit]');
 	if (editEmail) {
@@ -404,10 +432,7 @@ document.addEventListener('click', async event => {
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {
 		const target = copy.dataset.copyTarget ? document.getElementById(copy.dataset.copyTarget) : null;
-		if (target?.id === 'ai-native-setup' && aiChoice?.value === 'native') {
-			if (document.querySelector('[data-debate-ai]').dataset.nativeKey === 'true') { if (!await loadDebateSetup()) return; }
-			else if (!await checkClaudeConnection(true)) return;
-		}
+		if (target?.id === 'ai-native-setup' && aiChoice?.value === 'native' && !await checkClaudeConnection(true)) return;
 		// Refresh private access before copying; an already-open tab may hold a revoked key or old instructions.
 		if (target?.matches('[data-private-setup]') && document.querySelector('[data-debate-ai]') && !await loadDebateSetup()) return;
 		const value = copy.dataset.copy ?? (target && 'value' in target ? target.value : target?.textContent);
@@ -415,7 +440,7 @@ document.addEventListener('click', async event => {
 			const copied = await copyText(value, target);
 			announce(t(copied ? 'copied' : 'setup_copy_failed'));
 			if (target?.matches('[data-private-setup]')) document.querySelector('#connection-copy-status').textContent = t(copied ? 'setup_copied' : 'setup_copy_failed');
-			if (target?.id === 'ai-native-setup') document.querySelector('#connection-copy-status').textContent = t(copied ? 'claude_enable' : 'setup_copy_failed');
+			if (target?.id === 'ai-native-setup') document.querySelector('#connection-copy-status').textContent = t(copied ? (aiChoice?.value === 'native' ? 'claude_copied' : 'setup_copied') : 'setup_copy_failed');
 			if (copied) copy.focus();
 		}
 	}

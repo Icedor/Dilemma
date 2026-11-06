@@ -66,3 +66,8 @@ and nullable expiry; source/config and database backup required before deploymen
 # 2026-11-04: Notification default and invitation identity
 
 Owner explicitly selects email on by default for new debate participation, superseding earlier opt-in-only defaults. Each new-participant form shows the checked choice. Existing opt-outs remain unchanged. Push replaces email only after a deliberate selection, with a clearly disclosed email fallback if push cannot be sent. Both channels obey account/per-debate choices. Invitations and login links always use email. Invitation subject/body must identify the inviting account. See INVITATION_DELIVERY.md.
+
+## 2026-11-06: one Claude connector per account
+
+Claude's Free plan allows one custom connector and Team/Enterprise members cannot add their own, so per-debate connector URLs would fail for many people. One `https://dilemma.se/mcp` connector per account holds one OAuth grant; each debate inside it is a separate connection the human enables on that debate's page and can revoke alone. Calls must name their debate and are refused for debates that were not enabled. Alternatives considered: per-debate URLs (strict, but blocked by plan limits and duplicate-URL errors) and an account-wide grant (simpler, but no per-debate consent).
+

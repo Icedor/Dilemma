@@ -47,8 +47,8 @@ $default_url = Config::url($path) . ($index_query ? '?' . http_build_query($inde
 	<link rel="apple-touch-icon" href="/assets/icon-192.png?v=20261103-2">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script src="/assets/language.js?v=20261103-2"></script>
-	<link rel="stylesheet" href="/assets/style.css?v=20261106-1">
-	<script type="module" src="/assets/app.js?v=20261106-1"></script>
+	<link rel="stylesheet" href="/assets/style.css?v=20261106-2">
+	<script type="module" src="/assets/app.js?v=20261106-2"></script>
 </head>
 <body class="<?= $path === '/' && $indexable ? 'home-page' : 'inner-page' ?>" data-user="<?= $e($user['id'] ?? '') ?>">
 	<?= \Dilemma\Views::render('icons', []) ?>

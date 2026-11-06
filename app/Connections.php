@@ -9,22 +9,86 @@ final class Connections
 	public const READ = 'debates:read';
 	public const WRITE = 'arguments:write';
 
+	public const CLAUDE_CALLBACKS = ['https://claude.ai/api/mcp/auth_callback', 'https://claude.com/api/mcp/auth_callback'];
+
+	// One Claude connector per account: each debate is a separate, revocable connection inside that grant.
 	public static function native_status(array $actor, string $debate_id): array
 	{
 		Debates::human($actor);
 		Debates::actor($actor);
 		$debate_id = Support::uuid($debate_id);
 		$member = Debates::member($debate_id, $actor['user_id']);
+		$roots = self::claude_roots($actor['user_id']);
 		$ready = false; $verified = false;
-		// Registration or an unused authorization code is not a completed connection.
-		$rows = Db::all("SELECT DISTINCT c.write_test_at, o.redirect_uris FROM mcp_connections c JOIN mcp_tokens t ON t.connection_id=c.id JOIN oauth_clients o ON o.id=t.client_id WHERE c.user_id=? AND c.debate_id=? AND c.revoked_at IS NULL AND c.scopes LIKE '%arguments:write%' AND ((t.kind='access' AND t.expires_at>UTC_TIMESTAMP()) OR (t.kind='refresh' AND t.used_at IS NULL AND (t.expires_at IS NULL OR t.expires_at>UTC_TIMESTAMP())))", [$actor['user_id'], $debate_id]);
-		foreach ($rows as $row) {
-			if (!in_array('https://claude.ai/api/mcp/auth_callback', json_decode($row['redirect_uris'], true, 16, JSON_THROW_ON_ERROR), true)) continue;
-			$ready = true;
-			$verified = $verified || $row['write_test_at'] !== null;
+		if ($roots) {
+			$marks = implode(',', array_fill(0, count($roots), '?'));
+			foreach (Db::all("SELECT write_test_at FROM mcp_connections WHERE user_id=? AND debate_id=? AND revoked_at IS NULL AND scopes LIKE '%arguments:write%' AND COALESCE(grant_id, id) IN ($marks)", [$actor['user_id'], $debate_id, ...$roots]) as $row) {
+				$ready = true;
+				$verified = $verified || $row['write_test_at'] !== null;
+			}
 		}
-		if ($member['left_at'] !== null || Debates::row($debate_id)['hidden']) $ready = $verified = false;
-		return ['ready' => $ready, 'verified' => $verified, 'native_setup' => AiSetup::connector($debate_id, I18n::locale(), $actor['user_id'])];
+		$open = $member['left_at'] === null && !Debates::row($debate_id)['hidden'];
+		if (!$open) $ready = $verified = false;
+		$state = $ready ? 'ready' : ($roots && $open ? 'enable' : 'connect');
+		return ['ready' => $ready, 'verified' => $verified, 'state' => $state, 'native_setup' => AiSetup::connector($debate_id, I18n::locale(), $actor['user_id'])];
+	}
+
+	// Claude's documented install link only prefills the form; the human still confirms it in Claude.
+	public static function install_url(): string
+	{
+		return 'https://claude.ai/customize/connectors?' . http_build_query(['modal' => 'add-custom-connector', 'connectorName' => 'Dilemma', 'connectorUrl' => Config::url('/mcp')], '', '&', PHP_QUERY_RFC3986);
+	}
+
+	// Live Claude grants for a user, most recently refreshed first.
+	public static function claude_roots(string $user_id): array
+	{
+		$rows = Db::all("SELECT r.id, r.revoked_at, o.redirect_uris, t.expires_at FROM mcp_connections r JOIN mcp_tokens t ON t.connection_id=r.id JOIN oauth_clients o ON o.id=t.client_id WHERE r.user_id=? AND r.grant_id IS NULL AND r.scopes LIKE '%arguments:write%' AND ((t.kind='access' AND t.expires_at>UTC_TIMESTAMP()) OR (t.kind='refresh' AND t.used_at IS NULL AND (t.expires_at IS NULL OR t.expires_at>UTC_TIMESTAMP()))) ORDER BY r.created_at DESC", [$user_id]);
+		$recent = [];
+		foreach ($rows as $row) {
+			if (!array_intersect(self::CLAUDE_CALLBACKS, json_decode($row['redirect_uris'], true, 16, JSON_THROW_ON_ERROR))) continue;
+			if (!self::members($row['id'])) continue;
+			$recent[$row['id']] = max($recent[$row['id']] ?? '', (string) $row['expires_at']);
+		}
+		arsort($recent, SORT_STRING);
+		return array_keys($recent);
+	}
+
+	// Active per-debate connections that share one OAuth grant (the root plus enabled debates).
+	public static function members(string $root_id): array
+	{
+		return Db::all('SELECT id, debate_id FROM mcp_connections WHERE (id = ? OR grant_id = ?) AND revoked_at IS NULL ORDER BY grant_id IS NOT NULL, created_at, id', [$root_id, $root_id]);
+	}
+
+	public static function enable_claude(array $actor, string $debate_id): array
+	{
+		Debates::human($actor);
+		$debate_id = Support::uuid($debate_id);
+		Db::transaction(static function () use ($actor, $debate_id): void {
+			Debates::actor($actor, true);
+			Support::rate('connection:' . $actor['user_id'], 20, 3600);
+			$member = Db::one('SELECT left_at FROM debate_participants WHERE debate_id = ? AND user_id = ? FOR UPDATE', [$debate_id, $actor['user_id']]);
+			if (!$member) throw new Failure(404, 'not_found');
+			if ($member['left_at'] !== null || Debates::row($debate_id)['hidden']) throw new Failure(409, 'invalid_transition');
+			$roots = self::claude_roots($actor['user_id']);
+			if (!$roots) throw new Failure(409, 'claude_not_connected');
+			$root = Db::one('SELECT * FROM mcp_connections WHERE id = ? FOR UPDATE', [$roots[0]]);
+			foreach (self::members($root['id']) as $existing) if ($existing['debate_id'] === $debate_id) return;
+			Db::run('INSERT INTO mcp_connections (id, user_id, label, scopes, debate_id, created_at, grant_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [Support::id(), $actor['user_id'], $root['label'], $root['scopes'], $debate_id, Support::now(), $root['id']]);
+		});
+		return self::native_status($actor, $debate_id);
+	}
+
+	// Resolve a grant-wide MCP actor to the one connection for the requested debate.
+	public static function scoped(array $actor, ?string $debate_id, bool $required = false): array
+	{
+		$debates = $actor['debates'] ?? [];
+		if (count($debates) < 2 && !($debate_id !== null && isset($debates[$debate_id]))) return $actor;
+		if ($debate_id === null) {
+			if ($required) throw new Failure(422, 'debate_id_required', ['enabled_debate_ids' => array_keys($debates)]);
+			return $actor;
+		}
+		if (!isset($debates[$debate_id])) throw new Failure(403, 'connection_debate_mismatch', ['enabled_debate_ids' => array_keys($debates), 'recovery' => 'This debate is not enabled for this connection. Use only the debate your human named. The human can enable another debate on its Dilemma page.']);
+		return ['connection_id' => $debates[$debate_id], 'debate_id' => $debate_id] + $actor;
 	}
 
 	public static function scopes(mixed $value): string
@@ -115,10 +179,15 @@ final class Connections
 	public static function authenticate(string $authorization): array
 	{
 		if (!preg_match('/^Bearer ([A-Za-z0-9_-]{43})$/D', $authorization, $match)) throw new Failure(401, 'invalid_token');
-		$row = Db::one("SELECT c.*, t.expires_at, t.resource FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND (t.expires_at > UTC_TIMESTAMP() OR (t.expires_at IS NULL AND EXISTS (SELECT 1 FROM debate_ai_access a WHERE a.connection_id = c.id AND a.user_id = c.user_id AND a.debate_id = c.debate_id))) AND c.revoked_at IS NULL AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
+		$row = Db::one("SELECT c.*, t.expires_at, t.resource FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND (t.expires_at > UTC_TIMESTAMP() OR (t.expires_at IS NULL AND EXISTS (SELECT 1 FROM debate_ai_access a WHERE a.connection_id = c.id AND a.user_id = c.user_id AND a.debate_id = c.debate_id))) AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
 		if (!$row || $row['resource'] !== Config::url('/mcp')) throw new Failure(401, 'invalid_token');
+		// A grant stays usable while any of its debate connections is active.
+		$members = self::members($row['id']);
+		if (!$members) throw new Failure(401, 'invalid_token');
 		Support::rate('mcp:' . $row['id'], 120, 60);
-		return ['user_id' => $row['user_id'], 'connection_id' => $row['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $row['debate_id']];
+		$debates = [];
+		foreach ($members as $member) if ($member['debate_id'] !== null) $debates[$member['debate_id']] = $member['id'];
+		return ['user_id' => $row['user_id'], 'connection_id' => $members[0]['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $members[0]['debate_id'], 'grant_id' => $row['id'], 'debates' => $debates];
 	}
 
 	public static function identity(array $actor): array
@@ -126,7 +195,9 @@ final class Connections
 		if (!isset($actor['connection_id'])) throw new Failure(403, 'connection_required');
 		$user = Debates::actor($actor);
 		$connection = Db::one('SELECT id, debate_id, scopes FROM mcp_connections WHERE id = ? AND user_id = ?', [$actor['connection_id'], $actor['user_id']]);
-		return ['user_id' => $actor['user_id'], 'alias' => $user['alias'], 'scopes' => explode(' ', $connection['scopes']), 'connection_id' => $connection['id'], 'debate_id' => $connection['debate_id']];
+		$identity = ['user_id' => $actor['user_id'], 'alias' => $user['alias'], 'scopes' => explode(' ', $connection['scopes']), 'connection_id' => $connection['id'], 'debate_id' => $connection['debate_id']];
+		if (count($actor['debates'] ?? []) > 1) $identity['enabled_debates'] = array_map(static fn (string $debate, string $id): array => ['debate_id' => $debate, 'connection_id' => $id], array_keys($actor['debates']), array_values($actor['debates']));
+		return $identity;
 	}
 
 	public static function test(array $actor, array $input, bool $write): array

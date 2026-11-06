@@ -50,6 +50,15 @@ final class Http
 			I18n::locale($locale);
 			if (str_starts_with($path, '/api/')) self::api($method, $path, $user, $actor, $ip);
 			if ($method !== 'GET') throw new Failure(405, 'method_not_allowed');
+			if ($path === '/connect/claude') {
+				// Remember which debate the human started from so consent preselects it, then open Claude's prefilled form.
+				$id = Support::uuid(is_string($_GET['debate'] ?? null) ? $_GET['debate'] : '');
+				if (!$user) { header('Location: /login?' . http_build_query(['return_to' => '/debate/' . $id, 'lang' => I18n::locale()]), true, 303); exit; }
+				$member = Debates::member($id, $user['id']);
+				if ($member['left_at'] !== null) throw new Failure(409, 'invalid_transition');
+				setcookie('dilemma_connect_debate', $id, ['expires' => time() + 3600, 'path' => '/oauth/', 'secure' => Config::production(), 'httponly' => true, 'samesite' => 'Lax']);
+				header('Location: ' . Connections::install_url(), true, 303); exit;
+			}
 			if ($path === '/connect') {
 				Auth::require_user($user);
 				$target = '/app';
@@ -127,6 +136,7 @@ final class Http
 		if ($path === '/api/connections') self::json(Connections::create($actor, $input), 201);
 		if ($path === '/api/connections/waiting') self::json(AiWaiting::update($actor, $input));
 		if ($path === '/api/connections/setup') self::json(Connections::setup($actor, $input), 201);
+		if ($path === '/api/connections/claude') self::json(Connections::enable_claude($actor, Support::text($input, 'debate_id', 36, 36)));
 		if ($path === '/api/oauth/authorize') self::json(OAuth::authorize($actor, $input));
 		if ($path === '/api/admin') self::json(Moderation::apply($actor, $input));
 		if (preg_match('~^/api/connections/([a-f0-9-]{36})/revoke$~D', $path, $match)) self::json(Connections::revoke($actor, $match[1]));

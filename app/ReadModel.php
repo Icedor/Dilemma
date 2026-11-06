@@ -13,7 +13,10 @@ final class ReadModel
 			Debates::actor($actor);
 			$where[] = 'EXISTS (SELECT 1 FROM debate_participants pm WHERE pm.debate_id = d.id AND pm.user_id = ?)';
 			$params[] = $actor['user_id'];
-			if (isset($actor['connection_id'])) {
+			if (count($actor['debates'] ?? []) > 1) {
+				$where[] = 'd.id IN (' . implode(',', array_fill(0, count($actor['debates']), '?')) . ')';
+				array_push($params, ...array_keys($actor['debates']));
+			} elseif (isset($actor['connection_id'])) {
 				$connection = Db::one('SELECT debate_id FROM mcp_connections WHERE id = ?', [$actor['connection_id']]);
 				if ($connection['debate_id'] !== null) { $where[] = 'd.id = ?'; $params[] = $connection['debate_id']; }
 			}
