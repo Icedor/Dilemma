@@ -12,6 +12,8 @@ Goal: a new user copies one instruction from the debate into their AI chat. Clau
 - [x] Copied text is five short lines: debate link, call `dilemma_get_instructions`, act only in this debate, publish on Dilemma, and what to say if the tools are missing. No credential.
 - [x] Real Claude app test on production (old release, before this deployment): owner's existing connector, Connect, Dilemma consent for the private test topic `194e0d31…`, then from a real Claude session through the claude.ai connector: whoami, test_connection (read_verified), test_write receipt at 2026-11-06 16:24:11 UTC and a published opening test argument `8204457d-3cfb-4080-896a-c73c351f5683` (16:24:32 UTC). First completed native Claude OAuth/read/write/publish chain.
 - [ ] Mobile: not verified on a phone. The install link is a claude.ai web link; the manual fallback covers apps that do not open the dialog.
+- [x] Live updates: a new argument arriving while the page is open appears automatically; a typed draft and the reading anchor are kept (local Chromium, 390 px).
+- [ ] Publish release `3e99802f03c3bb01` with `var/deploy-3e99802f03c3bb01.cmd` (blocked in this session: no SSH/HTTPS route from the cloud, computer use off).
 - [ ] After deployment: enable a second private test debate in the same grant and verify whoami lists both.
 
 Tests: new grant checks in `tests/claude-onboarding.php` (41) and `tests/claude-install-http.php` (11 HTTP checks inside `tests/http.php`), updated `tests/claude-ui.cjs`.
@@ -27,7 +29,7 @@ Tests: new grant checks in `tests/claude-onboarding.php` (41) and `tests/claude-
 - [x] Verify 672 PHP/domain/HTTP checks, eleven JS suites, package integrity and private-value scan. Check concurrent status/copy actions and disabled initial button.
 - [x] Inspect SV/EN, desktop/mobile 320/390, keyboard, light/dark and reduced motion. Real Chrome copy contains the current guide call and shows the next action. Local visual grants revoked; only the owned fixture hidden; browser viewport/cache settings reset and original user tab restored.
 - [x] Publish runtime `8c65099`, release `0566e551321f8c76`; verify 103 live hashes, fourteen migrations, source/config and 26-table backup, production preflight, current guide tool, HTTPS health 200 and GitHub. History scan passed for 718 blobs.
-- [ ] Complete the actual Claude application's login and harmless read/write-receipt check when the owner resumes that test.
+- [x] Complete the actual Claude application's login and harmless read/write-receipt check (done November 6 through the owner's claude.ai account; see the top section).
 
 Production evidence: the latest Claude client registered on November 6 at 10:07:56 UTC with `client_secret_post`, but the owner's grants contained no OAuth codes or refresh tokens. Registration was not a completed connection. This does not establish why the earlier user-side approval was interrupted. No credential or real debate argument was changed during this investigation.
 
@@ -46,7 +48,7 @@ Live Chrome shows the new assets, first connection step, pending Claude status a
 - [x] Registration/authentication compatibility and per-debate consent.
 - [x] App-specific instructions and protected manual fallback.
 - [x] Domain/HTTP and real-client checks to the available consent boundary.
-- [ ] Final live Claude grant/read/write receipt on the authorized new private topic, awaiting the owner's resumption of computer control.
+- [x] Final live Claude grant/read/write receipt on the authorized new private topic (done November 6; see the top section).
 - [x] Backup, release, GitHub, production verification and handoff.
 
 Evidence: November4 11:30:07 Swedish time POST/oauth/register returned201, despite Claude reporting a registration failure. Request bodies were not logged, so exact Claude parser reason is unverified. Existing code returned auth=none, no secret, missing issued_at; it defaulted to none contrary to RFC7591 default client_secret_basic. OAuth consent omitted debate selection and could grant account-wide access. New consent will require one owned debate.

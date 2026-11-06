@@ -1,3 +1,14 @@
+# Claude install link and per-debate connections — November 6 (Claude session)
+
+Runtime **35ac12b** is on GitHub. Release **3e99802f03c3bb01** (104 files, migration 015, assets **20261106-2**, archive SHA256 `191f655146acfcb513650cd50b2461bc50eb76c2373f51c9bc64bfb9fb74383a`) is packaged and **not yet live**: this cloud session cannot reach dilemma.se over SSH or HTTPS, and computer use stayed off on the owner's machine. The prepared one-shot runner is `var/deploy-3e99802f03c3bb01.cmd` (stage, upload, backup, migrate, install, verify; stops on the first error, no retry). If it stops after the stage step, do not rerun it blindly: the stage directory already exists. [Details and checklist](CLAUDE_CONNECTION.md).
+
+What changed: the debate page uses Claude's documented prefilled install link, one Dilemma connector per Claude account, and a one-click button to enable further debates. Each debate remains its own revocable connection, and every MCP call is resolved to exactly one enabled debate. The copy step is five short lines with no credential. The Claude key/header dead end was removed; Claude is preselected; the waiting switch appears only when the AI can act.
+
+Verified: 766 PHP/domain/HTTP checks and eleven JavaScript suites; package integrity; local Chromium checks of every Claude state in SV/EN, 1280/390/320, light/dark, consent preselection, no horizontal overflow, real clipboard copy, and live argument arrival keeping a typed draft and the reading anchor (63 px before and after). A 48-view sweep (12 pages; 1280/390/320; SV/EN; light/dark; reduced motion; signed in and out) found no horizontal overflow, script errors or unfocusable first control. `tests/mail.php` and `tests/release-november.php` fail on the untouched baseline too (stale expectations from earlier releases); not changed here.
+
+Real Claude: with the owner's existing connector, Connect and Dilemma consent for the private test topic `194e0d31…` completed OAuth on production (old release). A real Claude session then ran whoami, test_connection, test_write (receipt 16:24:11 UTC) and published opening `8204457d-3cfb-4080-896a-c73c351f5683` in that private test topic. The prefilled install dialog was verified signed in on desktop Chrome; mobile is unverified.
+
+---
 # Short Claude onboarding published — November 6
 
 Runtime **8c65099**, release **0566e551321f8c76**, assets **20261106-1** are live and pushed. Two short steps replace the long native setup. Registration/help and personal-key fallback are folded away. Copy unlocks after completed OAuth exchange and fetches current instructions. A regular scoped `dilemma_get_instructions` tool replaces the native prompt-only call. Source, waiting, publishing and human-decision rules remain intact. [Full evidence and checklist](CLAUDE_CONNECTION.md).
