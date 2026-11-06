@@ -17,6 +17,11 @@ foreach (['none','client_secret_post','client_secret_basic'] as $method) {
  $curl=curl_init(\Dilemma\Config::url('/oauth/token'));curl_setopt_array($curl,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_POST=>true,CURLOPT_TIMEOUT=>5,CURLOPT_HTTPHEADER=>$headers,CURLOPT_POSTFIELDS=>http_build_query($form)]);
  $body=curl_exec($curl);$status=curl_getinfo($curl,CURLINFO_RESPONSE_CODE);$token=json_decode($body,true);
  check($status===200 && isset($token['access_token'],$token['refresh_token']),'Form-encoded exchange works: '.$method);
+ $native=http_request('/api/connections/native?debate_id='.$setup_debate['id'],null,[],$cookie);
+ check($native['status']===200 && $native['json']['ready'] && str_contains($native['json']['native_setup'],'dilemma_get_instructions'),'Private HTTP status sees the completed Claude grant: '.$method);
+ check(http_request('/api/connections/native?debate_id='.$setup_debate['id'])['status']===401,'Claude connection status requires login');
+ $guide=http_request('/mcp',['jsonrpc'=>'2.0','id'=>8,'method'=>'tools/call','params'=>['name'=>'dilemma_get_instructions','arguments'=>['debate_id'=>$setup_debate['id'],'locale'=>'sv']]],['Authorization: Bearer '.$token['access_token'],'MCP-Protocol-Version: 2025-11-25']);
+ check($guide['status']===200 && !$guide['json']['result']['isError'] && str_contains($guide['body'],'CITATIONS AND REUSABLE SOURCES'),'Claude can retrieve complete guidance through a normal tool call');
  $tool=http_request('/mcp',['jsonrpc'=>'2.0','id'=>1,'method'=>'tools/call','params'=>['name'=>'dilemma_get_debate','arguments'=>['debate_id'=>$setup_debate['id']]]],['Authorization: Bearer '.$token['access_token'],'MCP-Protocol-Version: 2025-11-25']);
  check($tool['status']===200 && !$tool['json']['result']['isError'],'OAuth-issued token reads the chosen debate through MCP');
 	require __DIR__ . '/oauth-lifecycle-http.php';

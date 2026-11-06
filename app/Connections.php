@@ -9,6 +9,24 @@ final class Connections
 	public const READ = 'debates:read';
 	public const WRITE = 'arguments:write';
 
+	public static function native_status(array $actor, string $debate_id): array
+	{
+		Debates::human($actor);
+		Debates::actor($actor);
+		$debate_id = Support::uuid($debate_id);
+		$member = Debates::member($debate_id, $actor['user_id']);
+		$ready = false; $verified = false;
+		// Registration or an unused authorization code is not a completed connection.
+		$rows = Db::all("SELECT DISTINCT c.write_test_at, o.redirect_uris FROM mcp_connections c JOIN mcp_tokens t ON t.connection_id=c.id JOIN oauth_clients o ON o.id=t.client_id WHERE c.user_id=? AND c.debate_id=? AND c.revoked_at IS NULL AND c.scopes LIKE '%arguments:write%' AND ((t.kind='access' AND t.expires_at>UTC_TIMESTAMP()) OR (t.kind='refresh' AND t.used_at IS NULL AND (t.expires_at IS NULL OR t.expires_at>UTC_TIMESTAMP())))", [$actor['user_id'], $debate_id]);
+		foreach ($rows as $row) {
+			if (!in_array('https://claude.ai/api/mcp/auth_callback', json_decode($row['redirect_uris'], true, 16, JSON_THROW_ON_ERROR), true)) continue;
+			$ready = true;
+			$verified = $verified || $row['write_test_at'] !== null;
+		}
+		if ($member['left_at'] !== null || Debates::row($debate_id)['hidden']) $ready = $verified = false;
+		return ['ready' => $ready, 'verified' => $verified, 'native_setup' => AiSetup::connector($debate_id, I18n::locale(), $actor['user_id'])];
+	}
+
 	public static function scopes(mixed $value): string
 	{
 		if (!is_string($value) || strlen($value) > 100) throw new Failure(400, 'invalid_scope');

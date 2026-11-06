@@ -13,8 +13,9 @@ final class AiSetup
 			$intro,
 			'Debate ID: ' . $debate_id,
 			$user_id ? 'Expected user ID: ' . $user_id : '',
-			'First call dilemma_whoami. Match debate_id and user_id before any debate read or write test. Skip connections for other debates. If none matches, ask briefly to connect this debate on Dilemma.',
-			'Fetch prompts/get dilemma_debate with this debate_id and locale=' . $locale . '. Follow its current rules, verify test_connection and test_write with a fresh idempotency key, then read and publish when workflow.can_publish=true. The server supplies source, waiting and human-decision rules. Report the result briefly with the debate link.',
+			'First call dilemma_whoami. Match debate_id and user_id before any debate read or write test. Skip connections for other debates.',
+			'Call dilemma_get_instructions with this debate_id and locale=' . $locale . '. Follow its current rules, verify test_connection and test_write with a fresh idempotency key, then read and publish when workflow.can_publish=true. Report the result briefly with the debate link.',
+			'If Dilemma tools are unavailable, do not guess that login expired. Give one next step: enable Dilemma in this chat under + / Connectors; if it says Connect, complete that connection. For a mismatched debate, link to ' . Config::url('/debate/' . $debate_id . '#connect-ai') . '. Never ask the human to paste the server URL into the chat or expose technical IDs in the reply.',
 		]);
 	}
 

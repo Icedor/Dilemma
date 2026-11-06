@@ -81,6 +81,7 @@ final class Http
 	private static function api(string $method, string $path, ?array $user, ?array $actor, string $ip): never
 	{
 		if ($method === 'GET') {
+			if ($path === '/api/connections/native') { Auth::require_user($user); Support::rate('native-status:' . $user['id'], 30, 60); self::json(Connections::native_status($actor, Support::text($_GET, 'debate_id', 36, 36))); }
 			if ($path === '/api/push') { Auth::require_user($user); self::json(Push::status($user)); }
 			if ($path === '/api/i18n') self::json(I18n::all());
 			if ($path === '/api/debates') self::json(ReadModel::list($_GET));

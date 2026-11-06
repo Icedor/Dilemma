@@ -726,6 +726,22 @@
 	.connect-steps { padding-inline-start: 1.25rem; display: grid; gap: var(--space-4); font-size: .9375rem; line-height: 1.55; }
 	.server-copy { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); margin-block: var(--space-4); }
 	.server-copy code, .oauth-callback { overflow-wrap: anywhere; }
+}
+
+@layer pages {
+	.claude-guide { display: grid; gap: var(--space-3); }
+	.claude-guide > details { margin: 0; padding-block: var(--space-3); }
+	.claude-guide > details > summary { font-weight: 700; padding-block: var(--space-2); }
+	.claude-guide details > p, .claude-guide details > .button { margin-block: var(--space-4); }
+	.claude-guide .connect-steps { margin-block: var(--space-4); gap: var(--space-3); }
+	.claude-guide .claude-new { margin: 0; }
+	.claude-status { padding-inline-start: var(--space-3); border-inline-start: .2rem solid currentColor; font-size: .9375rem; line-height: 1.5; }
+	.claude-status[data-ready="true"] { font-weight: 650; }
+	.native-chat-step { border-top: 1px solid #19191850; padding-block-start: var(--space-6); }
+	.native-chat-step h3 { font-size: 1.05rem; letter-spacing: -.02em; margin-block-end: var(--space-3); }
+	.native-chat-step > p { font-size: .9375rem; line-height: 1.5; }
+	.connect-start .button:disabled { opacity: 1; background: #19191820; color: #4c400b; border-color: #19191840; cursor: not-allowed; }
+	.connect-start input[data-private-setup] { color: #191918; background: #ffdf39; border-color: #19191880; }
 	.oauth-consent { max-width: 48rem; }
 	.oauth-consent h1 { font-size: clamp(2.5rem, 7vw, 5rem); }
 	.oauth-consent form { padding: var(--space-6); border: 1px solid var(--rule); margin-block: var(--space-6); }

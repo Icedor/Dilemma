@@ -1,3 +1,22 @@
+# Short Claude onboarding — November 6
+
+- [x] Preserve existing work, verify lock/Drive/Git baseline and inspect production without changing access.
+- [x] Reduce onboarding to two short steps: connect once for this debate, then copy into the chat. Fold registration and key fallback into help.
+- [x] Distinguish registration, completed OAuth exchange and a persisted write test. Gate copying on completed login; refresh current instructions before copy.
+- [x] Expose `dilemma_get_instructions` as a regular read-only tool for clients that do not expose MCP prompts. Keep exact participant/debate scope and full source, publication and human-decision rules.
+- [x] Verify 672 PHP/domain/HTTP checks, eleven JS suites, package integrity and private-value scan. Check concurrent status/copy actions and disabled initial button.
+- [x] Inspect SV/EN, desktop/mobile 320/390, keyboard, light/dark and reduced motion. Real Chrome copy contains the current guide call and shows the next action. Local visual grants revoked; only the owned fixture hidden; browser viewport/cache settings reset and original user tab restored.
+- [ ] Publish release `0566e551321f8c76`, verify live hashes and GitHub.
+- [ ] Complete the actual Claude application's login and harmless read/write-receipt check when the owner resumes that test.
+
+Production evidence: the latest Claude client registered on November 6 at 10:07:56 UTC with `client_secret_post`, but the owner's grants contained no OAuth codes or refresh tokens. Registration was not a completed connection. This does not establish why the earlier user-side approval was interrupted. No credential or real debate argument was changed during this investigation.
+
+Native Claude control was resumed by the owner, then stopped immediately at "Vänta". Subsequent work is website/code verification; local OAuth fixtures are not evidence of an actual Claude app connection. Claude's first connector approval remains required by the platform. The copied text no longer invents an expired-login diagnosis or asks the user to paste the server URL into the chat. Reference: [Claude custom connectors](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp).
+
+Release assets: `20261106-1`; 103 files; no schema change. Archive SHA256: `5ec35cb8f7a6de96d4dbec8fb700a95120819828326612ab96a7107fac2b1bb3`.
+
+---
+
 # Claude connection compatibility — November 4
 
 - [x] Startup sync/version/lock checks; owner authorized release.

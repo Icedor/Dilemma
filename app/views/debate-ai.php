@@ -2,28 +2,43 @@
 use Dilemma\{Connections, Support};
 $setup = Connections::current($actor, $debate['id']);
 $revoked = $setup['revoked'] ?? false;
+$native = Connections::native_status($actor, $debate['id']);
 ?>
 <section id="connect-ai" class="connect-start debate-ai" data-debate-ai="<?= $e($debate['id']) ?>" data-setup-ready="<?= $setup ? 'true' : 'false' ?>">
 <h2><?= $t('connect') ?></h2>
 <label class="field"><span><?= $t('ai_app') ?></span><select id="ai-app-choice"><option value=""><?= $t('ai_app_choose') ?></option><option value="native">Claude</option><option value="direct">Codex</option><option value="other"><?= $t('ai_app_other') ?></option></select></label>
-<div data-app-route="native" hidden><a class="text-button" href="https://claude.ai/customize/connectors" target="_blank" rel="noopener noreferrer"><?= \Dilemma\Views::icon('external-link') ?><span><?= $t('ai_open_claude') ?></span></a><ol class="connect-steps"><li><?= $t('ai_claude_step') ?></li><li><?= $t('ai_oauth_step') ?></li></ol></div>
+<div data-app-route="native" class="claude-guide" hidden>
+	<details id="claude-connect-steps" <?= !$native['ready'] ? 'open' : '' ?>>
+		<summary class="disclosure-control"><span><?= $t('claude_step_one') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary>
+		<p><?= $t('claude_once') ?></p>
+		<a class="button" href="https://claude.ai/customize/connectors" target="_blank" rel="noopener noreferrer" data-claude-open><?= \Dilemma\Views::icon('external-link') ?><span><?= $t('ai_open_claude') ?></span></a>
+		<ol class="connect-steps"><li><?= $t('claude_existing') ?></li><li><?= $t('claude_approve') ?></li></ol>
+		<details class="claude-new"><summary class="disclosure-control"><span><?= $t('claude_missing') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary>
+			<p><?= $t('claude_add') ?></p><div class="server-copy"><code id="claude-endpoint"><?= $e(Dilemma\Config::url('/mcp')) ?></code><button type="button" class="text-button" data-copy-target="claude-endpoint"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy') ?></span></button></div>
+			<p><?= $t('claude_options') ?></p>
+		</details>
+	</details>
+	<p id="claude-status" class="claude-status" role="status" aria-live="polite" data-ready="<?= $native['ready'] ? 'true' : 'false' ?>"><?= $t($native['ready'] ? 'claude_ready' : 'claude_pending') ?></p>
+	<button type="button" class="text-button" data-claude-check <?= $native['ready'] ? 'hidden' : '' ?>><?= \Dilemma\Views::icon('rotate-ccw') ?><span data-control-label><?= $t('claude_check') ?></span></button>
+</div>
 <div data-app-route="other" hidden><p><?= $t('ai_other_step') ?></p></div>
-<div data-app-route="server" hidden><div class="server-copy"><code id="mcp-endpoint"><?= $e(Dilemma\Config::url('/mcp')) ?></code><button type="button" class="text-button" data-copy-target="mcp-endpoint"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy') ?></span></button></div><p><?= $t('ai_native_finish') ?></p><button type="button" class="button" data-copy-target="ai-native-setup"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy_setup') ?></span></button></div><details data-app-route="server" hidden><summary class="disclosure-control"><span><?= $t('show_setup') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><textarea aria-label="<?= $t('copy_setup') ?>" id="ai-native-setup" rows="7" readonly autocomplete="off" data-private-setup><?= $e($setup['native_setup'] ?? '') ?></textarea></details>
+<div data-app-route="other" hidden><div class="server-copy"><code id="mcp-endpoint"><?= $e(Dilemma\Config::url('/mcp')) ?></code><button type="button" class="text-button" data-copy-target="mcp-endpoint"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy') ?></span></button></div></div>
+<div data-app-route="server" class="native-chat-step" hidden><h3><?= $t('claude_step_two') ?></h3><p><?= $t('claude_paste') ?></p><button type="button" class="button" id="native-copy" data-copy-target="ai-native-setup" disabled><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy_setup') ?></span></button><details id="native-text"><summary class="disclosure-control"><span><?= $t('show_setup') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><textarea aria-label="<?= $t('copy_setup') ?>" id="ai-native-setup" rows="7" readonly autocomplete="off" data-native-setup><?= $e($native['native_setup']) ?></textarea></details></div>
 <p data-app-route="direct" hidden><?= $t('ai_direct_step') ?></p>
 
-<p id="connection-copy-status" role="status" aria-live="polite"><?= !$setup ? $t('working') : ($revoked ? $t('setup_removed') : '') ?></p>
+<p id="connection-copy-status" role="status" aria-live="polite"><?= !$setup ? $t('working') : '' ?></p>
+<p id="direct-access-status" data-app-route="direct" hidden><?= $revoked ? $t('setup_removed') : '' ?></p>
 <div id="connection-result" <?= !$setup || $revoked ? 'hidden' : '' ?>>
 <div class="actions"><button class="button" type="button" data-ai-copy data-copy-target="ai-setup" disabled><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('copy_setup') ?></span></button></div>
 
-<p class="connect-secret-note"><?= $t('setup_update_hint') ?></p>
+<p class="connect-secret-note" data-app-route="direct" hidden><?= $t('setup_update_hint') ?></p>
 <details class="setup-text-disclosure"><summary class="disclosure-control"><span><?= $t('show_setup') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary>
 <label class="visually-hidden" for="ai-setup"><?= $t('copy_setup') ?></label>
 <textarea id="ai-setup" rows="7" readonly autocomplete="off" spellcheck="false" data-private-setup><?= $e($setup['setup_text'] ?? '') ?></textarea>
 </details>
 
-<details data-app-route="fallback" hidden><summary class="disclosure-control"><span><?= $t('ai_fallback') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('ai_header_help') ?></p><input id="ai-header" readonly autocomplete="off" data-private-setup aria-label="Authorization" value="<?= $e(preg_match('/Authorization: (Bearer [A-Za-z0-9_-]{43})/', $setup['setup_text'] ?? '', $auth_match) ? $auth_match[1] : '') ?>"><button type="button" class="text-button" data-copy-target="ai-header"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('ai_copy_header') ?></span></button></details>
-<p class="connect-secret-note"><?= $t('ai_manual_fallback') ?></p>
-<details class="connection-help"><summary class="disclosure-control"><span><?= $t('connection_help') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('setup_support') ?></p><p><?= $t('setup_persistent_note') ?></p></details>
+<details data-app-route="fallback" hidden><summary class="disclosure-control"><span><?= $t('ai_fallback') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('claude_recover') ?></p><details><summary class="disclosure-control"><span><?= $t('claude_key_option') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('ai_header_help') ?></p><input id="ai-header" readonly autocomplete="off" data-private-setup aria-label="Authorization" value="<?= $e(preg_match('/Authorization: (Bearer [A-Za-z0-9_-]{43})/', $setup['setup_text'] ?? '', $auth_match) ? $auth_match[1] : '') ?>"><button type="button" class="text-button" data-copy-target="ai-header"><?= \Dilemma\Views::icon('copy') ?><span data-control-label><?= $t('ai_copy_header') ?></span></button><button type="button" class="text-button" data-native-key><?= $t('claude_key_used') ?></button></details><p><?= $t('ai_manual_fallback') ?></p></details>
+<details class="connection-help" data-app-route="direct" hidden><summary class="disclosure-control"><span><?= $t('connection_help') ?></span><?= \Dilemma\Views::icon('chevron-down') ?></summary><p><?= $t('setup_support') ?></p><p><?= $t('setup_persistent_note') ?></p><p><?= $t('ai_manual_fallback') ?></p></details>
 
 </div>
 

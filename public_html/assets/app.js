@@ -266,9 +266,57 @@ function chooseAiApp() {
 	copy.dataset.copyTarget = native ? 'ai-native-setup' : 'ai-setup';
 	const details = document.querySelector('.setup-text-disclosure');
 	if (details) details.hidden = native || !choice.value;
+	const ready = choice.value !== 'native' || document.querySelector('#claude-status')?.dataset.ready === 'true' || document.querySelector('[data-debate-ai]')?.dataset.nativeKey === 'true';
+	document.querySelector('#native-copy').disabled = !ready;
+	document.querySelector('#native-text').hidden = !ready;
 }
-document.querySelector('#ai-app-choice')?.addEventListener('change', chooseAiApp);
+const aiChoice = document.querySelector('#ai-app-choice');
+const aiChoiceKey = `dilemma:ai-app:${user}:${location.pathname}`;
+if (aiChoice && ['native', 'direct', 'other'].includes(storageGet(aiChoiceKey))) aiChoice.value = storageGet(aiChoiceKey);
+aiChoice?.addEventListener('change', () => {
+	storageSet(aiChoiceKey, aiChoice.value);
+	chooseAiApp();
+	if (aiChoice.value === 'native') checkClaudeConnection(true);
+});
 chooseAiApp();
+
+let claudeCheckBusy = false, claudeCheckFailed = false, claudeCheckedAt = 0, claudeCheckPromise;
+function checkClaudeConnection(manual = false) {
+	const section = document.querySelector('[data-debate-ai]');
+	const status = document.querySelector('#claude-status');
+	if (claudeCheckBusy) return claudeCheckPromise;
+	if (!section || !status || (!manual && (claudeCheckFailed || Date.now() - claudeCheckedAt < 5000))) return Promise.resolve(false);
+	claudeCheckBusy = true;
+	const button = document.querySelector('[data-claude-check]');
+	button.disabled = true; button.setAttribute('aria-busy', 'true');
+	claudeCheckPromise = (async () => {
+	try {
+		const data = await request(`/api/connections/native?debate_id=${encodeURIComponent(section.dataset.debateAi)}`);
+		status.dataset.ready = String(data.ready);
+		button.hidden = data.ready;
+		status.textContent = t(data.verified ? 'claude_verified' : data.ready ? 'claude_ready' : 'claude_pending');
+		document.querySelector('#ai-native-setup').value = data.native_setup;
+		if (data.ready) document.querySelector('#claude-connect-steps').open = false;
+		claudeCheckFailed = false;
+		chooseAiApp();
+		return data.ready;
+	} catch {
+		status.dataset.ready = 'false';
+		button.hidden = false;
+		status.textContent = t('claude_check_failed');
+		claudeCheckFailed = true;
+		chooseAiApp();
+		return false;
+	} finally {
+		claudeCheckedAt = Date.now(); claudeCheckBusy = false;
+		button.disabled = false; button.removeAttribute('aria-busy');
+	}
+	})();
+	return claudeCheckPromise;
+}
+window.addEventListener('focus', () => { if (aiChoice?.value === 'native') checkClaudeConnection(); });
+// A returning browser tab gets one read-only check; no background polling or AI calls.
+document.addEventListener('visibilitychange', () => { if (!document.hidden && aiChoice?.value === 'native') checkClaudeConnection(); });
 
 function renderSetup(data) {
 	const section = document.querySelector('[data-debate-ai]');
@@ -280,7 +328,8 @@ function renderSetup(data) {
 	chooseAiApp();
 	renderWaiting(data.waiting);
 	document.querySelector('#connection-result').hidden = data.revoked || !target.value;
-	document.querySelector('#connection-copy-status').textContent = data.revoked ? t('setup_removed') : '';
+	document.querySelector('#connection-copy-status').textContent = '';
+	document.querySelector('#direct-access-status').textContent = data.revoked ? t('setup_removed') : '';
 	const revoke = document.querySelector('#revoke-new-connection');
 	revoke.dataset.connectionId = data.connection_id; revoke.disabled = false; revoke.hidden = Boolean(data.revoked);
 	document.querySelector('#renew-debate-connection').hidden = !data.revoked;
@@ -306,7 +355,7 @@ async function loadDebateSetup(renew = false) {
 }
 
 function clearSetup() {
-	for (const target of document.querySelectorAll('[data-private-setup]')) target.value = '';
+	for (const target of document.querySelectorAll('[data-private-setup], [data-native-setup]')) target.value = '';
 	for (const overview of document.querySelectorAll('.overview-setup')) overview.hidden = true;
 	if (!document.querySelector('[data-debate-ai]')) return;
 	document.querySelector('#connection-result').hidden = true;
@@ -318,6 +367,12 @@ window.addEventListener('pageshow', event => { if (event.persisted) loadDebateSe
 if (document.querySelector('[data-debate-ai][data-setup-ready="false"]')) loadDebateSetup();
 
 document.addEventListener('click', async event => {
+	if (event.target.closest('[data-claude-check]')) await checkClaudeConnection(true);
+	if (event.target.closest('[data-native-key]')) {
+		document.querySelector('[data-debate-ai]').dataset.nativeKey = 'true';
+		document.querySelector('#claude-status').textContent = t('claude_key_selected');
+		chooseAiApp();
+	}
 	const editEmail = event.target.closest('[data-auth-edit]');
 	if (editEmail) {
 		const panel = editEmail.closest('.auth-form');
@@ -349,6 +404,10 @@ document.addEventListener('click', async event => {
 	const copy = event.target.closest('[data-copy], [data-copy-target]');
 	if (copy) {
 		const target = copy.dataset.copyTarget ? document.getElementById(copy.dataset.copyTarget) : null;
+		if (target?.id === 'ai-native-setup' && aiChoice?.value === 'native') {
+			if (document.querySelector('[data-debate-ai]').dataset.nativeKey === 'true') { if (!await loadDebateSetup()) return; }
+			else if (!await checkClaudeConnection(true)) return;
+		}
 		// Refresh private access before copying; an already-open tab may hold a revoked key or old instructions.
 		if (target?.matches('[data-private-setup]') && document.querySelector('[data-debate-ai]') && !await loadDebateSetup()) return;
 		const value = copy.dataset.copy ?? (target && 'value' in target ? target.value : target?.textContent);
@@ -356,6 +415,7 @@ document.addEventListener('click', async event => {
 			const copied = await copyText(value, target);
 			announce(t(copied ? 'copied' : 'setup_copy_failed'));
 			if (target?.matches('[data-private-setup]')) document.querySelector('#connection-copy-status').textContent = t(copied ? 'setup_copied' : 'setup_copy_failed');
+			if (target?.id === 'ai-native-setup') document.querySelector('#connection-copy-status').textContent = t(copied ? 'claude_enable' : 'setup_copy_failed');
 			if (copied) copy.focus();
 		}
 	}

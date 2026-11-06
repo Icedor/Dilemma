@@ -10,7 +10,7 @@ final class Mcp
 	public const LEGACY = '2025-11-25';
 	public const LEGACY_VERSIONS = [self::LEGACY, '2025-06-18', '2025-03-26'];
 	public const SUPPORTED = [self::MODERN, ...self::LEGACY_VERSIONS];
-	public const INSTRUCTIONS = AiGuide::RULES . ' Use the dilemma_debate prompt for the human’s short onboarding and scoped debate context.';
+	public const INSTRUCTIONS = AiGuide::RULES . ' Use dilemma_get_instructions for current guidance and scoped debate context. The dilemma_debate MCP prompt is also available for apps supporting prompts.';
 
 	private static function instructions(array $actor): string
 	{
