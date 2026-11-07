@@ -1,3 +1,12 @@
+# Review sweep ready for publication — November 7 (Claude session)
+
+Runtime **aefe803** (on GitHub) is packaged as release **fccfc1a0348b362e**: 104 files, no new migration (15 total, 26 tables), archive SHA256 `56c023b4a28b1ee2af24d57edfc9b26657c8a661264ac43da8153a2d41883185`. Live before publication: **3e99802f03c3bb01**. Changed runtime files: Auth, Connections, DebateFlow, I18n, ReadModel, ToolRegistry, Views and the views debate-flow, home, information, login. No asset version change (CSS/JS unchanged).
+
+Publish exactly once with `var/deploy-fccfc1a0348b362e.cmd` (stage, upload, backup, migrate check, install, verify; stops on the first error). It expects 104 live files from 3e99802f03c3bb01. If it stops after stage, read `var/deploy-fccfc1a0348b362e.log` before anything else: the stage directory already exists. Rollback: restore `.backup-before-fccfc1a0348b362e/previous-release.zip` (schema unchanged, so code rollback alone is enough).
+
+After publication check: `/health` 200; verify JSON shows 104 hashes, 15 migrations, `test_topic_state` ready; a debate page shows the three participant AI labels. Details of the sweep: STATUS.md top entry. Claude did not publish; lock released for Codex.
+
+---
 # Release published and live Chrome checks — November 7
 
 Runtime **35ac12b**, handed over at documentation commit **a22a061**, is live as **3e99802f03c3bb01**. Before publication, Drive tracked contents, local Git HEAD and fetched GitHub all matched a22a061 with a clean working tree. The specified archive SHA256 matched, and the private-value/key scan passed. The prepared `.cmd` runner ran exactly once and returned RESULT OK at 00:57:49 +01:00. All **104 live hashes**, **15 migrations**, grant column, private source/config and 26-table backup, and production preflight passed. `/health` returned **200**; Chrome loaded app/style **20261106-2**. Backup: `/home/superpeppse/dilemma.se/.backup-before-3e99802f03c3bb01/`.
