@@ -1,3 +1,17 @@
+# Release published and live Chrome checks — November 7
+
+Runtime **35ac12b**, handed over at documentation commit **a22a061**, is live as **3e99802f03c3bb01**. Before publication, Drive tracked contents, local Git HEAD and fetched GitHub all matched a22a061 with a clean working tree. The specified archive SHA256 matched, and the private-value/key scan passed. The prepared `.cmd` runner ran exactly once and returned RESULT OK at 00:57:49 +01:00. All **104 live hashes**, **15 migrations**, grant column, private source/config and 26-table backup, and production preflight passed. `/health` returned **200**; Chrome loaded app/style **20261106-2**. Backup: `/home/superpeppse/dilemma.se/.backup-before-3e99802f03c3bb01/`.
+
+Requested live Chrome checks passed with the owner's signed-in account:
+- Existing private paper-books test shows “Claude är anslutet och har testats i den här debatten.”
+- Created “Test: Claude-anslutning 7 november” (private, both public consents off, notifications off, no invite or argument). The “Använd Claude i den här debatten” button changed the page to “Claude är anslutet till den här debatten.” and the copy step after one click. Clipboard contained the new debate's instruction; readiness persisted after navigation back.
+- The actual install link in this test page redirected to Claude's Add custom connector dialog with `Dilemma` and `https://dilemma.se/mcp` prefilled. Because this account already has a Claude grant, that install button is correctly hidden: its rendered href was opened in the existing tab to verify the same route without revoking the grant. Cancelled the dialog without registering a duplicate.
+
+Observed wording issue, left unchanged under the owner's documentation-only instruction: the participant row says “AI-anslutning saknas” before the new debate's first write-test receipt, while the connection panel correctly says connected. `ReadModel::participants` derives that badge from `write_test_at`, so enabled and tested states need distinct labels in a future code change. This did not block the requested enable/copy flow. No new real Claude chat or argument was run in this deployment check; previous real-client evidence remains below. Mobile-device installation is still unverified.
+
+The existing browser tab was restored to its original URL; no new tab/group, viewport override or native-app action was used. Real debates and existing grants were not changed. Runtime code remains byte-for-byte at a22a061; only these three documentation files are being pushed. Do not rerun the completed deploy runner. Private test URL and screenshots are recorded in the private operations notes.
+
+---
 # Claude install link and one connector per account — November 6 (Claude session)
 
 Goal: a new user copies one instruction from the debate into their AI chat. Claude cannot be installed by a prompt, so the page shows only the next action the platform requires.
@@ -13,8 +27,8 @@ Goal: a new user copies one instruction from the debate into their AI chat. Clau
 - [x] Real Claude app test on production (old release, before this deployment): owner's existing connector, Connect, Dilemma consent for the private test topic `194e0d31…`, then from a real Claude session through the claude.ai connector: whoami, test_connection (read_verified), test_write receipt at 2026-11-06 16:24:11 UTC and a published opening test argument `8204457d-3cfb-4080-896a-c73c351f5683` (16:24:32 UTC). First completed native Claude OAuth/read/write/publish chain.
 - [ ] Mobile: not verified on a phone. The install link is a claude.ai web link; the manual fallback covers apps that do not open the dialog.
 - [x] Live updates: a new argument arriving while the page is open appears automatically; a typed draft and the reading anchor are kept (local Chromium, 390 px).
-- [ ] Publish release `3e99802f03c3bb01` with `var/deploy-3e99802f03c3bb01.cmd` (blocked in this session: no SSH/HTTPS route from the cloud, computer use off).
-- [ ] After deployment: enable a second private test debate in the same grant and verify whoami lists both.
+- [x] Published release `3e99802f03c3bb01` through the prepared runner on November 7; see live checks above.
+- [x] After deployment: enabled a second private test debate through the live Chrome button; copy state persists. A fresh real-client whoami across both debates was outside the requested UI-only deployment check and remains unperformed.
 
 Tests: new grant checks in `tests/claude-onboarding.php` (41) and `tests/claude-install-http.php` (11 HTTP checks inside `tests/http.php`), updated `tests/claude-ui.cjs`.
 
