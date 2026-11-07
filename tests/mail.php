@@ -47,7 +47,7 @@ foreach (['sv', 'en'] as $locale) {
 		$plain = base64_decode(trim($encoded[1][0] ?? ''), true);
 		$html = base64_decode(trim($encoded[1][1] ?? ''), true);
 		check(is_string($plain) && is_string($html) && str_contains($plain, $url) && str_contains($html, 'href="' . Support::escape($url) . '"') && !str_contains($html, '<img src=x') && substr_count($html, '<img ') === ($kind === 'invitation' ? 1 : 0) && !str_contains($message, 'Reply-To:') && substr_count($html, '<h1 ') === 1, 'Mail alternatives preserve action URL and escape user content: ' . $locale . '/' . $kind);
-		if ($kind === 'invitation') check(str_contains($html, '/assets/share-change-your-mind.jpg') && str_contains($plain, $locale === 'sv' ? 'ni avgör vad som övertygar' : 'you decide what changes your mind'), 'Invitation includes the graphic and a plain-text explanation: ' . $locale);
+		if ($kind === 'invitation') check(str_contains($html, '/assets/share-change-your-mind.jpg') && str_contains($plain, $locale === 'sv' ? 'avgör vad som övertygar' : 'decide what convinces you'), 'Invitation includes the graphic and a plain-text explanation: ' . $locale);
 		if ($kind === 'login') check(!str_contains(strip_tags($html), 'synthetic-token') && str_contains($html, '15 min') && !str_contains($html, '/settings') && !str_contains($html, 'onerror'), 'Login excludes raw token, settings and debate text: ' . $locale);
 	}
 }

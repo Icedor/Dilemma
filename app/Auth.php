@@ -57,7 +57,7 @@ final class Auth
 
 	private static function return_target(string $path): string
 	{
-		if ($path === '' || $path === '/app') return $path;
+		if ($path === '' || $path === '/app' || $path === '/new') return $path;
 		if (preg_match('~^/debate/[a-f0-9-]{36}(?:#(?:join|your-decision))?$~D', $path)) return $path;
 		if (preg_match('~^/invite#[A-Za-z0-9_-]{43}$~D', $path)) return $path;
 		if (str_starts_with($path, '/oauth/authorize?') && !str_contains($path, '#') && !strpbrk($path, "\r\n")) {

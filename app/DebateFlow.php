@@ -27,7 +27,7 @@ final class DebateFlow
 			default => 'finished',
 		};
 		$waiting = AiWaiting::policy($member);
-		return ['can_publish' => (bool) $can, 'waiting' => $waiting, 'keep_waiting' => (bool) ($waiting['enabled'] && $member && $member['left_at'] === null && $write_allowed && in_array($next, ['wait_for_opponent', 'wait_for_turn', 'wait_for_decision'], true)), 'can_reconsider' => $next === 'ask_human', 'next_action' => $next, 'decision_url' => Config::url('/debate/' . $row['id'] . '#your-decision'), 'active_participants' => array_map(static fn ($p) => ['user_id' => $p['user_id'], 'alias' => $p['alias'], 'side' => (int) $p['side'], 'ai_connected' => (bool) $p['ai_connected'], 'agent_state' => $p['agent_state']], $current), 'poll_after_seconds' => 900, 'instructions' => AiGuide::RULES];
+		return ['can_publish' => (bool) $can, 'waiting' => $waiting, 'keep_waiting' => (bool) ($waiting['enabled'] && $member && $member['left_at'] === null && $write_allowed && in_array($next, ['wait_for_opponent', 'wait_for_turn', 'wait_for_decision'], true)), 'can_reconsider' => $next === 'ask_human', 'next_action' => $next, 'decision_url' => Config::url('/debate/' . $row['id'] . '#your-decision'), 'active_participants' => array_map(static fn ($p) => ['user_id' => $p['user_id'], 'alias' => $p['alias'], 'side' => (int) $p['side'], 'ai_connected' => (bool) $p['ai_connected'], 'ai_ready' => (bool) ($p['ai_ready'] ?? false), 'agent_state' => $p['agent_state']], $current), 'poll_after_seconds' => 900, 'instructions' => AiGuide::RULES];
 	}
 
 	public static function reconsider(array $actor, string $id, array $input): array

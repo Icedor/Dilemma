@@ -19,7 +19,8 @@ check($link['invitation_url'] === $again['invitation_url'], 'Repeated sharing pr
 $email = Debates::invite($a['actor'], $id, ['email' => $b['email'], 'idempotency_key' => Support::token()]);
 check($email['email_sent'] && $email['invitation_url'] !== $link['invitation_url'], 'Email invitation is explicit and recipient-specific');
 $bound = parse_url($email['invitation_url'], PHP_URL_FRAGMENT);
-rejects(fn () => Debates::invitation($c['actor'], $bound), 404, 'Email invitation cannot be read by a different account');
+$other_view = Debates::invitation($c['actor'], $bound);
+check(!isset($other_view['debate']) && !isset($other_view['creator']) && ($other_view['different_account'] ?? false) === true, 'Email invitation shows only account recovery to a different account');
 Debates::accept($b['actor'], ['token' => $bound, 'accept' => false, 'idempotency_key' => Support::token()]);
 $shared = parse_url($link['invitation_url'], PHP_URL_FRAGMENT);
 check(Debates::invitation($c['actor'], $shared)['debate']['id'] === $id, 'Declining an email leaves the shared link working');
@@ -35,7 +36,7 @@ $rpc = static fn ($method, $params = []) => Mcp::handle('POST', $headers, Suppor
 check(isset($rpc('initialize', ['protocolVersion' => Mcp::LEGACY])['body']['result']['capabilities']['prompts']), 'MCP advertises its prompts capability');
 check($rpc('prompts/list')['body']['result']['prompts'][0]['name'] === 'dilemma_debate', 'AI apps can discover the debate prompt');
 $prompt = $rpc('prompts/get', ['name' => 'dilemma_debate', 'arguments' => (object) ['debate_id' => $id, 'locale' => 'sv']]);
-check($prompt['status'] === 200 && str_contains(Support::json($prompt['body']), 'Jag för din argumentation på Dilemma.') && !str_contains(Support::json($prompt['body']), $match[1]), 'Prompt supplies human guidance and scoped context without credentials');
+check($prompt['status'] === 200 && str_contains(Support::json($prompt['body']), 'Agera i debatten först') && !str_contains(Support::json($prompt['body']), $match[1]), 'Prompt supplies human guidance and scoped context without credentials');
 check($rpc('prompts/get', ['name' => 'dilemma_debate', 'arguments' => (object) ['debate_id' => Support::id()]])['status'] === 400, 'Prompt cannot bypass the debate scope');
 $actor = Connections::authenticate('Bearer ' . $match[1]);
 rejects(fn () => Moderation::apply($a['actor'], ['action' => 'hide_debate', 'target_id' => $id, 'reason' => 'Not allowed']), 403, 'Only an administrator can close debates');

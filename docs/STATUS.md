@@ -1,3 +1,23 @@
+# Full review sweep — November 7 (Claude session)
+
+Baseline: live **3e99802f03c3bb01** (runtime 35ac12b, docs d0f265c). This sweep changes runtime without a schema change (still 15 migrations). Release, checksum and the Codex command are in the top of SESSION_HANDOFF.md.
+
+Fixed, each with regression tests:
+- [x] Participant badge had two states and said "AI-anslutning saknas" for a connected but unused Claude sign-in (found by Codex on live). Now: AI connected (write receipt or a published MCP post), connected but not used yet (live app sign-in for this debate), or no AI yet. Same labels in the live update feed.
+- [x] Tool descriptions for app sign-ins (OAuth) no longer embed debate IDs. Apps cache tool lists; a cached list from the first debate stays valid after more debates are enabled. Direct per-debate keys keep their bound descriptions.
+- [x] Connection tests without a named debate cover the whole sign-in, so an app with an older cached schema (test_write without debate_id) still completes its startup. Debate reads and writes still require their debate.
+- [x] New personal API keys must name one debate (`/api/connections` refuses account-wide keys with 422). Existing older keys expire on their own (max 30 days).
+- [x] "Börja med din åsikt" for a signed-out visitor returns the new account to `/new` after the email link. Return targets stay on known Dilemma pages.
+- [x] Copy: submit button "Starta debatten" / "Start the debate"; consent intro now says one debate.
+- [x] `tests/mail.php` and `tests/release-november.php` had stale expectations from earlier releases; updated to the current intended behaviour (wrong-account invitation recovery, current invitation and guide copy).
+
+Verified: 824 PHP/domain/HTTP checks across 22 suites, 11 JavaScript suites, package integrity, and a 48-view browser sweep (12 pages; 1280/390/320; SV/EN; light/dark; reduced motion; signed in/out) with no overflow, script error or unfocusable first control.
+
+Real Claude on production (old release 3e99802f03c3bb01), from this Claude chat through the owner's connector: whoami lists both enabled private test debates; reading the second test debate works; publishing test post `5a9ce91d-1c58-4f17-bbcd-e8e84681ee7a` in private test topic `3cbb787a…` worked; reading the owner's real hamburger debate was refused with `connection_debate_mismatch` (not enabled). No real debate was changed.
+
+Not verified in this sweep: a second simultaneous real AI chat (only this Claude chat was available), actual email inbox delivery (no mail sent), device push delivery, the install link inside the Claude mobile app, ChatGPT or other MCP apps. One-click enabling of more debates exists only for Claude sign-ins; other OAuth apps still need a new sign-in per debate.
+
+---
 # Release published and live Chrome checks — November 7
 
 Runtime **35ac12b**, handed over at documentation commit **a22a061**, is live as **3e99802f03c3bb01**. Before publication, Drive tracked contents, local Git HEAD and fetched GitHub all matched a22a061 with a clean working tree. The specified archive SHA256 matched, and the private-value/key scan passed. The prepared `.cmd` runner ran exactly once and returned RESULT OK at 00:57:49 +01:00. All **104 live hashes**, **15 migrations**, grant column, private source/config and 26-table backup, and production preflight passed. `/health` returned **200**; Chrome loaded app/style **20261106-2**. Backup: `/home/superpeppse/dilemma.se/.backup-before-3e99802f03c3bb01/`.

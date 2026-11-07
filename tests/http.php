@@ -84,7 +84,8 @@ try {
 	check(http_request('/api/profile', ['alias' => 'New alias'], [], $cookie)['status'] === 403, 'Session alone cannot bypass CSRF');
 	check(http_request('/settings', null, [], $cookie)['status'] === 200, 'Authenticated settings render through HTTP');
 	check(http_request('/api/profile', ['alias' => 'New alias', 'locale' => 'en'], $session_headers, $cookie)['status'] === 200, 'Valid session and CSRF can update a profile');
-	check(http_request('/api/connections', ['label' => 'Invalid input', 'scopes' => ['bad']], $session_headers, $cookie)['status'] === 400, 'Malformed scope is a client error');
+	check(http_request('/api/connections', ['label' => 'Invalid input', 'scopes' => ['bad'], 'debate_id' => $setup_debate['id']], $session_headers, $cookie)['status'] === 400, 'Malformed scope is a client error');
+	check(http_request('/api/connections', ['label' => 'Account wide', 'scopes' => 'debates:read'], $session_headers, $cookie)['status'] === 422, 'A new personal key must be limited to one debate');
 	check(http_request('/api/debates?q%5B%5D=bad')['status'] === 422, 'Malformed query is rejected without server failure');
 	check(http_request('/oauth/register', ['client_name' => 'Invalid client', 'redirect_uris' => ['https://client.example.test/callback'], 'grant_types' => 'bad'])['status'] === 400, 'Malformed OAuth metadata is rejected');
 	$client = OAuth::register(['token_endpoint_auth_method' => 'none', 'client_name' => 'HTTP test', 'redirect_uris' => ['https://client.example.test/callback']], 'http-' . $run);

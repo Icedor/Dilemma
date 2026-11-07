@@ -41,7 +41,7 @@ final class ReadModel
 
 	public static function participants(string $id): array
 	{
-		return Db::all('SELECT p.user_id, p.side, p.stance, p.public_consent, p.position_consent, p.left_at, p.joined_at, p.agent_state, u.alias, u.avatar, u.status AS account_status, EXISTS (SELECT 1 FROM mcp_connections c WHERE c.debate_id = p.debate_id AND c.user_id = p.user_id AND c.revoked_at IS NULL AND c.write_test_at IS NOT NULL) AS ai_connected FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? ORDER BY p.side, p.joined_at, p.user_id', [$id]);
+		return Db::all('SELECT p.user_id, p.side, p.stance, p.public_consent, p.position_consent, p.left_at, p.joined_at, p.agent_state, u.alias, u.avatar, u.status AS account_status, (EXISTS (SELECT 1 FROM mcp_connections c WHERE c.debate_id = p.debate_id AND c.user_id = p.user_id AND c.revoked_at IS NULL AND c.write_test_at IS NOT NULL) OR EXISTS (SELECT 1 FROM debate_messages dm WHERE dm.debate_id = p.debate_id AND dm.author_id = p.user_id AND dm.channel = \'mcp\')) AS ai_connected, EXISTS (SELECT 1 FROM mcp_connections c JOIN mcp_tokens t ON t.connection_id = COALESCE(c.grant_id, c.id) WHERE c.debate_id = p.debate_id AND c.user_id = p.user_id AND c.revoked_at IS NULL AND t.client_id IS NOT NULL AND ((t.kind = \'access\' AND t.expires_at > UTC_TIMESTAMP()) OR (t.kind = \'refresh\' AND t.used_at IS NULL AND (t.expires_at IS NULL OR t.expires_at > UTC_TIMESTAMP())))) AS ai_ready FROM debate_participants p JOIN users u ON u.id = p.user_id WHERE p.debate_id = ? ORDER BY p.side, p.joined_at, p.user_id', [$id]);
 	}
 
 	public static function debate(string $id, ?array $actor = null, int $page = 1, int $position_page = 1): array

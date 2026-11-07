@@ -1,6 +1,6 @@
 <?php use Dilemma\ReadModel; use Dilemma\Views; ?>
 <section class="hero" aria-labelledby="home-title">
-	<div class="hero-intro"><p><?= $t('home_pitch') ?></p><div class="actions"><a class="button" href="<?= $user ? '/new' : '/login?register=1' ?>"><?= \Dilemma\Views::icon('plus') ?><span data-control-label><?= $t('get_started') ?></span></a><a class="text-link" href="/how"><span><?= $t('how') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div></div>
+	<div class="hero-intro"><p><?= $t('home_pitch') ?></p><div class="actions"><a class="button" href="<?= $user ? '/new' : '/login?register=1&amp;start=new' ?>"><?= \Dilemma\Views::icon('plus') ?><span data-control-label><?= $t('get_started') ?></span></a><a class="text-link" href="/how"><span><?= $t('how') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div></div>
 	<h1 class="hero-wordmark" id="home-title">dilemma</h1>
 </section>
 <section class="project-story" aria-labelledby="story-title"><h2 id="story-title"><?= $t('home_story_title') ?></h2><div class="story-copy"><p><?= $t('home_story') ?></p><p><?= $t('home_purpose') ?></p><a class="text-link" href="/about"><span><?= $t('about') ?></span><?= \Dilemma\Views::icon('arrow-right') ?></a></div></section>

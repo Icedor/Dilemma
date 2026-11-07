@@ -146,6 +146,8 @@ final class Connections
 			Debates::actor($actor, true);
 			Support::rate('connection:' . $actor['user_id'], 20, 3600);
 			$debate_id = ($input['debate_id'] ?? '') ?: null;
+			// New personal keys are always limited to one debate; only older keys may be account-wide.
+			if ($manual && $debate_id === null) throw new Failure(422, 'invalid_field', ['field' => 'debate_id']);
 			if ($debate_id !== null) Debates::member(Support::uuid($debate_id), $actor['user_id']);
 			$id = Support::id();
 			$scopes = self::scopes($input['scopes'] ?? self::READ);
@@ -179,7 +181,7 @@ final class Connections
 	public static function authenticate(string $authorization): array
 	{
 		if (!preg_match('/^Bearer ([A-Za-z0-9_-]{43})$/D', $authorization, $match)) throw new Failure(401, 'invalid_token');
-		$row = Db::one("SELECT c.*, t.expires_at, t.resource FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND (t.expires_at > UTC_TIMESTAMP() OR (t.expires_at IS NULL AND EXISTS (SELECT 1 FROM debate_ai_access a WHERE a.connection_id = c.id AND a.user_id = c.user_id AND a.debate_id = c.debate_id))) AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
+		$row = Db::one("SELECT c.*, t.expires_at, t.resource, t.client_id AS token_client FROM mcp_tokens t JOIN mcp_connections c ON c.id = t.connection_id JOIN users u ON u.id = c.user_id WHERE t.token_hash = ? AND t.kind = 'access' AND (t.expires_at > UTC_TIMESTAMP() OR (t.expires_at IS NULL AND EXISTS (SELECT 1 FROM debate_ai_access a WHERE a.connection_id = c.id AND a.user_id = c.user_id AND a.debate_id = c.debate_id))) AND u.status = 'active' AND u.verified_at IS NOT NULL", [Support::hash($match[1])]);
 		if (!$row || $row['resource'] !== Config::url('/mcp')) throw new Failure(401, 'invalid_token');
 		// A grant stays usable while any of its debate connections is active.
 		$members = self::members($row['id']);
@@ -187,7 +189,7 @@ final class Connections
 		Support::rate('mcp:' . $row['id'], 120, 60);
 		$debates = [];
 		foreach ($members as $member) if ($member['debate_id'] !== null) $debates[$member['debate_id']] = $member['id'];
-		return ['user_id' => $row['user_id'], 'connection_id' => $members[0]['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $members[0]['debate_id'], 'grant_id' => $row['id'], 'debates' => $debates];
+		return ['user_id' => $row['user_id'], 'connection_id' => $members[0]['id'], 'channel' => 'mcp', 'scopes' => $row['scopes'], 'debate_id' => $members[0]['debate_id'], 'grant_id' => $row['id'], 'debates' => $debates, 'oauth' => $row['token_client'] !== null];
 	}
 
 	public static function identity(array $actor): array
@@ -209,11 +211,17 @@ final class Connections
 			if ($write) {
 				$input['connection_id'] = $actor['connection_id'];
 				if ($receipt = Idempotency::replay($actor['user_id'], 'connection_test', $input)) return $receipt;
-				Db::run('UPDATE mcp_connections SET write_test_at = ? WHERE id = ?', [Support::now(), $actor['connection_id']]);
-				return Idempotency::save($actor['user_id'], 'connection_test', $input, ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'write_verified' => true, 'stored_at' => Support::now()]);
+				// Without a named debate the test covers the whole sign-in, so an app with an older cached tool list still completes it.
+				$tested = !isset($input['debate_id']) && count($actor['debates'] ?? []) > 1 ? array_values($actor['debates']) : [$actor['connection_id']];
+				foreach ($tested as $connection_id) Db::run('UPDATE mcp_connections SET write_test_at = ? WHERE id = ? AND user_id = ? AND revoked_at IS NULL', [Support::now(), $connection_id, $actor['user_id']]);
+				$receipt = ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'write_verified' => true, 'stored_at' => Support::now()];
+				if (count($tested) > 1) $receipt['debate_ids'] = array_keys($actor['debates']);
+				return Idempotency::save($actor['user_id'], 'connection_test', $input, $receipt);
 			}
 			// Read tools never persist a test result; successful write_test records proof.
-			return ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'read_verified' => true, 'scopes' => implode(' ', $identity['scopes'])];
+			$result = ['connection_id' => $identity['connection_id'], 'debate_id' => $identity['debate_id'], 'user_id' => $identity['user_id'], 'read_verified' => true, 'scopes' => implode(' ', $identity['scopes'])];
+			if (isset($identity['enabled_debates']) && !isset($input['debate_id'])) $result['enabled_debates'] = $identity['enabled_debates'];
+			return $result;
 		});
 	}
 }

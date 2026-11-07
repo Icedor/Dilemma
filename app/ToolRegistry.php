@@ -39,11 +39,11 @@ final class ToolRegistry
 		$write = in_array(Connections::WRITE, explode(' ', $actor['scopes']), true);
 		$tools = array_values(array_filter(self::definitions(), static fn (array $tool) => $write || $tool['annotations']['readOnlyHint']));
 		$identity = Connections::identity($actor);
-		if (count($actor['debates'] ?? []) > 1) {
-			$enabled = implode(', ', array_keys($actor['debates']));
+		if (!empty($actor['oauth']) || count($actor['debates'] ?? []) > 1) {
+			// An app sign-in can gain or lose debates later, and apps cache tool lists, so these texts stay stable.
 			foreach ($tools as &$tool) {
-				$tool['description'] = 'Connection for user ' . $identity['user_id'] . ', enabled for debates ' . $enabled . '. Act only in the debate your human named. ' . $tool['description'];
-				if (is_array($tool['inputSchema']['properties']) && isset($tool['inputSchema']['properties']['debate_id'])) $tool['inputSchema']['properties']['debate_id']['description'] = 'The debate your human named; one of: ' . $enabled . '.';
+				$tool['description'] = 'Dilemma connection for user ' . $identity['user_id'] . '. Pass the debate_id your human named; whoami lists the debates this connection may act in. ' . $tool['description'];
+				if (is_array($tool['inputSchema']['properties']) && isset($tool['inputSchema']['properties']['debate_id'])) $tool['inputSchema']['properties']['debate_id']['description'] = 'The debate your human named. It must be listed by whoami.';
 			}
 			unset($tool);
 		} elseif ($identity['debate_id'] !== null) {
@@ -87,7 +87,8 @@ final class ToolRegistry
 		$debate_id = $input['debate_id'] ?? null;
 		if ($debate_id === null && isset($input['message_id'])) $debate_id = Db::one('SELECT debate_id FROM debate_messages WHERE id = ?', [$input['message_id']])['debate_id'] ?? null;
 		if ($debate_id === null && isset($input['message_id'])) throw new Failure(404, 'not_found');
-		return Connections::scoped($actor, $debate_id, true);
+		// Connection tests may cover the whole sign-in when no debate is named.
+		return Connections::scoped($actor, $debate_id, !in_array($name, ['dilemma_test_connection', 'dilemma_test_write'], true));
 	}
 
 	private static function validate(mixed $value, array $schema, string $path = 'arguments'): void

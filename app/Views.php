@@ -11,6 +11,8 @@ final class Views
 		$template = match ($path) { '/' => 'home', '/explore' => 'archive', '/app' => 'dashboard', '/new' => 'new', '/login' => 'login', '/verify' => 'verify', '/invite' => 'invite', '/settings' => 'settings', '/admin' => 'admin', '/oauth/authorize' => 'authorize', '/about', '/how', '/privacy', '/terms' => 'information', default => '' };
 		$data = [];
 		if ($template === 'login' && is_string($_GET['return_to'] ?? null) && preg_match('~^/debate/[a-f0-9-]{36}$~D', $_GET['return_to'])) $data['debate_return'] = $_GET['return_to'];
+		// Starting from "write your opinion" brings a new account straight back to that form.
+		if ($template === 'login' && ($_GET['start'] ?? '') === 'new') $data['start_return'] = '/new';
 		if (preg_match('~^/debate/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'debate'; $data['debate'] = ReadModel::debate($match[1], $actor, Support::integer($_GET['page'] ?? 1, 1, 100000, 'page'), Support::integer($_GET['positions_page'] ?? 1, 1, 100000, 'positions_page')); }
 		if (preg_match('~^/profile/([a-f0-9-]{36})$~D', $path, $match)) { $template = 'profile'; $data['profile'] = Db::one("SELECT id, alias, bio, avatar FROM users WHERE id = ? AND status = 'active' AND verified_at IS NOT NULL", [$match[1]]); if (!$data['profile']) throw new Failure(404, 'not_found'); }
 		if ($template === '') throw new Failure(404, 'not_found');
@@ -57,7 +59,7 @@ final class Views
 			'assessment' => $debate['latest_assessment'] ? ['id' => $debate['latest_assessment']['id'], 'excerpt' => $debate['latest_assessment']['excerpt'], 'url' => '/debate/' . $id . '?page=' . (int) ceil($debate['latest_assessment']['ordinal'] / 20) . '#argument-' . $debate['latest_assessment']['id']] : null,
 			'status' => $debate['status'], 'status_label' => I18n::t($debate['status'] === 'open' ? 'looking_for_opponent' : $debate['status']),
 			'public_label' => I18n::t($debate['is_public'] ? 'public' : 'private'),
-			'participants' => array_map(static fn ($person) => ['alias' => $person['alias'], 'connected' => I18n::t($person['ai_connected'] ? 'flow_connected' : 'flow_not_connected')], $flow['active_participants']),
+			'participants' => array_map(static fn ($person) => ['alias' => $person['alias'], 'connected' => I18n::t($person['ai_connected'] ? 'flow_connected' : (!empty($person['ai_ready']) ? 'flow_ai_ready' : 'flow_not_connected'))], $flow['active_participants']),
 		];
 	}
 

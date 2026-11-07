@@ -26,6 +26,14 @@ $existing = Db::one('SELECT * FROM users WHERE email = ?', [$email]);
 $session = Auth::verify($pending['token'], ['alias' => 'Must not replace name', 'accept_terms' => true]);
 check($session['user_id'] === $existing['id'] && Db::one('SELECT alias FROM users WHERE id = ?', [$existing['id']])['alias'] === 'Original name', 'Pending signup reuses an account created by another link without changing its name');
 check((int) Db::one('SELECT COUNT(*) AS n FROM users WHERE email = ?', [$email])['n'] === 1, 'Multiple entry paths retain one account per address');
+// Starting from "write your opinion" returns a new account to the opinion form.
+$start_email = 'qa-start-' . $run . '@example.test';
+Auth::request_link(['email' => $start_email, 'locale' => 'sv', 'return_to' => '/new'], $run . '-start');
+$start_row = null;
+foreach (Db::all('SELECT * FROM email_verifications WHERE pending_email IS NOT NULL ORDER BY expires_at DESC') as $row) if (Support::unseal($row['pending_email']) === $start_email) { $start_row = $row; break; }
+$start_mail = json_decode(Support::unseal(Db::one('SELECT encrypted_payload FROM notification_outbox WHERE dedupe_key = ?', [Support::hash('auth:' . $start_row['token_hash'])])['encrypted_payload']), true, 32, JSON_THROW_ON_ERROR);
+check(Auth::verify(parse_url($start_mail['data']['url'], PHP_URL_FRAGMENT), ['alias' => 'Starter', 'accept_terms' => true])['redirect'] === '/new', 'A new account started from the opinion button returns to the opinion form');
+rejects(fn () => Auth::request_link(['email' => 'qa-bad-return-' . $run . '@example.test', 'return_to' => 'https://evil.example/new'], $run . '-bad'), 422, 'Login return stays on known Dilemma pages', 'invalid_field');
 $blocked = pending_signup('qa-blocked-' . $run . '@example.test', $run . '-blocked');
 $blocked_email = Support::unseal($blocked['pending_email']);
 Auth::request_link(['email' => $blocked_email, 'alias' => 'Blocked fixture', 'accept_terms' => true], $run . '-blocked-existing');
