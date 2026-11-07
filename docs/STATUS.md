@@ -1,3 +1,18 @@
+# Review release published and verified — November 7, 08:34 CET
+
+Runtime **aefe803**, handed over at **759947a**, is live as **fccfc1a0348b362e**. Before deployment, Drive tracked contents, local Git HEAD and fetched GitHub origin/main matched 759947a with a clean working tree. The archive SHA256 matched `56c023b4a28b1ee2af24d57edfc9b26657c8a661264ac43da8153a2d41883185`.
+
+- [x] Acquired Claude's released lock for the owner's explicitly authorized publication.
+- [x] Ran `var/deploy-fccfc1a0348b362e.cmd` exactly once, 08:34:19–08:34:21 +01:00; log ends `RESULT OK`.
+- [x] Private source/config and all 26 database tables backed up; production preflight passed. No new schema migration.
+- [x] Verify JSON: `hashes_verified=104`, `migrations=15`, `test_topic_state=ready`, `test_topic_verified=true`, `install_url_ok=true`, `writes_performed=false`.
+- [x] HTTPS `/health` returned 200 and status ok.
+- [x] Signed-in Chrome: private test `3cbb787a…` displays **AI ansluten** in the participant row and Claude connected in the setup panel.
+- [x] Existing browser tab restored to its original URL. No tabs/groups created; no arguments, settings, invitations or real debates changed.
+
+Backup: `/home/superpeppse/dilemma.se/.backup-before-fccfc1a0348b362e/previous-release.zip`. Schema unchanged; code-only rollback remains available. Do not rerun this completed deployment runner. The stage log's phrase "current 103 hashes" is a stale message: its actual guard checks 104, and final verification confirms all 104. No runtime edits were made during publication. Previous sweep limitations below remain; this deployment check is not a new two-chat or delivery test. Only STATUS.md and SESSION_HANDOFF.md are included in the publication documentation commit.
+
+---
 # Full review sweep — November 7 (Claude session)
 
 Baseline: live **3e99802f03c3bb01** (runtime 35ac12b, docs d0f265c). This sweep changes runtime without a schema change (still 15 migrations). Release, checksum and the Codex command are in the top of SESSION_HANDOFF.md.
